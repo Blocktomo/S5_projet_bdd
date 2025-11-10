@@ -153,5 +153,5 @@
             <url>https://maven.vaadin.com/vaadin-prereleases</url>
         </pluginRepository>
     </pluginRepositories>
-    <name>M3Vide2025</name>
+    <name>S5_projet_bdd</name>
 </project>
