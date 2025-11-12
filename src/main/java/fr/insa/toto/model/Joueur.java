@@ -46,7 +46,7 @@ public class Joueur extends ClasseMiroir implements Serializable {
     private double taillecm;
 
     /**
-     * pour nouvel utilisateur en mémoire
+     * pour nouveau joueur en mémoire
      */
     public Joueur(String surnom, String categorie, double taillecm) {
         super();
@@ -55,7 +55,7 @@ public class Joueur extends ClasseMiroir implements Serializable {
 //        this.role = role;
         this.categorie = categorie;
         this.taillecm = taillecm;
-    }
+    } //TODO : ajouter le traitement de la valeur "null" pour les différentes variables
 
     /**
      * pour utilisateur récupéré de la base de données
@@ -161,7 +161,7 @@ public class Joueur extends ClasseMiroir implements Serializable {
 
     public static Joueur entreeConsole() {
         String nom = ConsoleFdB.entreeString("surnom du joueur : ");
-        String categorie = ConsoleFdB.entreeString("categorie : ");
+        String categorie = ConsoleFdB.entreeString("categorie (S/J/null): ");
         double taillecm = ConsoleFdB.entreeDouble("taillecm du joueur (double) : ");
         return new Joueur(nom, categorie, taillecm);
     }

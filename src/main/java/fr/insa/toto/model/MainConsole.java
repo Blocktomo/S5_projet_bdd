@@ -36,32 +36,32 @@ import java.util.List;
  */
 public class MainConsole {
 
-    public static void menuUtilisateur(Connection con) {
+    public static void menuJoueur(Connection con) {
         int rep = -1;
         while (rep != 0) {
             int i = 1;
-            System.out.println("Menu utilisateurs");
+            System.out.println("Menu joueurs");
             System.out.println("============================");
-            System.out.println((i++) + ") liste des utilisateurs");
-            System.out.println((i++) + ") ajouter un utilisateurs");
-            System.out.println((i++) + ") supprimer des utilisateurs");
+            System.out.println((i++) + ") liste des joueurs");
+            System.out.println((i++) + ") ajouter un joueur");
+            System.out.println((i++) + ") supprimer des joueurs");
             System.out.println("0) Retour");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
             try {
                 int j = 1;
                 if (rep == j++) {
-                    List<Utilisateur> tous = Utilisateur.tousLesUtilisateur(con);
-                    System.out.println(tous.size() + " utilisateurs trouvés :");
-                    System.out.println(ListUtils.formatList(tous, "---- tous les utilisateurs\n",
+                    List<Joueur> tous = Joueur.tousLesJoueur(con);
+                    System.out.println(tous.size() + " joueurs trouvés :");
+                    System.out.println(ListUtils.formatList(tous, "---- tous les joueurs\n",
                             "\n", "\n", u -> u.getId() + " : " + u.getSurnom()));
-                } else if (rep == j++) {
-                    System.out.println("Nouvel utilisateur : ");
-                    Utilisateur u = Utilisateur.entreeConsole();
+                } else if (rep == j++) { //j++ incrémente j au sein de la condition, si je comprends bien
+                    System.out.println("Nouveau Joueur : ");
+                    Joueur u = Joueur.entreeConsole();
                     u.saveInDB(con);
                 } else if (rep == j++) {
-                    List<Utilisateur> tous = Utilisateur.tousLesUtilisateur(con);
-                    List<Utilisateur> selected = ListUtils.selectMultiple(
-                            "selectionnez les utilisateurs à supprimer : ", tous, 
+                    List<Joueur> tous = Joueur.tousLesJoueur(con);
+                    List<Joueur> selected = ListUtils.selectMultiple(
+                            "selectionnez les joueurs à supprimer : ", tous, 
                             u -> u.getId() + " : " + u.getSurnom());
                     for (var u : selected) {
                         u.deleteInDB(con);
@@ -80,7 +80,7 @@ public class MainConsole {
             System.out.println("Menu gestion base de données");
             System.out.println("============================");
             System.out.println((i++) + ") RAZ BdD = delete + create + init");
-            System.out.println((i++) + ") donner un ordre SQL update quelconque");
+            System.out.println((i++) + ") donner un ordre SQL update quelconque"); //TODO partie très importante
             System.out.println((i++) + ") donner un ordre SQL query quelconque");
             System.out.println("0) Retour");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
@@ -88,7 +88,7 @@ public class MainConsole {
                 int j = 1;
                 if (rep == j++) {
                     GestionBdD.razBdd(con);
-                    BdDTest.createBdDTestV2(con);
+                    BdDTest.createBdDTestV3(con); //la V3 est celle décrite dans la question 7 : c'est des joueurs et non des utilisateurs.
                 } else if (rep == j++) {
                     String ordre = ConsoleFdB.entreeString("ordre SQL : ");
                     try (PreparedStatement pst = con.prepareStatement(ordre)) {
@@ -123,7 +123,7 @@ public class MainConsole {
             System.out.println("Menu principal");
             System.out.println("==================");
             System.out.println((i++) + ") menu gestion BdD");
-            System.out.println((i++) + ") menu utilisateurs");
+            System.out.println((i++) + ") menu joueurs");
             System.out.println("0) Fin");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
             try {
@@ -131,7 +131,7 @@ public class MainConsole {
                 if (rep == j++) {
                     menuBdD(con);
                 } else if (rep == j++) {
-                    menuUtilisateur(con);
+                    menuJoueur(con);
                 }
             } catch (Exception ex) {
                 System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
