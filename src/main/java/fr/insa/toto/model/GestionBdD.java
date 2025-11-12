@@ -34,13 +34,7 @@ public class GestionBdD {
             con.setAutoCommit(false);
             try (Statement st = con.createStatement()) {
                 // creation des tables
-                st.executeUpdate("create table utilisateur ( "
-                        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
-                        + " surnom varchar(30) not null unique,"
-                        + " pass varchar(20) not null,"
-                        + " role integer not null "
-                        + ") "
-                );
+                
                 st.executeUpdate("create table joueur ( "
                         + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
                         + " surnom varchar(30) not null unique,"
@@ -74,46 +68,9 @@ public class GestionBdD {
                         + "  add constraint fk_composition_idjoueur\n"
                         + "  foreign key (idjoueur) references joueur(id)"
                 );
-                
-                st.executeUpdate("create table loisir ( "
-                        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
-                        + " nom varchar(20) not null unique,"
-                        + " description text not null"
-                        + ") "
-                );
-                st.executeUpdate("create table pratique ( "
-                        + " idutilisateur integer not null,"
-                        + " idloisir integer not null,"
-                        + " niveau integer not null "
-                        + ") "
-                );
+               
                 con.commit();
-                st.executeUpdate("create table apprecie ( "
-                        + " u1 integer not null,"
-                        + " u2 integer not null"
-                        + ") "
-                );
-
-                st.executeUpdate("alter table apprecie\n"
-                        + "  add constraint fk_apprecie_u1\n"
-                        + "  foreign key (u1) references utilisateur(id)"
-                );
-                st.executeUpdate("alter table apprecie\n"
-                        + "  add constraint fk_apprecie_u2\n"
-                        + "  foreign key (u2) references utilisateur(id)"
-                );
-                st.executeUpdate("alter table pratique\n"
-                        + "  add constraint fk_pratique_idutilisateur\n"
-                        + "  foreign key (idutilisateur) references utilisateur(id)"
-                );
-
-                st.executeUpdate("alter table pratique\n"
-                        + "  add constraint fk_pratique_idloisir\n"
-                        + "  foreign key (idloisir) references loisir(id)"
-                );
-
-                con.commit();
-            }
+                }
         } catch (SQLException ex) {
             con.rollback();
             throw ex;
@@ -129,30 +86,9 @@ public class GestionBdD {
      */ 
     public static void deleteSchema(Connection con) throws SQLException {
         try (Statement st = con.createStatement()) {
-            try {
-                st.executeUpdate(
-                        "alter table utilisateur "
-                        + "drop constraint fk_utilisateur_u1");
-            } catch (SQLException ex) {
-            }
-            try {
-                st.executeUpdate(
-                        "alter table utilisateur "
-                        + "drop constraint fk_utilisateur_u2");
-            } catch (SQLException ex) {
-            }
-            try {
-                st.executeUpdate(
-                        "alter table pratique "
-                        + "drop constraint fk_pratique_idutilisateur");
-            } catch (SQLException ex) {
-            }
-            try {
-                st.executeUpdate(
-                        "alter table pratique "
-                        + "drop constraint fk_pratique_idloisir");
-            } catch (SQLException ex) {
-            }
+            
+            
+            
             try {
                 st.executeUpdate(
                         "alter table composition "
@@ -165,22 +101,7 @@ public class GestionBdD {
                         + "drop constraint fk_composition_idjoueur");
             } catch (SQLException ex) {
             }
-            try {
-                st.executeUpdate("drop table apprecie");
-            } catch (SQLException ex) {
-            }
-            try {
-                st.executeUpdate("drop table pratique");
-            } catch (SQLException ex) {
-            }
-            try {
-                st.executeUpdate("drop table loisir");
-            } catch (SQLException ex) {
-            }
-            try {
-                st.executeUpdate("drop table utilisateur");
-            } catch (SQLException ex) {
-            }
+            
             try {
                 st.executeUpdate("drop table joueur");
             } catch (SQLException ex) {
