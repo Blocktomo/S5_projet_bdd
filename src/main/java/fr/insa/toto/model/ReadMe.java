@@ -1,20 +1,12 @@
 /*
 Copyright 2000- Francois de Bertrand de Beuvron
 
-This file is part of CoursBeuvron.
+voici le github :
+https://github.com/Blocktomo/S5_projet_bdd.git
 
-CoursBeuvron is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+token2
+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
 
-CoursBeuvron is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with CoursBeuvron.  If not, see <http://www.gnu.org/licenses/>.
  */
 package fr.insa.toto.model;
 
@@ -25,6 +17,9 @@ package fr.insa.toto.model;
 public class ReadMe {
     public static void main(String[] args) {
         System.out.println("TODO voir sujet M3 TD3");
+        System.out.println("voir aussi commentaire en haut de ce fichier");
+        
     }
+    
     
 }
