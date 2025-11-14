@@ -1,35 +1,12 @@
-# Pasapas README
+A FAIRE : 
+# Classes
+Créer/modifier chaque classe pour que cela corresponde au diagramme UML 
+https://lucid.app/lucidchart/ebc83882-e98e-4a42-baeb-7bd54f4cd9ca/edit?viewport_loc=-1709%2C-915%2C1141%2C1329%2C0_0&invitationId=inv_a073d439-21d9-4d68-b4bc-f817c417a1f9
 
-- [ ] TODO Replace or update this README with instructions relevant to your application
 
-To start the application in development mode, import it into your IDE and run the `Application` class. 
-You can also start the application from the command line by running: 
+# menu gestion bdd
 
-```bash
-./mvnw
-```
 
-To build the application in production mode, run:
+MENU GESTION BDD
 
-```bash
-./mvnw -Pproduction package
-```
 
-To build a Docker image, run:
-
-```bash
-docker build -t my-application:latest .
-```
-
-If you use commercial components, pass the license key as a build secret:
-
-```bash
-docker build --secret id=proKey,src=$HOME/.vaadin/proKey .
-```
-
-## Getting Started
-
-The [Getting Started](https://vaadin.com/docs/latest/getting-started) guide will quickly familiarize you with your new
-Pasapas implementation. You'll learn how to set up your development environment, understand the project 
-structure, and find resources to help you add muscles to your skeleton — transforming it into a fully-featured 
-application.
