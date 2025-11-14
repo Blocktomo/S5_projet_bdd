@@ -16,8 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with CoursBeuvron.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.insa.toto.model;
+package fr.insa.toto.model.GestionRH;
 
+import fr.insa.toto.model.Jeu.Matchs;
 import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

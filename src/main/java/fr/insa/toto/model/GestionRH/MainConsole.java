@@ -1,23 +1,8 @@
-/*
-Copyright 2000- Francois de Bertrand de Beuvron
 
-This file is part of CoursBeuvron.
+package fr.insa.toto.model.GestionRH;
 
-CoursBeuvron is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-CoursBeuvron is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with CoursBeuvron.  If not, see <http://www.gnu.org/licenses/>.
- */
-package fr.insa.toto.model;
-
+import fr.insa.toto.model.GestionRH.GestionBdD;
+import fr.insa.toto.model.GestionRH.BdDTest;
 import fr.insa.beuvron.utils.ConsoleFdB;
 import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
 import fr.insa.beuvron.utils.database.ResultSetUtils;
@@ -30,10 +15,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @author francois
- */
+
 public class MainConsole {
 
     public static void menuJoueur(Connection con) {
@@ -124,6 +106,9 @@ public class MainConsole {
             System.out.println("==================");
             System.out.println((i++) + ") menu gestion BdD");
             System.out.println((i++) + ") menu joueurs");
+            System.out.println("Menu principal");
+System.out.println((i++) + ") menu équipes");
+
             System.out.println("0) Fin");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
             try {
@@ -132,6 +117,8 @@ public class MainConsole {
                     menuBdD(con);
                 } else if (rep == j++) {
                     menuJoueur(con);
+                } else if (rep == j++) {
+                    menuEquipe(con);    
                 }
             } catch (Exception ex) {
                 System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
@@ -142,4 +129,50 @@ public class MainConsole {
     public static void main(String[] args) {
         menuPrincipal();
     }
+    
+    public static void menuEquipe(Connection con) {
+    int rep = -1;
+    while (rep != 0) {
+        int i = 1;
+        System.out.println("Menu équipes");
+        System.out.println("================================");
+        System.out.println((i++) + ") créer des équipes aléatoires pour un match");
+        System.out.println((i++) + ") afficher les équipes et leurs joueurs");
+        System.out.println("0) Retour");
+        rep = ConsoleFdB.entreeEntier("Votre choix : ");
+        try {
+            int j = 1;
+            if (rep == j++) {
+                // 1) CRÉATION D'ÉQUIPES ALÉATOIRES
+                int idMatch = ConsoleFdB.entreeEntier("Id du match : ");
+                int tailleEquipe = ConsoleFdB.entreeEntier("Taille des équipes (nb joueurs par équipe) : ");
+
+                var equipes = Equipe.creerEquipes(con, idMatch, tailleEquipe);
+                System.out.println(equipes.size() + " équipes créées pour le match " + idMatch);
+
+            } else if (rep == j++) {
+                // 2) AFFICHAGE DES ÉQUIPES + JOUEURS
+                String ordre =
+                        "select e.id as idEquipe, e.num, e.score, e.idmatch, " +
+                        "       j.id as idJoueur, j.surnom " +
+                        "from equipe e " +
+                        "left join composition c on c.idequipe = e.id " +
+                        "left join joueur j on j.id = c.idjoueur " +
+                        "order by e.id, j.id";
+
+                try (PreparedStatement pst = con.prepareStatement(ordre)) {
+                    try (ResultSet rst = pst.executeQuery()) {
+                        System.out.println(ResultSetUtils.formatResultSetAsTxt(rst));
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
+        }
+    }
+}
+
+    
+    
+    
 }

@@ -16,7 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with CoursBeuvron.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.insa.toto.model;
+package fr.insa.toto.model.Jeu;
 
 import fr.insa.beuvron.utils.database.ClasseMiroir;
 import java.sql.Connection;

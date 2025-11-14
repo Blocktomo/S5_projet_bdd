@@ -1,22 +1,5 @@
-/*
-Copyright 2000- Francois de Bertrand de Beuvron
 
-This file is part of CoursBeuvron.
-
-CoursBeuvron is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-CoursBeuvron is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with CoursBeuvron.  If not, see <http://www.gnu.org/licenses/>.
- */
-package fr.insa.toto.model;
+package fr.insa.toto.model.GestionRH;
 
 import fr.insa.beuvron.utils.ConsoleFdB;
 import fr.insa.beuvron.utils.database.ClasseMiroir;
@@ -29,11 +12,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Collections;
 
-/**
- *
- * @author francois
- */
+
 public class Equipe extends ClasseMiroir implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -72,6 +53,63 @@ public class Equipe extends ClasseMiroir implements Serializable {
         insert.setInt(3, getIdmatch());
         insert.executeUpdate();
         return insert;
+    }
+    
+   
+    public static List<Equipe> creerEquipes(
+            Connection con,
+            int idMatch,
+            int tailleEquipe) throws SQLException {
+
+        // 1) On récupère tous les joueurs existants
+        List<Joueur> joueurs = Joueur.tousLesJoueur(con);
+
+        // 2) On mélange la liste pour que ça soit aléatoire
+        Collections.shuffle(joueurs);
+
+        List<Equipe> equipesCreees = new ArrayList<>();
+
+        // 3) On calcule le nombre d'équipes complètes possibles
+        int nbEquipesCompletes = joueurs.size() / tailleEquipe;
+        // Les joueurs restants (modulo) ne joueront pas cette ronde (trop de joueurs)
+    
+
+        try {
+            con.setAutoCommit(false);
+
+            // Prépare l'insert dans la table composition
+            try (PreparedStatement pstCompo = con.prepareStatement(
+                    "insert into composition (idequipe,idjoueur) values (?,?)")) {
+
+                int indexJoueur = 0;
+
+                for (int numEquipe = 1; numEquipe <= nbEquipesCompletes; numEquipe++) {
+                    // Score de départ = 0
+                    Equipe e = new Equipe(numEquipe, 0, idMatch);
+                    e.saveInDB(con);  // va insérer dans equipe et remplir son id
+                    equipesCreees.add(e);
+
+                    // On met tailleEquipe joueurs dans cette équipe
+                    for (int k = 0; k < tailleEquipe; k++) {
+                        Joueur j = joueurs.get(indexJoueur++);
+
+                        // insertion dans composition (idequipe, idjoueur)
+                        pstCompo.setInt(1, e.getId());
+                        pstCompo.setInt(2, j.getId());
+                        pstCompo.executeUpdate();
+                    }
+                }
+            }
+
+            con.commit();
+        } catch (SQLException ex) {
+            con.rollback();
+            throw ex;
+        } finally {
+            con.setAutoCommit(true);
+        }
+
+        return equipesCreees;
     }
 
     public static List<Equipe> tousLesUtilisateur(Connection con) throws SQLException {
