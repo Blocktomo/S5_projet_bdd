@@ -29,6 +29,14 @@ Créer/modifier chaque classe pour que cela corresponde au diagramme UML
 - créer/supprimer joueurs
 
 # VAADIN
+
+ # A modifier : 
+ - Supprimer l'attribut # dans joueur (C'est le même que ID)
+ - Ali: DANS EQUIPE, supprimer num (1 ou 2 ) ne sert à  rien, proble id match,  le même id pour tous les match,
+ - Tournoi : Choisir Option : PAR catégorie ou équilibrer les équipes
+ - Catégorie choisir ebtre S et J 
+ - 
+ -  
  
 
 
