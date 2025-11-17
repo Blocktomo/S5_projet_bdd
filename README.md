@@ -5,7 +5,7 @@ A FAIRE :
 # Classes
 Créer/modifier chaque classe pour que cela corresponde au diagramme UML 
 - Ali : modifier classe équipe pour mettre les attribvuts, gestion des scores, composition aléatoire d'une équipe...
-- Thomas : ajouter la classe tournoi, attribut type de sport, attribut année, nombre de rondes, liste des rondes ; liste des terrains ; liste de joueurs
+- Thomas : classe tournoi  : créer les attributs suivants, ainsi que les tables pour les gérer :  liste des rondes ; liste des terrains ; liste de joueurs
 - classe matchs : les deux équipes qui s'affrontent (parmi les équipes de la ronde)
 - Rayan : classe ronde : liste des matchs ; liste de toutes les équipes de cette ronde; liste des joueurs exclus ; assignation des matchs aux terrains
 - classe terrain : libre/occupé
@@ -21,6 +21,8 @@ Créer/modifier chaque classe pour que cela corresponde au diagramme UML
 
 ## tournoi : 
 - créer un tournoi
+- afficher les tournois existants (passés, futurs, présent)
+- "activer" un tournoi; toutes les données entrée par ailleurs doivent être relatives à ce tournoi.
 - renseigner le nombre de terrains disponibles
 
 ## Joueurs : 
