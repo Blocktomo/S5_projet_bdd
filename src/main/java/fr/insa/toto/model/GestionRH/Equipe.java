@@ -152,18 +152,54 @@ public class Equipe extends ClasseMiroir implements Serializable {
         return equipesCreees;
     }
 
-    public static List<Equipe> tousLesUtilisateur(Connection con) throws SQLException {
-        List<Equipe> res = new ArrayList<>();
-        try (PreparedStatement pst = con.prepareStatement("select id,surnom,pass,role from utilisateur")) {
-            try (ResultSet allU = pst.executeQuery()) {
-                while (allU.next()) {
-                    res.add(new Equipe(allU.getInt("id"), allU.getInt("num"),
-                            allU.getInt("score"), allU.getInt("idmatch")));
-                }
+public static List<Equipe> toutesLesEquipes(Connection con) throws SQLException {
+    List<Equipe> res = new ArrayList<>();
+    try (PreparedStatement pst = con.prepareStatement(
+            "select id, num, score, idmatch from equipe")) {
+        try (ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                res.add(new Equipe(
+                        rs.getInt("id"),
+                        rs.getInt("num"),
+                        rs.getInt("score"),
+                        rs.getInt("idmatch")
+                ));
             }
         }
-        return res;
     }
+    return res;
+}
+    
+    public void SuppEquipe(Connection con) throws SQLException {
+    if (this.getId() == -1) {
+        throw new ClasseMiroir.EntiteNonSauvegardee();
+    }
+    try {
+        con.setAutoCommit(false);
+
+        // On supprimee les lignes de composition qui utilisent cette équipe
+        try (PreparedStatement pst = con.prepareStatement(
+                "delete from composition where idequipe = ?")) {
+            pst.setInt(1, this.getId());
+            pst.executeUpdate();
+        }
+
+        // Puis supprimer l'équipe elle-même
+        try (PreparedStatement pst = con.prepareStatement(
+                "delete from equipe where id = ?")) {
+            pst.setInt(1, this.getId());
+            pst.executeUpdate();
+        }
+
+        this.entiteSupprimee();
+        con.commit();
+    } catch (SQLException ex) {
+        con.rollback();
+        throw ex;
+    } finally {
+        con.setAutoCommit(true);
+    }
+}
     
    
 

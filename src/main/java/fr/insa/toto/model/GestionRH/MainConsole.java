@@ -2,7 +2,7 @@
 package fr.insa.toto.model.GestionRH;
 
 import fr.insa.toto.model.GestionRH.GestionBdD;
-import fr.insa.toto.model.GestionRH.BdDTest;
+//import fr.insa.toto.model.GestionRH.BdDTest;
 import fr.insa.beuvron.utils.ConsoleFdB;
 import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
 import fr.insa.beuvron.utils.database.ResultSetUtils;
@@ -70,7 +70,7 @@ public class MainConsole {
                 int j = 1;
                 if (rep == j++) {
                     GestionBdD.razBdd(con);
-                    BdDTest.createBdDTestV3(con); //la V3 est celle décrite dans la question 7 : c'est des joueurs et non des utilisateurs.
+                    BdDTest.createBdDTestV4(con); //la V3 est celle décrite dans la question 7 : c'est des joueurs et non des utilisateurs.
                 } else if (rep == j++) {
                     String ordre = ConsoleFdB.entreeString("ordre SQL : ");
                     try (PreparedStatement pst = con.prepareStatement(ordre)) {
@@ -128,7 +128,7 @@ System.out.println((i++) + ") menu équipes");
 
   
     
-    public static void menuEquipe(Connection con) {
+public static void menuEquipe(Connection con) {
     int rep = -1;
     while (rep != 0) {
         int i = 1;
@@ -136,12 +136,13 @@ System.out.println((i++) + ") menu équipes");
         System.out.println("================================");
         System.out.println((i++) + ") créer des équipes aléatoires pour un match");
         System.out.println((i++) + ") afficher les équipes et leurs joueurs");
+        System.out.println((i++) + ") supprimer des équipes");
         System.out.println("0) Retour");
         rep = ConsoleFdB.entreeEntier("Votre choix : ");
         try {
             int j = 1;
             if (rep == j++) {
-                // 1) CRÉATION D'ÉQUIPES ALÉATOIRES
+                // créer des équipes
                 int idMatch = ConsoleFdB.entreeEntier("Id du match : ");
                 int tailleEquipe = ConsoleFdB.entreeEntier("Taille des équipes (nb joueurs par équipe) : ");
 
@@ -149,7 +150,7 @@ System.out.println((i++) + ") menu équipes");
                 System.out.println(equipes.size() + " équipes créées pour le match " + idMatch);
 
             } else if (rep == j++) {
-                // 2) AFFICHAGE DES ÉQUIPES + JOUEURS
+                // afficher toutes les équipes + joueurs
                 String ordre =
                         "select e.id as idEquipe, e.num, e.score, e.idmatch, " +
                         "       j.id as idJoueur, j.surnom " +
@@ -157,11 +158,24 @@ System.out.println((i++) + ") menu équipes");
                         "left join composition c on c.idequipe = e.id " +
                         "left join joueur j on j.id = c.idjoueur " +
                         "order by e.id, j.id";
-
                 try (PreparedStatement pst = con.prepareStatement(ordre)) {
                     try (ResultSet rst = pst.executeQuery()) {
                         System.out.println(ResultSetUtils.formatResultSetAsTxt(rst));
                     }
+                }
+
+            } else if (rep == j++) {
+                // SUPPRIMER DES ÉQUIPES
+                List<Equipe> toutes = Equipe.toutesLesEquipes(con);
+                System.out.println(toutes.size() + " équipes trouvées :");
+                // même principe que pour les joueurs
+                List<Equipe> selected = ListUtils.selectMultiple(
+                        "Sélectionnez les équipes à supprimer : ",
+                        toutes,
+                        e -> "Equipe " + e.getId() + " (match " + e.getIdmatch() + ", num " + e.getNum() + ")"
+                );
+                for (var e : selected) {
+                    e.SuppEquipe(con);
                 }
             }
         } catch (Exception ex) {
@@ -169,6 +183,7 @@ System.out.println((i++) + ") menu équipes");
         }
     }
 }
+
       public static void main(String[] args) {
         menuPrincipal();
     }
