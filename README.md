@@ -10,8 +10,7 @@ Créer/modifier chaque classe pour que cela corresponde au diagramme UML
 - Rayan : classe ronde : liste des matchs ; liste de toutes les équipes de cette ronde; liste des joueurs exclus ; assignation des matchs aux terrains
 - classe terrain : libre/occupé
 - classe utilisateur : classe mère dont admin, et joueur héritent. Il faut donc créer la classe admin. On peut aussi créer une classe utilisateur_standard...
-
-
+- on doit pouvoir créer le tournoi ou simplement ronde par ronde en spécifiant si on veut des matchs séparés pour les seniors et les juniors, ou bien si on veut mélanger les deux catégories dans les matchs
 
 # menu textuel gestion bdd
 ## Ronde : 
