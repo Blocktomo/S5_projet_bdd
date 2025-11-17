@@ -126,9 +126,7 @@ System.out.println((i++) + ") menu équipes");
         }
     }
 
-    public static void main(String[] args) {
-        menuPrincipal();
-    }
+  
     
     public static void menuEquipe(Connection con) {
     int rep = -1;
@@ -171,6 +169,9 @@ System.out.println((i++) + ") menu équipes");
         }
     }
 }
+      public static void main(String[] args) {
+        menuPrincipal();
+    }
 
     
     
