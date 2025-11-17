@@ -53,7 +53,14 @@ public class GestionBdD {
                         + " score integer,"
                         + " idmatch integer not null "
                         + ") "
+                
                 );
+                st.executeUpdate("create table ronde ( "
+                        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "idronde") + ","
+                        + " Terminer integer CHECK ( Terminer=0 or Terminer=1) ,"
+                        + ") "
+                );
+                
                 st.executeUpdate("create table composition ( "
                         + " idequipe integer not null,"
                         + " idjoueur integer not null"
