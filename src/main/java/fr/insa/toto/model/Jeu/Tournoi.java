@@ -49,88 +49,85 @@ public class Tournoi extends ClasseMiroir {
         this.nb_joueurs_equipe = nb_joueurs_equipe;
         this.annee = annee;
     }
-//TODO ---------------------------------------
+
     @Override
     public Statement saveSansId(Connection con) throws SQLException {
         PreparedStatement insert = con.prepareStatement(
-                    "insert into tournoi (nom, nb_de_rondes, nb_de_rondes, duree_match, nb_joueurs_equipe, annee) values (?,?,?,?,?,?)",
+                    "insert into tournoi (nom, nb_de_rondes, duree_match, nb_joueurs_equipe, annee) values (?,?,?,?,?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
-        /*insert.setInt(1, this.getNum());
-        insert.setInt(2, this.getScore());
-        insert.setInt(3, getIdmatch());*/
+        insert.setString(1, this.getNom());
+        insert.setInt(2, this.getNb_de_rondes());
+        insert.setInt(3, getDuree_match());
+        insert.setInt(4, getNb_joueurs_equipe());
+        insert.setInt(5, getAnnee());
         insert.executeUpdate();
         return insert;
-    } //TODO : à finir
-    
-   
-    public static List<Tournoi> creerEquipes(
-            Connection con,
-            int idMatch,
-            int tailleEquipe) throws SQLException {
+    } 
 
-        // 1) On récupère tous les joueurs existants
-        List<Joueur> joueurs = Joueur.tousLesJoueur(con);
-
-        // 2) On mélange la liste pour que ça soit aléatoire
-        Collections.shuffle(joueurs);
-
-        List<Tournoi> equipesCreees = new ArrayList<>();
-
-        // 3) On calcule le nombre d'équipes complètes possibles
-        int nbEquipesCompletes = joueurs.size() / tailleEquipe;
-        // Les joueurs restants (modulo) ne joueront pas cette ronde (trop de joueurs)
-    
-
-        try {
-            con.setAutoCommit(false);
-
-            // Prépare l'insert dans la table composition
-            try (PreparedStatement pstCompo = con.prepareStatement(
-                    "insert into composition (idequipe,idjoueur) values (?,?)")) {
-
-                int indexJoueur = 0;
-
-                for (int numEquipe = 1; numEquipe <= nbEquipesCompletes; numEquipe++) {
-                    // Score de départ = 0
-                    Tournoi e = new Tournoi(numEquipe, 0, idMatch);
-                    e.saveInDB(con);  // va insérer dans equipe et remplir son id
-                    equipesCreees.add(e);
-
-                    // On met tailleEquipe joueurs dans cette équipe
-                    for (int k = 0; k < tailleEquipe; k++) {
-                        Joueur j = joueurs.get(indexJoueur++);
-
-                        // insertion dans composition (idequipe, idjoueur)
-                        pstCompo.setInt(1, e.getId());
-                        pstCompo.setInt(2, j.getId());
-                        pstCompo.executeUpdate();
-                    }
-                }
-            }
-
-            con.commit();
-        } catch (SQLException ex) {
-            con.rollback();
-            throw ex;
-        } finally {
-            con.setAutoCommit(true);
-        }
-
-        return equipesCreees;
-    }
-
-    public static List<Tournoi> tousLesUtilisateur(Connection con) throws SQLException {
+    public static List<Tournoi> tousLesTournois(Connection con) throws SQLException {
         List<Tournoi> res = new ArrayList<>();
-        try (PreparedStatement pst = con.prepareStatement("select id,surnom,pass,role from utilisateur")) {
-            try (ResultSet allU = pst.executeQuery()) {
-                while (allU.next()) {
-                    res.add(new Tournoi(allU.getInt("id"), allU.getInt("num"),
-                            allU.getInt("score"), allU.getInt("idmatch")));
+        try (PreparedStatement pst = con.prepareStatement("select id, nom, nb_de_rondes, duree_match, nb_joueurs_equipe, annee from tournoi")) {
+            try (ResultSet allT = pst.executeQuery()) {
+                while (allT.next()) {
+                    res.add(new Tournoi(allT.getInt("id"), allT.getString("nom"),
+                            allT.getInt("nb_de_rondes"), allT.getInt("duree_match"), 
+                            allT.getInt("nb_joueurs_equipe"), allT.getInt("annee")));
                 }
             }
         }
         return res;
     }
+    
+    public static Tournoi entreeConsole() {
+        String nom = ConsoleFdB.entreeString("nom du tournoi : ");
+        int nb_de_rondes = ConsoleFdB.entreeInt("combien de rondes pour ce tournoi? Votre choix :  ");
+        int duree_match = ConsoleFdB.entreeInt("combien de temps durent les matchs (nombre entier, donc en minutes). Votre choix : ");
+        int nb_joueurs_equipe = ConsoleFdB.entreeInt("combien de joueurs par équipe? Votre choix : ");
+        int annee = ConsoleFdB.entreeInt("quelle est l'année de ce tournoi?");
+
+        return new Tournoi(nom, nb_de_rondes, duree_match, nb_joueurs_equipe, annee);
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public int getNb_de_rondes() {
+        return nb_de_rondes;
+    }
+
+    public int getDuree_match() {
+        return duree_match;
+    }
+
+    public int getNb_joueurs_equipe() {
+        return nb_joueurs_equipe;
+    }
+
+    public int getAnnee() {
+        return annee;
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
+    public void setNb_de_rondes(int nb_de_rondes) {
+        this.nb_de_rondes = nb_de_rondes;
+    }
+
+    public void setDuree_match(int duree_match) {
+        this.duree_match = duree_match;
+    }
+
+    public void setNb_joueurs_equipe(int nb_joueurs_equipe) {
+        this.nb_joueurs_equipe = nb_joueurs_equipe;
+    }
+
+    public void setAnnee(int annee) {
+        this.annee = annee;
+    }
+    
     
    
 

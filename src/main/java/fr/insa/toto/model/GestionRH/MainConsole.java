@@ -8,6 +8,7 @@ import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
 import fr.insa.beuvron.utils.database.ResultSetUtils;
 import fr.insa.beuvron.utils.exceptions.ExceptionsUtils;
 import fr.insa.beuvron.utils.list.ListUtils;
+import fr.insa.toto.model.Jeu.Tournoi;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -107,7 +108,7 @@ public class MainConsole {
             System.out.println((i++) + ") menu gestion BdD");
             System.out.println((i++) + ") menu joueurs");
             System.out.println("Menu principal");
-System.out.println((i++) + ") menu équipes");
+            System.out.println((i++) + ") menu équipes");
 
             System.out.println("0) Fin");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
@@ -128,61 +129,121 @@ System.out.println((i++) + ") menu équipes");
 
   
     
-public static void menuEquipe(Connection con) {
-    int rep = -1;
-    while (rep != 0) {
-        int i = 1;
-        System.out.println("Menu équipes");
-        System.out.println("================================");
-        System.out.println((i++) + ") créer des équipes aléatoires pour un match");
-        System.out.println((i++) + ") afficher les équipes et leurs joueurs");
-        System.out.println((i++) + ") supprimer des équipes");
-        System.out.println("0) Retour");
-        rep = ConsoleFdB.entreeEntier("Votre choix : ");
-        try {
-            int j = 1;
-            if (rep == j++) {
-                // créer des équipes
-                int idMatch = ConsoleFdB.entreeEntier("Id du match : ");
-                int tailleEquipe = ConsoleFdB.entreeEntier("Taille des équipes (nb joueurs par équipe) : ");
+    public static void menuEquipe(Connection con) {
+        int rep = -1;
+        while (rep != 0) {
+            int i = 1;
+            System.out.println("Menu équipes");
+            System.out.println("================================");
+            System.out.println((i++) + ") créer des équipes aléatoires pour un match");
+            System.out.println((i++) + ") afficher les équipes et leurs joueurs");
+            System.out.println((i++) + ") supprimer des équipes");
+            System.out.println("0) Retour");
+            rep = ConsoleFdB.entreeEntier("Votre choix : ");
+            try {
+                int j = 1;
+                if (rep == j++) {
+                    // créer des équipes
+                    int idMatch = ConsoleFdB.entreeEntier("Id du match : ");
+                    int tailleEquipe = ConsoleFdB.entreeEntier("Taille des équipes (nb joueurs par équipe) : ");
 
-                var equipes = Equipe.creerEquipes(con, idMatch, tailleEquipe);
-                System.out.println(equipes.size() + " équipes créées pour le match " + idMatch);
+                    var equipes = Equipe.creerEquipes(con, idMatch, tailleEquipe);
+                    System.out.println(equipes.size() + " équipes créées pour le match " + idMatch);
 
-            } else if (rep == j++) {
-                // afficher toutes les équipes + joueurs
-                String ordre =
-                        "select e.id as idEquipe, e.num, e.score, e.idmatch, " +
-                        "       j.id as idJoueur, j.surnom " +
-                        "from equipe e " +
-                        "left join composition c on c.idequipe = e.id " +
-                        "left join joueur j on j.id = c.idjoueur " +
-                        "order by e.id, j.id";
-                try (PreparedStatement pst = con.prepareStatement(ordre)) {
-                    try (ResultSet rst = pst.executeQuery()) {
-                        System.out.println(ResultSetUtils.formatResultSetAsTxt(rst));
+                } else if (rep == j++) {
+                    // afficher toutes les équipes + joueurs
+                    String ordre =
+                            "select e.id as idEquipe, e.num, e.score, e.idmatch, " +
+                            "       j.id as idJoueur, j.surnom " +
+                            "from equipe e " +
+                            "left join composition c on c.idequipe = e.id " +
+                            "left join joueur j on j.id = c.idjoueur " +
+                            "order by e.id, j.id";
+                    try (PreparedStatement pst = con.prepareStatement(ordre)) {
+                        try (ResultSet rst = pst.executeQuery()) {
+                            System.out.println(ResultSetUtils.formatResultSetAsTxt(rst));
+                        }
+                    }
+
+                } else if (rep == j++) {
+                    // SUPPRIMER DES ÉQUIPES
+                    List<Equipe> toutes = Equipe.toutesLesEquipes(con);
+                    System.out.println(toutes.size() + " équipes trouvées :");
+                    // même principe que pour les joueurs
+                    List<Equipe> selected = ListUtils.selectMultiple(
+                            "Sélectionnez les équipes à supprimer : ",
+                            toutes,
+                            e -> "Equipe " + e.getId() + " (match " + e.getIdmatch() + ", num " + e.getNum() + ")"
+                    );
+                    for (var e : selected) {
+                        e.SuppEquipe(con);
                     }
                 }
-
-            } else if (rep == j++) {
-                // SUPPRIMER DES ÉQUIPES
-                List<Equipe> toutes = Equipe.toutesLesEquipes(con);
-                System.out.println(toutes.size() + " équipes trouvées :");
-                // même principe que pour les joueurs
-                List<Equipe> selected = ListUtils.selectMultiple(
-                        "Sélectionnez les équipes à supprimer : ",
-                        toutes,
-                        e -> "Equipe " + e.getId() + " (match " + e.getIdmatch() + ", num " + e.getNum() + ")"
-                );
-                for (var e : selected) {
-                    e.SuppEquipe(con);
-                }
+            } catch (Exception ex) {
+                System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
             }
-        } catch (Exception ex) {
-            System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
         }
     }
-}
+    
+    /* // TODO : menu à finir
+    public static void menuTournoi(Connection con) {
+        int rep = -1;
+        while (rep != 0) {
+            int i = 1;
+            System.out.println("Menu tournoi");
+            System.out.println("================================");
+            //TODO : faire un texte intermédiaire qui affiche un aperçu de tous les tournois existants
+
+            System.out.println((i++) + ") créer un nouveau tournoi");
+            System.out.println((i++) + ") afficher/modifier un tournoi");
+            System.out.println((i++) + ") supprimer un tournoi");
+            rep = ConsoleFdB.entreeEntier("Votre choix : ");
+            try {
+                int j = 1;
+                if (rep == j++) {
+                    System.out.println("création d'un nouveau tournoi")
+                    // créer un nouveau tournoi
+                    Tournoi nouveauTournoi = Tournoi.entreeConsole();
+                    nouveauTournoi.saveInDB(con);
+
+                } else if (rep == j++) {
+                    // afficher un tournoi
+                    List<Tournoi> listeTournois = Tournoi.tousLesTournois(con);
+                    System.out.println("Quel tournoi voulez vous modifier? Merci de donner le nom ou l'année (quatre chiffres)");
+                    //TODO contrôler que l'année a quatre chiffres
+                    
+                    String ordre =
+                            "select e.id as idEquipe, e.num, e.score, e.idmatch, " +
+                            "       j.id as idJoueur, j.surnom " +
+                            "from equipe e " +
+                            "left join composition c on c.idequipe = e.id " +
+                            "left join joueur j on j.id = c.idjoueur " +
+                            "order by e.id, j.id";
+                    try (PreparedStatement pst = con.prepareStatement(ordre)) {
+                        try (ResultSet rst = pst.executeQuery()) {
+                            System.out.println(ResultSetUtils.formatResultSetAsTxt(rst));
+                        }
+                    }
+
+                } else if (rep == j++) {
+                    // SUPPRIMER DES ÉQUIPES
+                    List<Equipe> toutes = Equipe.toutesLesEquipes(con);
+                    System.out.println(toutes.size() + " équipes trouvées :");
+                    // même principe que pour les joueurs
+                    List<Equipe> selected = ListUtils.selectMultiple(
+                            "Sélectionnez les équipes à supprimer : ",
+                            toutes,
+                            e -> "Equipe " + e.getId() + " (match " + e.getIdmatch() + ", num " + e.getNum() + ")"
+                    );
+                    for (var e : selected) {
+                        e.SuppEquipe(con);
+                    }
+                }
+            } catch (Exception ex) {
+                System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
+            }
+        }
+    } */
 
       public static void main(String[] args) {
         menuPrincipal();
