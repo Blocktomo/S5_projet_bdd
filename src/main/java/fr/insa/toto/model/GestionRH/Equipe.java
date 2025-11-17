@@ -23,6 +23,46 @@ public class Equipe extends ClasseMiroir implements Serializable {
     private int score;
     private int idmatch;
 
+        public int getNum() {
+        return num;
+    }
+
+    /**
+     * @param num the num to set
+     */
+    public void setNum(int num) {
+        this.num = num;
+    }
+
+    /**
+     * @return the score
+     */
+    public int getScore() {
+        return score;
+    }
+
+    /**
+     * @param score the score to set
+     */
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    /**
+     * @return the idmatch
+     */
+    public int getIdmatch() {
+        return idmatch;
+    }
+
+    /**
+     * @param idmatch the idmatch to set
+     */
+    public void setIdmatch(int idmatch) {
+        this.idmatch = idmatch;
+    }
+    
+    
     /**
      * pour nouvel utilisateur en mémoire
      */
@@ -124,114 +164,7 @@ public class Equipe extends ClasseMiroir implements Serializable {
         }
         return res;
     }
-    /*//TODO peut-être implémanter ceci
-    public static Optional<Equipe> findBySurnomPass(Connection con,String surnom,String pass) throws SQLException {
-        try (PreparedStatement pst = con.prepareStatement(
-                "select id,role from utilisateur where surnom = ? and pass = ?")) {
-            pst.setString(1, surnom);
-            pst.setString(2, pass);
-            ResultSet res = pst.executeQuery();
-            if (res.next()) {
-                int id = res.getInt(1);
-                int role = res.getInt(2);
-                return Optional.of(new Equipe(id,surnom, pass, role));
-            } else {
-                return Optional.empty();
-            }
-
-        }
-    }*/
-
-    /**
-     * supprime l'utilisateur de la BdD. Attention : supprime d'abord les
-     * éventuelles dépendances.
-     *
-     * @param con
-     * @throws SQLException
-     *//*    //TODO à implémenter
-    public void deleteInDB(Connection con) throws SQLException {
-        if (this.getId() == -1) {
-            throw new ClasseMiroir.EntiteNonSauvegardee();
-        }
-        try {
-            con.setAutoCommit(false);
-            try (PreparedStatement pst = con.prepareStatement(
-                    "delete from pratique where idutilisateur = ?")) {
-                pst.setInt(1, this.getId());
-                pst.executeUpdate();
-            }
-            try (PreparedStatement pst = con.prepareStatement(
-                    "delete from apprecie where u1 = ?")) {
-                pst.setInt(1, this.getId());
-                pst.executeUpdate();
-            }
-            try (PreparedStatement pst = con.prepareStatement(
-                    "delete from apprecie where u2 = ?")) {
-                pst.setInt(1, this.getId());
-                pst.executeUpdate();
-            }
-
-            try (PreparedStatement pst = con.prepareStatement(
-                    "delete from utilisateur where id = ?")) {
-                pst.setInt(1, this.getId());
-                pst.executeUpdate();
-            }
-            this.entiteSupprimee();
-            con.commit();
-        } catch (SQLException ex) {
-            con.rollback();
-            throw ex;
-        } finally {
-            con.setAutoCommit(true);
-        }
-    }
-
-    public static Equipe entreeConsole() {
-        String nom = ConsoleFdB.entreeString("surnom de l'utilisateur : ");
-        String pass = ConsoleFdB.entreeString("password : ");
-        return new Equipe(nom, pass, 2);
-    }*/
-
-    /**
-     * @return the NUM
-     */
-    public int getNum() {
-        return num;
-    }
-
-    /**
-     * @param num the num to set
-     */
-    public void setNum(int num) {
-        this.num = num;
-    }
-
-    /**
-     * @return the score
-     */
-    public int getScore() {
-        return score;
-    }
-
-    /**
-     * @param score the score to set
-     */
-    public void setScore(int score) {
-        this.score = score;
-    }
-
-    /**
-     * @return the idmatch
-     */
-    public int getIdmatch() {
-        return idmatch;
-    }
-
-    /**
-     * @param idmatch the idmatch to set
-     */
-    public void setIdmatch(int idmatch) {
-        this.idmatch = idmatch;
-    }
+    
+   
 
 }
