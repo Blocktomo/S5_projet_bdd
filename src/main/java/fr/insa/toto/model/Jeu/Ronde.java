@@ -38,29 +38,45 @@ import java.util.Optional;
  */
 public class Ronde extends ClasseMiroir {
     
-    private int Terminer;
+    private int terminer;
     
-    public Ronde(int Terminer){
-        this.Terminer = Terminer; 
+    public Ronde(int terminer){
+        this.terminer = terminer; 
         
     }
     
-    public Ronde (int idronde, int Terminer){
+    public Ronde (int idronde, int terminer){
             super(idronde);
-            this.Terminer = Terminer;
+            this.terminer = terminer;
             
     }
     
+    @Override
+    public Statement saveSansId(Connection con) throws SQLException {
+        PreparedStatement insert = con.prepareStatement(
+                "insert into ronde (terminer) values (?)",
+                PreparedStatement.RETURN_GENERATED_KEYS);
+        insert.setInt(1, this.getTerminer());
+        insert.executeUpdate();
+        return insert;
+    }
+   /* 
     public static List<Ronde> creerRondes{
             Connection con,
             int idMatch,
             int idJoueur,
         List<Joueur> joueurs = Joueur.tousLesJoueur (con);
         
-                  
-    
-}
-    
+    }
+    */
+
+    public int getTerminer() {
+        return terminer;
+    }
+
+    public void setTerminer(int terminer) {
+        this.terminer = terminer;
+    }
     
     
     
