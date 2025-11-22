@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Collections;
+import fr.insa.toto.model.Jeu.Ronde;
 
 
 public class Equipe extends ClasseMiroir implements Serializable {
@@ -22,8 +23,9 @@ public class Equipe extends ClasseMiroir implements Serializable {
     private int num;
     private int score;
     private int idmatch;
+    private Ronde ronde; 
 
-        public int getNum() {
+    public int getNum() {
         return num;
     }
 
@@ -61,10 +63,20 @@ public class Equipe extends ClasseMiroir implements Serializable {
     public void setIdmatch(int idmatch) {
         this.idmatch = idmatch;
     }
+
+    public Ronde getRonde() {
+        return ronde;
+    }
+    
+    
+    public int getNb_joueurs(){
+        int nb_joueurs_equipe = this.getRonde().getTournoi().getNb_joueurs_equipe();
+        return nb_joueurs_equipe;
+    }
     
     
     /**
-     * pour nouvel utilisateur en mémoire
+     * pour nouvelle équipe en mémoire
      */
     public Equipe(int num, int score, int idmatch) {
         super();
@@ -74,13 +86,35 @@ public class Equipe extends ClasseMiroir implements Serializable {
     }
 
     /**
-     * pour utilisateur récupéré de la base de données
+     * pour équipe récupérée de la base de données
      */
     public Equipe(int id, int num, int score, int idmatch) {
         super(id);
         this.num = num;
         this.score = score;
         this.idmatch = idmatch;
+    }
+    
+    /**
+     * pour nouvelle équipe en mémoire
+     */
+    public Equipe(int num, int score, int idmatch, Ronde ronde) {
+        super();
+        this.num = num;
+        this.score = score;
+        this.idmatch = idmatch;
+        this.ronde = ronde;
+    }
+
+    /**
+     * pour équipe récupérée de la base de données
+     */
+    public Equipe(int id, int num, int score, int idmatch, Ronde ronde) {
+        super(id);
+        this.num = num;
+        this.score = score;
+        this.idmatch = idmatch;
+        this.ronde = ronde;
     }
 
     @Override
