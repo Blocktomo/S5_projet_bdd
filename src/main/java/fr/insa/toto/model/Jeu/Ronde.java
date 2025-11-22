@@ -19,7 +19,6 @@ along with CoursBeuvron.  If not, see <http://www.gnu.org/licenses/>.
 package fr.insa.toto.model.Jeu;
 
 
-import fr.insa.toto.model.GestionRH.Joueur;
 import fr.insa.beuvron.utils.ConsoleFdB;
 import fr.insa.beuvron.utils.database.ClasseMiroir;
 import java.io.Serializable;
@@ -39,7 +38,9 @@ import java.util.Optional;
 public class Ronde extends ClasseMiroir {
     
     private int terminer;
+    private Tournoi tournoi;
     
+    //Thomas : on va devoir supprimer ce constructeur, car il faut toujours spécifier un tournoi d'appartenance
     public Ronde(int terminer){
         this.terminer = terminer; 
         
@@ -48,7 +49,11 @@ public class Ronde extends ClasseMiroir {
     public Ronde (int idronde, int terminer){
             super(idronde);
             this.terminer = terminer;
-            
+    }
+    
+    public Ronde (int terminer, Tournoi tournoi){
+        this.terminer = terminer;
+        this.tournoi= tournoi;
     }
     
     @Override
@@ -74,6 +79,11 @@ public class Ronde extends ClasseMiroir {
         return terminer;
     }
 
+    public Tournoi getTournoi() {
+        return tournoi;
+    }
+
+    
     public void setTerminer(int terminer) {
         this.terminer = terminer;
     }

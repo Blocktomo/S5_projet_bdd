@@ -1,5 +1,5 @@
 
-package fr.insa.toto.model.GestionRH;
+package fr.insa.toto.model.Jeu;
 
 import fr.insa.beuvron.utils.ConsoleFdB;
 import fr.insa.beuvron.utils.database.ClasseMiroir;

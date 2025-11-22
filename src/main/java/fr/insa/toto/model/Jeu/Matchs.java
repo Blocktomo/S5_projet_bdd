@@ -31,11 +31,20 @@ import java.sql.Statement;
 public class Matchs extends ClasseMiroir {
 
     private int ronde;
+    private Terrain terrain; ///TODO : est-ce mieux d'avoir un ID Terrain ou un objet Terrain?
+    //TODO : MàJ des méthodes de la classe pour ajouter l'attribut Terrain.
 
+    
     public Matchs(int ronde) {
         this.ronde = ronde;
     }
-
+    
+    public Matchs(int ronde, Terrain terrain) {
+        this.ronde = ronde;
+        this.terrain = terrain;
+    }
+    
+    
     @Override
     public Statement saveSansId(Connection con) throws SQLException {
         PreparedStatement insert = con.prepareStatement(
