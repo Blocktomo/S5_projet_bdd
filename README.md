@@ -4,11 +4,11 @@ A FAIRE :
 
 # Classes
 Créer/modifier chaque classe pour que cela corresponde au diagramme UML 
-- Ali : modifier classe équipe pour mettre les attribvuts, gestion des scores, composition aléatoire d'une équipe...
-- Thomas : classe tournoi  : créer les attributs suivants, ainsi que les tables pour les gérer :  liste des rondes ; liste des terrains ; liste de joueurs
+- classe équipe : --?
+- Thomas : classe tournoi  : créer les attributs suivants, ainsi que les tables pour les gérer :  liste des rondes ; **liste des terrains** ; liste de joueurs
 - classe matchs : les deux équipes qui s'affrontent (parmi les équipes de la ronde)
-- Rayan : classe ronde : liste des matchs ; liste de toutes les équipes de cette ronde; liste des joueurs exclus ; assignation des matchs aux terrains
-- classe terrain : libre/occupé
+- Rayan : classe ronde : liste de toutes les équipes de cette ronde; liste des joueurs exclus (??) ; **assignation des matchs aux terrains**
+- classe terrain : méthodes pour créer le terrain dans le BDD; intégrer ces méthodes dans MainConsole.
 - classe utilisateur : classe mère dont admin, et joueur héritent. Il faut donc créer la classe admin. On peut aussi créer une classe utilisateur_standard...
 - on doit pouvoir créer le tournoi ou simplement ronde par ronde en spécifiant si on veut des matchs séparés pour les seniors et les juniors, ou bien si on veut mélanger les deux catégories dans les matchs
 
