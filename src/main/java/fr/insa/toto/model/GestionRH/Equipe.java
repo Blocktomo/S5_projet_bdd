@@ -25,54 +25,7 @@ public class Equipe extends ClasseMiroir implements Serializable {
     private int idmatch;
     private Ronde ronde; 
 
-    public int getNum() {
-        return num;
-    }
-
-    /**
-     * @param num the num to set
-     */
-    public void setNum(int num) {
-        this.num = num;
-    }
-
-    /**
-     * @return the score
-     */
-    public int getScore() {
-        return score;
-    }
-
-    /**
-     * @param score the score to set
-     */
-    public void setScore(int score) {
-        this.score = score;
-    }
-
-    /**
-     * @return the idmatch
-     */
-    public int getIdmatch() {
-        return idmatch;
-    }
-
-    /**
-     * @param idmatch the idmatch to set
-     */
-    public void setIdmatch(int idmatch) {
-        this.idmatch = idmatch;
-    }
-
-    public Ronde getRonde() {
-        return ronde;
-    }
     
-    
-    public int getNb_joueurs(){
-        int nb_joueurs_equipe = this.getRonde().getTournoi().getNb_joueurs_equipe();
-        return nb_joueurs_equipe;
-    }
     
     
     /**
@@ -234,7 +187,54 @@ public static List<Equipe> toutesLesEquipes(Connection con) throws SQLException 
         con.setAutoCommit(true);
     }
 }
+    public int getNum() {
+        return num;
+    }
+
+    /**
+     * @param num the num to set
+     */
+    public void setNum(int num) {
+        this.num = num;
+    }
+
+    /**
+     * @return the score
+     */
+    public int getScore() {
+        return score;
+    }
+
+    /**
+     * @param score the score to set
+     */
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    /**
+     * @return the idmatch
+     */
+    public int getIdmatch() {
+        return idmatch;
+    }
+
+    /**
+     * @param idmatch the idmatch to set
+     */
+    public void setIdmatch(int idmatch) {
+        this.idmatch = idmatch;
+    }
+
+    public Ronde getRonde() {
+        return ronde;
+    }
     
+    
+    public int getNb_joueurs(){
+        int nb_joueurs_equipe = this.getRonde().getTournoi().getNb_joueurs_equipe();
+        return nb_joueurs_equipe;
+    }
    
 
 }
