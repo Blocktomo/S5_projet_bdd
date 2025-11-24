@@ -66,6 +66,7 @@ public class Ronde extends ClasseMiroir {
         this.tournoi.addRonde(this);
     }
     
+    
     @Override
     public Statement saveSansId(Connection con) throws SQLException {
         PreparedStatement insert = con.prepareStatement(
@@ -75,6 +76,26 @@ public class Ronde extends ClasseMiroir {
         insert.executeUpdate();
         return insert;
     }
+    
+    
+    public static Ronde chercherRondeParId(Connection con, int idRonde) throws SQLException {
+    try (PreparedStatement pst = con.prepareStatement(
+            "select id, terminer from ronde where id = ?")) {
+        pst.setInt(1, idRonde);
+
+        try (ResultSet rs = pst.executeQuery()) {
+            if (rs.next()) {
+                return new Ronde(
+                        rs.getInt("id"),
+                        rs.getInt("terminer")
+                );
+            }
+        }
+    }
+    return null; // ou exception
+}
+    
+    
    /* 
     public static List<Ronde> creerRondes{
             Connection con,
@@ -98,7 +119,7 @@ public class Ronde extends ClasseMiroir {
         this.terminer = terminer;
     }
     
-    
+   
     
     
 }
