@@ -54,6 +54,16 @@ public class Ronde extends ClasseMiroir {
     public Ronde (int terminer, Tournoi tournoi){
         this.terminer = terminer;
         this.tournoi= tournoi;
+        this.tournoi.addRonde(this);
+    }
+    
+    /**
+     * pour récupérer une ronde depuis la bdd
+     */
+    public Ronde (int idRonde, int terminer, Tournoi tournoi){
+        this.terminer = terminer;
+        this.tournoi= tournoi;
+        this.tournoi.addRonde(this);
     }
     
     @Override
