@@ -56,6 +56,7 @@ public class Ronde extends ClasseMiroir {
         this.tournoi= tournoi;
     }
     
+    
     @Override
     public Statement saveSansId(Connection con) throws SQLException {
         PreparedStatement insert = con.prepareStatement(
@@ -88,7 +89,7 @@ public class Ronde extends ClasseMiroir {
         this.terminer = terminer;
     }
     
-    
+   
     
     
 }

@@ -246,12 +246,71 @@ public class MainConsole {
             }
         }
     } */
-
+    
+    /*public static void menuRonde(Connection con){
+        int rep= -1;
+        while (rep !=0) {
+            int i = 1;
+            System.out.println("Menu Ronde");
+            System.out.println("======================================");
+            System.out.println((i++) + ") creer Ronde");
+            System.out.println((i++) + ")Afficher Ronde et detail");
+            System.out.println((i++) + ")Modifier etat Ronde");
+            System.out.println((i++) + ")Supprimer Ronde");
+            System.out.println("0) Retour");
+            rep = ConsoleFdB.entreeEntier("Votre choix : ");
+            try(
+                int j = 1;
+                if (rep == j++) {
+                    //creer Ronde
+                    int idronde = ConsoleFdB.entreeEntier("Id du match : ");
+                    int Terminer = 0
+                    
+                    var Ronde = Ronde.creerRonde(con, idronde, Terminer)
+                    System.out.println(Ronde.size() + " Ronde creer pour le Tournoi "+ nomtournoi);
+                    
+                    
+                }else if (rep == j++) {
+                    // afficher  Ronde et detail
+                    String ordre=
+                            "select e.id as idronde, e.Terminer" +
+                            "       j.id as idJoueur, j.surnom"+
+                            "       i.id as idEquipe, i.num, i.score, i.idmatch" +
+                            "form Tournoi e";
+                    
+                    try(PreparedStatement pst = con.prepareStatement(ordre)) {
+                        try(ResultSet rst = pst.executeQuery()) {
+                            System.out.println(ResultSetUtils.formatResultSetAsTxt(rst));
+                        }
+                    }
+                    //TODO: modifier RONDE
+                }else if (rep == j++) {
+                    //SUPPRIMER RONDE
+                    List<Ronde> toutes = Ronde.touteslesRondes(con);
+                    System.out.println(toutes.idronde() + "Ronde trouvées :");
+                    List<Ronde> selected = ListUtils.selectMultiple(
+                        "Sélectionnez les Rondes à supprimer : ",
+                            toutes,
+                            e -> "Ronde " + e.getidronde() + "(Terminer " + e.getTerminer );
+                    );
+                    for (var e : selected) {
+                        e.SuppRonde(con);
+                    }
+                } catch (Exception ex) {
+                        System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex,"fr.insa",3));
+                        }
+}
+} */
+                    
+                    
+                    
+                            
+                }
+    
       public static void main(String[] args) {
         menuPrincipal();
-    }
+}
 
     
     
-    
-}
+  
