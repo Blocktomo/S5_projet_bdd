@@ -2,6 +2,8 @@
 
 package fr.insa.toto.model.GestionRH;
 
+import fr.insa.toto.model.Jeu.Equipe;
+import fr.insa.toto.model.Jeu.Joueur;
 import fr.insa.toto.model.Jeu.Matchs;
 import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
 import java.sql.Connection;

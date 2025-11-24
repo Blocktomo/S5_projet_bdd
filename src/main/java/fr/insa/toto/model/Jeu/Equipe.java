@@ -1,6 +1,7 @@
 
-package fr.insa.toto.model.GestionRH;
+package fr.insa.toto.model.Jeu;
 
+import fr.insa.toto.model.Jeu.Joueur;
 import fr.insa.beuvron.utils.ConsoleFdB;
 import fr.insa.beuvron.utils.database.ClasseMiroir;
 import java.io.Serializable;
@@ -22,49 +23,13 @@ public class Equipe extends ClasseMiroir implements Serializable {
     private int num;
     private int score;
     private int idmatch;
+    private Ronde ronde; 
 
-        public int getNum() {
-        return num;
-    }
-
-    /**
-     * @param num the num to set
-     */
-    public void setNum(int num) {
-        this.num = num;
-    }
-
-    /**
-     * @return the score
-     */
-    public int getScore() {
-        return score;
-    }
-
-    /**
-     * @param score the score to set
-     */
-    public void setScore(int score) {
-        this.score = score;
-    }
-
-    /**
-     * @return the idmatch
-     */
-    public int getIdmatch() {
-        return idmatch;
-    }
-
-    /**
-     * @param idmatch the idmatch to set
-     */
-    public void setIdmatch(int idmatch) {
-        this.idmatch = idmatch;
-    }
+    
     
     
     /**
-     * pour nouvel utilisateur en mémoire
+     * pour nouvelle équipe en mémoire
      */
     public Equipe(int num, int score, int idmatch) {
         super();
@@ -74,13 +39,35 @@ public class Equipe extends ClasseMiroir implements Serializable {
     }
 
     /**
-     * pour utilisateur récupéré de la base de données
+     * pour équipe récupérée de la base de données
      */
     public Equipe(int id, int num, int score, int idmatch) {
         super(id);
         this.num = num;
         this.score = score;
         this.idmatch = idmatch;
+    }
+    
+    /**
+     * pour nouvelle équipe en mémoire
+     */
+    public Equipe(int num, int score, int idmatch, Ronde ronde) {
+        super();
+        this.num = num;
+        this.score = score;
+        this.idmatch = idmatch;
+        this.ronde = ronde;
+    }
+
+    /**
+     * pour équipe récupérée de la base de données
+     */
+    public Equipe(int id, int num, int score, int idmatch, Ronde ronde) {
+        super(id);
+        this.num = num;
+        this.score = score;
+        this.idmatch = idmatch;
+        this.ronde = ronde;
     }
 
     @Override
@@ -200,7 +187,54 @@ public static List<Equipe> toutesLesEquipes(Connection con) throws SQLException 
         con.setAutoCommit(true);
     }
 }
+    public int getNum() {
+        return num;
+    }
+
+    /**
+     * @param num the num to set
+     */
+    public void setNum(int num) {
+        this.num = num;
+    }
+
+    /**
+     * @return the score
+     */
+    public int getScore() {
+        return score;
+    }
+
+    /**
+     * @param score the score to set
+     */
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    /**
+     * @return the idmatch
+     */
+    public int getIdmatch() {
+        return idmatch;
+    }
+
+    /**
+     * @param idmatch the idmatch to set
+     */
+    public void setIdmatch(int idmatch) {
+        this.idmatch = idmatch;
+    }
+
+    public Ronde getRonde() {
+        return ronde;
+    }
     
+    
+    public int getNb_joueurs(){
+        int nb_joueurs_equipe = this.getRonde().getTournoi().getNb_joueurs_equipe();
+        return nb_joueurs_equipe;
+    }
    
 
 }
