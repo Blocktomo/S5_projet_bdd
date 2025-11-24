@@ -34,8 +34,6 @@ public class Joueur extends ClasseMiroir implements Serializable {
     public Joueur(String surnom, String categorie, double taillecm) {
         super();
         this.surnom = surnom;
-//        this.pass = pass;
-//        this.role = role;
         this.categorie = categorie;
         this.taillecm = taillecm;
     } //TODO : ajouter le traitement de la valeur "null" pour les différentes variables
@@ -48,10 +46,8 @@ public class Joueur extends ClasseMiroir implements Serializable {
         this.surnom = surnom;
         this.categorie = categorie;
         this.taillecm = taillecm;
-//        this.pass = pass;
-//        this.role = role;
     }
-
+    
     @Override
     public Statement saveSansId(Connection con) throws SQLException {
         PreparedStatement insert = con.prepareStatement(
@@ -59,11 +55,11 @@ public class Joueur extends ClasseMiroir implements Serializable {
                 PreparedStatement.RETURN_GENERATED_KEYS);
         insert.setString(1, this.getSurnom());
         insert.setString(2, this.getCategorie());
-        if (this.getTaillecm()==-1){
+        if (this.getTaillecm()==-1){ //on assigne -1 à "taillecm" si on ne spécifie pas
             insert.setNull(3, Types.DOUBLE);
         }else{
         insert.setDouble(3, this.getTaillecm());
-        }
+        }        
         insert.executeUpdate();
         return insert;
     }

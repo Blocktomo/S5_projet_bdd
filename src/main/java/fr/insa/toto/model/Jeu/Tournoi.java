@@ -23,6 +23,9 @@ public class Tournoi extends ClasseMiroir {
     private int duree_match;
     private int nb_joueurs_equipe;
     private int annee;
+    private List<Terrain> liste_terrains = new ArrayList<>();
+    private List<Joueur> liste_joueurs = new ArrayList<>(); //cette liste sera remplie avec la table "participe" joueur-tournoi
+    private List<Ronde> liste_rondes = new ArrayList<>();
     
     
     /**
@@ -31,7 +34,7 @@ public class Tournoi extends ClasseMiroir {
     public Tournoi(String nom, int nb_de_rondes, int duree_match, int nb_joueurs_equipe, int annee) {    
         this.nom = nom;
         this.nb_de_rondes = nb_de_rondes;
-        this.duree_match = duree_match;
+        this.duree_match = duree_match; //duree minutes
         this.nb_joueurs_equipe = nb_joueurs_equipe;
         this.annee = annee;
     }
@@ -39,8 +42,6 @@ public class Tournoi extends ClasseMiroir {
     /**
      * pour tournoi récupéré de la base de données
      */
-    
-
     public Tournoi( int id, String nom, int nb_de_rondes, int duree_match, int nb_joueurs_equipe, int annee) {
         super(id);
         this.nom = nom;
@@ -84,8 +85,8 @@ public class Tournoi extends ClasseMiroir {
         int duree_match = ConsoleFdB.entreeInt("combien de temps durent les matchs (nombre entier, donc en minutes). Votre choix : ");
         int nb_joueurs_equipe = ConsoleFdB.entreeInt("combien de joueurs par équipe? Votre choix : ");
         int annee = ConsoleFdB.entreeInt("quelle est l'année de ce tournoi?");
-
-        return new Tournoi(nom, nb_de_rondes, duree_match, nb_joueurs_equipe, annee);
+        Tournoi result = new Tournoi(nom, nb_de_rondes, duree_match, nb_joueurs_equipe, annee);
+        return result;
     }
 
     public String getNom() {
@@ -107,6 +108,10 @@ public class Tournoi extends ClasseMiroir {
     public int getAnnee() {
         return annee;
     }
+    
+    public int getNb_terrains(){
+        return this.liste_terrains.size();
+    }
 
     public void setNom(String nom) {
         this.nom = nom;
@@ -127,6 +132,32 @@ public class Tournoi extends ClasseMiroir {
     public void setAnnee(int annee) {
         this.annee = annee;
     }
+
+    public void setListe_terrains(List<Terrain> liste_terrains) {
+        this.liste_terrains = liste_terrains;
+    }
+    
+    public void addTerrain(Terrain nouveau_terrain){
+        this.liste_terrains.add(nouveau_terrain);
+    }
+
+    public void setListe_joueurs(List<Joueur> liste_joueurs) {
+        this.liste_joueurs = liste_joueurs;
+    }
+    
+    public void addJoueur(Joueur nouveauJoueur){
+        this.liste_joueurs.add(nouveauJoueur);
+    }
+
+    public void setListe_rondes(List<Ronde> liste_rondes) {
+        this.liste_rondes = liste_rondes;
+    }
+    
+    public void addRonde(Ronde nouvelleRonde){
+        this.liste_rondes.add(nouvelleRonde);
+    }
+    
+    
     
     
    

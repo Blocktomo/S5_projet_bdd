@@ -1,10 +1,9 @@
-
 package fr.insa.toto.model.GestionRH;
 
 import fr.insa.toto.model.Jeu.Equipe;
 import fr.insa.toto.model.Jeu.Joueur;
 import fr.insa.toto.model.GestionRH.GestionBdD;
-//import fr.insa.toto.model.GestionRH.BdDTest;
+import fr.insa.toto.model.GestionRH.BdDTest;
 import fr.insa.beuvron.utils.ConsoleFdB;
 import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
 import fr.insa.beuvron.utils.database.ResultSetUtils;
@@ -333,10 +332,11 @@ public class MainConsole {
                     
                     
                             
-                }
+                
     
       public static void main(String[] args) {
         menuPrincipal();
+        }
 }
 
     

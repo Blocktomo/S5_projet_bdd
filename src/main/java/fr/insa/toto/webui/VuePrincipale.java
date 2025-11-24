@@ -34,7 +34,7 @@ import com.vaadin.flow.router.Route;
 public class VuePrincipale extends VerticalLayout {
 
     public VuePrincipale() {
-        this.add(new H2("TODO"));
+        this.add(new H2("TODO_projetBDD"));
     }
 
 }
