@@ -95,16 +95,42 @@ public class Ronde extends ClasseMiroir {
     return null; // ou exception
 }
     
-    
-   /* 
-    public static List<Ronde> creerRondes{
-            Connection con,
-            int idMatch,
-            int idJoueur,
-        List<Joueur> joueurs = Joueur.tousLesJoueur (con);
+    public static List<Ronde> toutesLesRondes(Connection con) throws SQLException {
+        List<Ronde> res = new ArrayList<>();
+        String query= "SElECT id, terminer FROM ronde ORDER BY id";
         
+        try (PreparedStatement pst = con.prepareStatement(query)) {
+            try(ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    res.add(new Ronde (rs.getInt("id"), rs.getInt("Terminer")));
+                }
+            }
+        }
+        return res;
     }
-    */
+    
+    public void deleteInDB(Connection con) throws SQLException {
+        if (this.getId()== -1 ){
+            throw new ClasseMiroir.EntiteNonSauvegardee();
+        }
+        try {
+            con.setAutoCommit(false);
+            
+            try (PreparedStatement pstMatches = con.prepareStatement(
+                    "DELETE FROM matchs WHERE ronde = ?")) {
+                pstMatches.setInt(1,this.getId());
+                pstMatches.executeUpdate();
+            }
+            
+            this.entiteSupprimee();
+            con.commit();
+        } catch (SQLException ex){
+            con.rollback();
+            throw ex;
+        } finally {
+            con.setAutoCommit(true);
+        }
+    }
 
     public int getTerminer() {
         return terminer;

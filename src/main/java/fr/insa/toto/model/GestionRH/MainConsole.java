@@ -108,6 +108,7 @@ public class MainConsole {
             System.out.println("==================");
             System.out.println((i++) + ") menu gestion BdD");
             System.out.println((i++) + ") menu joueurs");
+            System.out.println((i++) + ") menu Ronde");
             System.out.println("Menu principal");
             System.out.println((i++) + ") menu équipes");
 
@@ -121,6 +122,8 @@ public class MainConsole {
                     menuJoueur(con);
                 } else if (rep == j++) {
                     menuEquipe(con);    
+                } else if (rep == j++) {
+                    menuRonde(con);
                 }
             } catch (Exception ex) {
                 System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
@@ -274,7 +277,7 @@ public class MainConsole {
         }
     } */
     
-    /*public static void menuRonde(Connection con){
+    public static void menuRonde(Connection con){
         int rep= -1;
         while (rep !=0) {
             int i = 1;
@@ -286,48 +289,56 @@ public class MainConsole {
             System.out.println((i++) + ")Supprimer Ronde");
             System.out.println("0) Retour");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
-            try(
+            try{
                 int j = 1;
+                
                 if (rep == j++) {
                     //creer Ronde
-                    int idronde = ConsoleFdB.entreeEntier("Id du match : ");
-                    int Terminer = 0
-                    
-                    var Ronde = Ronde.creerRonde(con, idronde, Terminer)
-                    System.out.println(Ronde.size() + " Ronde creer pour le Tournoi "+ nomtournoi);
-                    
+                    Ronde r = new Ronde(0);
+                    r.saveInDB(con);
+                    System.out.println("Ronde creer , ID = " + r.getId());                    
                     
                 }else if (rep == j++) {
                     // afficher  Ronde et detail
-                    String ordre=
-                            "select e.id as idronde, e.Terminer" +
-                            "       j.id as idJoueur, j.surnom"+
-                            "       i.id as idEquipe, i.num, i.score, i.idmatch" +
-                            "form Tournoi e";
+                    int idRonde = ConsoleFdB.entreeEntier("Quel est l'ID de la ronde à afficher ?");
                     
-                    try(PreparedStatement pst = con.prepareStatement(ordre)) {
-                        try(ResultSet rst = pst.executeQuery()) {
+                    String ordre=
+                        "SELECT m.id as MatchID, m.ronde, " +
+                        "       e.id as Equipe ID, e.score, " +
+                        "       j.surnom as Joueur " +
+                        "From matchs m" +
+                        "LEFT JOIN equipe e ON e.idmatch = m.id" +
+                        "LEFT JOIN composition c ON c.idequipe = e.id " +
+                        "LEFT JOIN joueur j ON j.id = c.idjoueur" +
+                        "WHERE JOIN joueur j ON j.id = c.idjoueur" +
+                        "ORDER BY m.id, e.id";
+                    System.out.println("Details Ronde"+ idRonde);
+                    try (PreparedStatement pst = con.prepareStatement(ordre)) {
+                        pst.setInt(1, idRonde);
+                        try (ResultSet rst = pst.executeQuery()){
                             System.out.println(ResultSetUtils.formatResultSetAsTxt(rst));
-                        }
                     }
-                    //TODO: modifier RONDE
+                }
                 }else if (rep == j++) {
                     //SUPPRIMER RONDE
-                    List<Ronde> toutes = Ronde.touteslesRondes(con);
-                    System.out.println(toutes.idronde() + "Ronde trouvées :");
+                    List<Ronde> toutes = Ronde.toutesLesRondes(con);
+                    System.out.println(toutes.size() + "Rondes trouvées :");
+                    
                     List<Ronde> selected = ListUtils.selectMultiple(
                         "Sélectionnez les Rondes à supprimer : ",
                             toutes,
-                            e -> "Ronde " + e.getidronde() + "(Terminer " + e.getTerminer );
+                            e -> "Ronde " + e.getId() + "(Statut: " + (e.getTerminer()==1 ? "Finie": "En cours") + ")"
                     );
-                    for (var e : selected) {
-                        e.SuppRonde(con);
+                    for (Ronde r : selected) {
+                        r.deleteInDB(con);
                     }
-                } catch (Exception ex) {
-                        System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex,"fr.insa",3));
+                    System.out.println("Rondes supprimées.");
+                }
+            } catch (SQLException ex) {
+                System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex,"fr.insa",3));
                         }
-}
-} */
+                }
+    }
                     
                     
                     
