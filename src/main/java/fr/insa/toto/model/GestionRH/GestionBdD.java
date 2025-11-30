@@ -35,6 +35,16 @@ public class GestionBdD {
             try (Statement st = con.createStatement()) {
                 // creation des tables
                 
+                st.executeUpdate("create table tournoi ( "
+                        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
+                        + " nom varchar(30) not null,"
+                        + " annee integer not null,"
+                        + " nb_de_rondes integer not null,"
+                        + " duree_match integer not null, "
+                        + "nb_joueurs_equipe integer not null"
+                        + ") "
+                );
+                
                 st.executeUpdate("create table joueur ( "
                         + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
                         + " surnom varchar(30) not null unique,"
@@ -57,7 +67,7 @@ public class GestionBdD {
                 );
                 st.executeUpdate("create table ronde ( "
                         + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "idronde") + ","
-                        + " Terminer integer CHECK ( Terminer=0 or Terminer=1) ,"
+                        + " Terminer integer CHECK ( Terminer=0 or Terminer=1) "
                         + ") "
                 );
                 
@@ -110,6 +120,10 @@ public class GestionBdD {
             }
             
             try {
+                st.executeUpdate("drop table tournoi");
+            } catch (SQLException ex) {
+            }
+            try {
                 st.executeUpdate("drop table joueur");
             } catch (SQLException ex) {
             }
@@ -119,6 +133,10 @@ public class GestionBdD {
             }
             try {
                 st.executeUpdate("drop table equipe");
+            } catch (SQLException ex) {
+            }
+            try {
+                st.executeUpdate("drop table ronde");
             } catch (SQLException ex) {
             }
             try {

@@ -18,7 +18,7 @@ public class BdDTest {
     //V1 et V2 était les tests du prof (loisirs, utilisateurs,etc.)  
     
     public static void createBdDTestV3(Connection con) throws SQLException {
-        Tournoi tournoi1 = new Tournoi("Mondial 2025", 10, 90, 2, 2025);
+        Tournoi.saveSansId(con);
         List<Joueur> players = List.of(
                 new Joueur("Pierre", "S", 180),
                 new Joueur("Ahmed", "J", 160),
@@ -65,17 +65,10 @@ public class BdDTest {
         }
     }
 
-    public static void main(String[] args) {
-        try (Connection con = ConnectionSimpleSGBD.defaultCon()) {
-            GestionBdD.razBdd(con);
-            createBdDTestV3(con);
-        } catch (SQLException ex) {
-            throw new Error(ex);
-        }
-    }
+    
  public static void createBdDTestV4(Connection con) throws SQLException {
-        Tournoi tournoi1 = new Tournoi("Mondial 2025", 10, 90, 2, 2025);
-        
+       
+        Tournoi.saveSansId(con);
         List<Joueur> players = List.of(
                 new Joueur("Pierre", "S", 180),
                 new Joueur("Ahmed", "J", 160),
@@ -110,6 +103,15 @@ public class BdDTest {
                 compo.setInt(2, cmp[1]);
                 compo.executeUpdate();
             }
+        }
+    }
+ 
+    public static void main(String[] args) {
+        try (Connection con = ConnectionSimpleSGBD.defaultCon()) {
+            GestionBdD.razBdd(con);
+            createBdDTestV4(con);
+        } catch (SQLException ex) {
+            throw new Error(ex);
         }
     }
  

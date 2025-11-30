@@ -104,12 +104,12 @@ public class MainConsole {
         }
         while (rep != 0) {
             int i = 1;
-            System.out.println("Menu principal");
-            System.out.println("==================");
+            System.out.println("Menu principal du tournoi " + Tournoi.getNom() +" "+  Tournoi.getAnnee());
+            System.out.println("======================================");
+            System.out.println((i++) + ") menu tournoi");
             System.out.println((i++) + ") menu gestion BdD");
             System.out.println((i++) + ") menu joueurs");
             System.out.println((i++) + ") menu Ronde");
-            System.out.println("Menu principal");
             System.out.println((i++) + ") menu équipes");
 
             System.out.println("0) Fin");
@@ -117,6 +117,8 @@ public class MainConsole {
             try {
                 int j = 1;
                 if (rep == j++) {
+                    menuTournoi(con);
+                }else if (rep == j++) {
                     menuBdD(con);
                 } else if (rep == j++) {
                     menuJoueur(con);
@@ -217,65 +219,27 @@ public class MainConsole {
 }
 
     
-    /* // TODO : menu à finir
+     // TODO : menu à finir
     public static void menuTournoi(Connection con) {
         int rep = -1;
         while (rep != 0) {
-            int i = 1;
             System.out.println("Menu tournoi");
             System.out.println("================================");
             //TODO : faire un texte intermédiaire qui affiche un aperçu de tous les tournois existants
-
-            System.out.println((i++) + ") créer un nouveau tournoi");
-            System.out.println((i++) + ") afficher/modifier un tournoi");
-            System.out.println((i++) + ") supprimer un tournoi");
+            System.out.println("Voici les caractérisitques du Tournoi actuel.");
+            Tournoi.affichageTexte();
+            System.out.println("1) modifier le tournoi");
+            System.out.println("0) retour");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
             try {
-                int j = 1;
-                if (rep == j++) {
-                    System.out.println("création d'un nouveau tournoi")
-                    // créer un nouveau tournoi
-                    Tournoi nouveauTournoi = Tournoi.entreeConsole();
-                    nouveauTournoi.saveInDB(con);
-
-                } else if (rep == j++) {
-                    // afficher un tournoi
-                    List<Tournoi> listeTournois = Tournoi.tousLesTournois(con);
-                    System.out.println("Quel tournoi voulez vous modifier? Merci de donner le nom ou l'année (quatre chiffres)");
-                    //TODO contrôler que l'année a quatre chiffres
-                    
-                    String ordre =
-                            "select e.id as idEquipe, e.num, e.score, e.idmatch, " +
-                            "       j.id as idJoueur, j.surnom " +
-                            "from equipe e " +
-                            "left join composition c on c.idequipe = e.id " +
-                            "left join joueur j on j.id = c.idjoueur " +
-                            "order by e.id, j.id";
-                    try (PreparedStatement pst = con.prepareStatement(ordre)) {
-                        try (ResultSet rst = pst.executeQuery()) {
-                            System.out.println(ResultSetUtils.formatResultSetAsTxt(rst));
-                        }
-                    }
-
-                } else if (rep == j++) {
-                    // SUPPRIMER DES ÉQUIPES
-                    List<Equipe> toutes = Equipe.toutesLesEquipes(con);
-                    System.out.println(toutes.size() + " équipes trouvées :");
-                    // même principe que pour les joueurs
-                    List<Equipe> selected = ListUtils.selectMultiple(
-                            "Sélectionnez les équipes à supprimer : ",
-                            toutes,
-                            e -> "Equipe " + e.getId() + " (match " + e.getIdmatch() + ", num " + e.getNum() + ")"
-                    );
-                    for (var e : selected) {
-                        e.SuppEquipe(con);
-                    }
-                }
+                if (rep == 1) {
+                    Tournoi.modifTournoi(con); //modifier un tournoi
+                } else{}
             } catch (Exception ex) {
                 System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
             }
         }
-    } */
+    } 
     
     public static void menuRonde(Connection con){
         int rep= -1;
