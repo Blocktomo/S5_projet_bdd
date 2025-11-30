@@ -23,8 +23,6 @@ public class Joueur extends ClasseMiroir implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String surnom;
-//    private String pass;
-//    private int role;
     private String categorie;
     private double taillecm;
 
@@ -36,6 +34,7 @@ public class Joueur extends ClasseMiroir implements Serializable {
         this.surnom = surnom;
         this.categorie = categorie;
         this.taillecm = taillecm;
+        Tournoi.addJoueur(this);
     } //TODO : ajouter le traitement de la valeur "null" pour les différentes variables
 
     /**
@@ -46,6 +45,7 @@ public class Joueur extends ClasseMiroir implements Serializable {
         this.surnom = surnom;
         this.categorie = categorie;
         this.taillecm = taillecm;
+        Tournoi.addJoueur(this);
     }
     
     @Override

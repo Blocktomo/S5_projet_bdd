@@ -26,11 +26,13 @@ public class Terrain extends ClasseMiroir {
 
     public Terrain(boolean libre) {
         this.libre = libre;
+        Tournoi.addTerrain(this);
     }
 
     public Terrain(boolean libre, String nom_terrain) {
         this(libre);
         this.nom_terrain = nom_terrain;
+        Tournoi.addTerrain(this);
     }
 
     /**
@@ -42,6 +44,7 @@ public class Terrain extends ClasseMiroir {
         this.libre = libre;
         this.libre = libre;
         this.nom_terrain = nom_terrain; //proposition : nom_terrain peut être NULL.
+        Tournoi.addTerrain(this);
     }
 
     @Override

@@ -43,27 +43,17 @@ public class Ronde extends ClasseMiroir {
     //Thomas : on va devoir supprimer ce constructeur, car il faut toujours spécifier un tournoi d'appartenance
     public Ronde(int terminer){
         this.terminer = terminer; 
+        Tournoi.addRonde(this);
         
     }
     
+    /**pour récupérer une ronde depuis la BDD
+     * @param terminer : int // 0 ou 1
+     */
     public Ronde (int idronde, int terminer){
             super(idronde);
             this.terminer = terminer;
-    }
-    
-    public Ronde (int terminer, Tournoi tournoi){
-        this.terminer = terminer;
-        this.tournoi= tournoi;
-        this.tournoi.addRonde(this);
-    }
-    
-    /**
-     * pour récupérer une ronde depuis la bdd
-     */
-    public Ronde (int idRonde, int terminer, Tournoi tournoi){
-        this.terminer = terminer;
-        this.tournoi= tournoi;
-        this.tournoi.addRonde(this);
+            Tournoi.addRonde(this);
     }
     
     
@@ -89,12 +79,14 @@ public class Ronde extends ClasseMiroir {
                         rs.getInt("id"),
                         rs.getInt("terminer")
                 );
-            }
+            } 
         }
     }
     return null; // ou exception
 }
     
+    /**permet de récupérer les rondes depuis la BDD, en plus de Tournoi.getListe_rondes().
+     */
     public static List<Ronde> toutesLesRondes(Connection con) throws SQLException {
         List<Ronde> res = new ArrayList<>();
         String query= "SElECT id, terminer FROM ronde ORDER BY id";

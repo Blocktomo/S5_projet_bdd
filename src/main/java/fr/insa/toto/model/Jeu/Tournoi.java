@@ -16,150 +16,202 @@ import java.util.Optional;
 import java.util.Collections;
 
 
-public class Tournoi extends ClasseMiroir {
+public class Tournoi { //suppression de "extends ClasseMiroir" car cela ne convenait pas
 
-    private String nom;
-    private int nb_de_rondes;
-    private int duree_match;
-    private int nb_joueurs_equipe;
-    private int annee;
-    private List<Terrain> liste_terrains = new ArrayList<>();
-    private List<Joueur> liste_joueurs = new ArrayList<>(); //cette liste sera remplie avec la table "participe" joueur-tournoi
-    private List<Ronde> liste_rondes = new ArrayList<>();
+    private static String nom="Tournoi_actuel";
+    private static int annee=2025;
+    private static int nb_de_rondes=10;
+    private static int duree_match=90;
+    private static int nb_joueurs_equipe=2;
+    private static List<Terrain> liste_terrains = new ArrayList<>();
+    private static List<Joueur> liste_joueurs = new ArrayList<>(); //cette liste sera remplie avec la table "participe" joueur-tournoi
+    private static List<Ronde> liste_rondes = new ArrayList<>();
     
-    
-    /**
-     * pour nouveau tournoi en mémoire
-     */
-    public Tournoi(String nom, int nb_de_rondes, int duree_match, int nb_joueurs_equipe, int annee) {    
-        this.nom = nom;
-        this.nb_de_rondes = nb_de_rondes;
-        this.duree_match = duree_match; //duree minutes
-        this.nb_joueurs_equipe = nb_joueurs_equipe;
-        this.annee = annee;
-    }
 
-    /**
-     * pour tournoi récupéré de la base de données
-     */
-    public Tournoi( int id, String nom, int nb_de_rondes, int duree_match, int nb_joueurs_equipe, int annee) {
-        super(id);
-        this.nom = nom;
-        this.nb_de_rondes = nb_de_rondes;
-        this.duree_match = duree_match;
-        this.nb_joueurs_equipe = nb_joueurs_equipe;
-        this.annee = annee;
-    }
-
-    @Override
-    public Statement saveSansId(Connection con) throws SQLException {
+//    @Override
+    public static Statement saveSansId(Connection con) throws SQLException {
         PreparedStatement insert = con.prepareStatement(
-                    "insert into tournoi (nom, nb_de_rondes, duree_match, nb_joueurs_equipe, annee) values (?,?,?,?,?)",
+                    "insert into tournoi (nom, annee, nb_de_rondes, duree_match, nb_joueurs_equipe) values (?,?,?,?,?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
-        insert.setString(1, this.getNom());
-        insert.setInt(2, this.getNb_de_rondes());
-        insert.setInt(3, getDuree_match());
-        insert.setInt(4, getNb_joueurs_equipe());
-        insert.setInt(5, getAnnee());
+        insert.setString(1, getNom());
+        insert.setInt(2, getAnnee());
+        insert.setInt(3, getNb_de_rondes());
+        insert.setInt(4, getDuree_match());
+        insert.setInt(5, getNb_joueurs_equipe());
+        
         insert.executeUpdate();
         return insert;
     } 
+    
+    /* //pas d'uitlité pour le moment pour cette méthode
+    public final static void saveInDB(Connection con) throws SQLException {
+        if (Tournoi.id != -1) {
+            throw new EntiteDejaSauvegardee();
+        }
+        //Statement saveAllButId = Tournoi.saveSansId(con);
+        try (ResultSet rid = saveAllButId.getGeneratedKeys()) {
+            rid.next();
+            this.id = rid.getInt(1);
+            return this.id;
+        }
+    }*/
 
-    public static List<Tournoi> tousLesTournois(Connection con) throws SQLException {
-        List<Tournoi> res = new ArrayList<>();
-        try (PreparedStatement pst = con.prepareStatement("select id, nom, nb_de_rondes, duree_match, nb_joueurs_equipe, annee from tournoi")) {
-            try (ResultSet allT = pst.executeQuery()) {
-                while (allT.next()) {
-                    res.add(new Tournoi(allT.getInt("id"), allT.getString("nom"),
-                            allT.getInt("nb_de_rondes"), allT.getInt("duree_match"), 
-                            allT.getInt("nb_joueurs_equipe"), allT.getInt("annee")));
+    public static void initTournoi(Connection con) throws SQLException {
+        try (PreparedStatement pst = con.prepareStatement("select nom, annee, nb_de_rondes, duree_match, nb_joueurs_equipe from tournoi")) {
+            try (ResultSet theT = pst.executeQuery()) {
+                while (theT.next()) {
+                    Tournoi.setNom(theT.getString("nom"));
+                    Tournoi.setAnnee(theT.getInt("annee"));
+                    Tournoi.setNb_de_rondes(theT.getInt("nb_de_rondes"));
+                    Tournoi.setDuree_match(theT.getInt("duree_match"));
+                    Tournoi.setNb_joueurs_equipe(theT.getInt("nb_joueurs_equipe"));
                 }
             }
         }
-        return res;
+        //TODO : get info from the tables like Terrain and Ronde and Joueur
     }
     
-    public static Tournoi entreeConsole() {
-        String nom = ConsoleFdB.entreeString("nom du tournoi : ");
-        int nb_de_rondes = ConsoleFdB.entreeInt("combien de rondes pour ce tournoi? Votre choix :  ");
-        int duree_match = ConsoleFdB.entreeInt("combien de temps durent les matchs (nombre entier, donc en minutes). Votre choix : ");
-        int nb_joueurs_equipe = ConsoleFdB.entreeInt("combien de joueurs par équipe? Votre choix : ");
-        int annee = ConsoleFdB.entreeInt("quelle est l'année de ce tournoi?");
-        Tournoi result = new Tournoi(nom, nb_de_rondes, duree_match, nb_joueurs_equipe, annee);
-        return result;
+    public static void modifTournoi(Connection con) throws SQLException {
+        int i=1;
+        boolean sortirDeLa = false;
+        while (!sortirDeLa){
+            int choix = ConsoleFdB.entreeEntier("que souhaitez-vous modifier?\n"
+                    + (i++) + ") le nom ("+Tournoi.getNom()+") \n"
+                    + (i++) + ") l\'annee du tournoi ("+Tournoi.getAnnee()+") \n"
+                    + (i++) + ") le nombres de rondes ("+Tournoi.getNb_de_rondes() +") \n"
+                    + (i++) + ") la duree des matchs (" + Tournoi.getDuree_match()+") \n"
+                    + (i++) + ") le nombre de joueurs par equipe (" + Tournoi.getNb_joueurs_equipe() + ") \n"
+                    + "0) retour en arrière"
+                    ); 
+            try {
+                con.setAutoCommit(false);
+                PreparedStatement commit_modif = con.prepareStatement(
+                    "update tournoi "
+                            + "set ? = ?");
+                String nom_colonne = "";
+                String res_string = "";
+                int res_int;
+                switch (choix) {
+                        case 1 :  
+                            nom_colonne = "nom";
+                            res_string = ConsoleFdB.entreeString("nom du tournoi : ");
+                            Tournoi.setNom(res_string);
+                            commit_modif.setString(2, res_string);
+                            break;
+                        case 2 : 
+                            nom_colonne = "annee";
+                            res_int = ConsoleFdB.entreeInt("quelle est l'année de ce tournoi?");
+                            Tournoi.setAnnee(res_int);
+                            commit_modif.setInt(2, res_int);
+                            break;
+                        case 3 : 
+                            nom_colonne = "nb_de_rondes";
+                            res_int = ConsoleFdB.entreeInt("combien de rondes pour ce tournoi? Votre choix :  ");
+                            Tournoi.setNb_de_rondes(res_int);
+                            commit_modif.setInt(2, res_int);    
+                            break;
+                        case 4 : 
+                            nom_colonne = "duree_match";
+                            res_int = ConsoleFdB.entreeInt("combien de temps durent les matchs (nombre entier, donc en minutes). Votre choix : ");
+                            Tournoi.setDuree_match(res_int);
+                            commit_modif.setInt(2, res_int);
+                            break;
+                        case 5 : 
+                            nom_colonne = "nb_joueurs_equipe";
+                            res_int = ConsoleFdB.entreeInt("combien de joueurs par équipe? Votre choix : ");
+                            Tournoi.setNb_joueurs_equipe(res_int);
+                            commit_modif.setInt(2, res_int);
+                            break;
+                        case 0 : sortirDeLa=true;
+                            break;
+                        default : sortirDeLa=true; break;
+                }
+                if (sortirDeLa==true){
+                    con.rollback();
+                }else{ //on ne fait le commit que si tout s'est bien passé.
+                commit_modif.setString(1, nom_colonne);
+                con.commit();
+                }
+            }catch (SQLException ex){
+                con.rollback();
+                throw new Error(ex) ;
+            }finally{
+                con.setAutoCommit(true);
+            }
+        }
+    }
+    
+    public static void affichageTexte(){
+        System.out.println("nom du tournoi : " + Tournoi.getNom()
+                        + "annee : " + Tournoi.getAnnee()
+                        + "nombres de rondes : " + Tournoi.getNb_de_rondes()
+                        + "duree des matchs : " + Tournoi.getDuree_match()
+                        + "nombre de joueurs par equipe : " + Tournoi.getNb_joueurs_equipe()
+                );
     }
 
-    public String getNom() {
-        return nom;
+    public static String getNom() {
+        return Tournoi.nom;
+    }
+    public static int getAnnee() {
+        return Tournoi.annee;
+    }
+    public static int getNb_de_rondes() {
+        return Tournoi.nb_de_rondes;
     }
 
-    public int getNb_de_rondes() {
-        return nb_de_rondes;
+    public static int getDuree_match() {
+        return Tournoi.duree_match;
     }
 
-    public int getDuree_match() {
-        return duree_match;
-    }
-
-    public int getNb_joueurs_equipe() {
-        return nb_joueurs_equipe;
-    }
-
-    public int getAnnee() {
-        return annee;
+    public static int getNb_joueurs_equipe() {
+        return Tournoi.nb_joueurs_equipe;
     }
     
     public int getNb_terrains(){
-        return this.liste_terrains.size();
+        return Tournoi.liste_terrains.size();
     }
 
-    public void setNom(String nom) {
-        this.nom = nom;
+    public static void setNom(String nom) {
+        Tournoi.nom = nom;
+    }
+    public static void setAnnee(int annee) {
+        Tournoi.annee = annee;
+    }
+    public static void setNb_de_rondes(int nb_de_rondes) {
+        Tournoi.nb_de_rondes = nb_de_rondes;
     }
 
-    public void setNb_de_rondes(int nb_de_rondes) {
-        this.nb_de_rondes = nb_de_rondes;
+    public static void setDuree_match(int duree_match) {
+        Tournoi.duree_match = duree_match;
     }
 
-    public void setDuree_match(int duree_match) {
-        this.duree_match = duree_match;
-    }
+    public static void setNb_joueurs_equipe(int nb_joueurs_equipe) {
+        Tournoi.nb_joueurs_equipe = nb_joueurs_equipe;
+    }    
 
-    public void setNb_joueurs_equipe(int nb_joueurs_equipe) {
-        this.nb_joueurs_equipe = nb_joueurs_equipe;
-    }
-
-    public void setAnnee(int annee) {
-        this.annee = annee;
-    }
-
-    public void setListe_terrains(List<Terrain> liste_terrains) {
-        this.liste_terrains = liste_terrains;
+    public static void setListe_terrains(List<Terrain> liste_terrains) {
+        Tournoi.liste_terrains = liste_terrains;
     }
     
-    public void addTerrain(Terrain nouveau_terrain){
-        this.liste_terrains.add(nouveau_terrain);
+    public static void addTerrain(Terrain nouveau_terrain){
+        Tournoi.liste_terrains.add(nouveau_terrain);
     }
 
-    public void setListe_joueurs(List<Joueur> liste_joueurs) {
-        this.liste_joueurs = liste_joueurs;
+    public static void setListe_joueurs(List<Joueur> liste_joueurs) {
+        Tournoi.liste_joueurs = liste_joueurs;
     }
     
-    public void addJoueur(Joueur nouveauJoueur){
-        this.liste_joueurs.add(nouveauJoueur);
+    public static void addJoueur(Joueur nouveauJoueur){
+        Tournoi.liste_joueurs.add(nouveauJoueur);
     }
 
-    public void setListe_rondes(List<Ronde> liste_rondes) {
-        this.liste_rondes = liste_rondes;
+    public static void setListe_rondes(List<Ronde> liste_rondes) {
+        Tournoi.liste_rondes = liste_rondes;
     }
     
-    public void addRonde(Ronde nouvelleRonde){
-        this.liste_rondes.add(nouvelleRonde);
+    public static void addRonde(Ronde nouvelleRonde){
+        Tournoi.liste_rondes.add(nouvelleRonde);
     }
     
-    
-    
-    
-   
-
 }
