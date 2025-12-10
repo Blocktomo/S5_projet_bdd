@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Collections;
@@ -24,10 +25,9 @@ public class Tournoi { //suppression de "extends ClasseMiroir" car cela ne conve
     private static int duree_match=90;
     private static int nb_joueurs_equipe=2;
     private static List<Terrain> liste_terrains = new ArrayList<>();
-    private static List<Joueur> liste_joueurs = new ArrayList<>(); //cette liste sera remplie avec la table "participe" joueur-tournoi
+    private static List<Joueur> liste_joueurs = new ArrayList<>(); //TODO : cette liste sera remplie avec la table "participe" joueur-tournoi
     private static List<Ronde> liste_rondes = new ArrayList<>();
     
-
 //    @Override
     public static Statement saveSansId(Connection con) throws SQLException {
         PreparedStatement insert = con.prepareStatement(
@@ -173,6 +173,23 @@ public class Tournoi { //suppression de "extends ClasseMiroir" car cela ne conve
         return Tournoi.liste_terrains.size();
     }
 
+    
+    //TODO : à priori, on devrait plutôt récupérer ces listes et les mettre à jour depuis la BDD
+    public static List<Terrain> getListe_terrains() {
+        return liste_terrains;
+    }
+
+    public static List<Joueur> getListe_joueurs() {
+        return liste_joueurs;
+    }
+
+    public static List<Ronde> getListe_rondes() {
+        return liste_rondes;
+    }
+
+    
+    
+    
     public static void setNom(String nom) {
         Tournoi.nom = nom;
     }

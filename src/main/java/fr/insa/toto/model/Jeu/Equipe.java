@@ -39,8 +39,6 @@ public Equipe(int score, Ronde ronde) {
     /**
      * pour équipe récupérée de la base de données
      */
-  
-    
   public Equipe(int id, int score, Ronde ronde) {
     super(id);
     this.score = score;
@@ -62,62 +60,60 @@ public Statement saveSansId(Connection con) throws SQLException {
 }
     
    
-    public static List<Equipe> creerEquipes(
-        Connection con,
-        Ronde ronde) throws SQLException {
+    public static List<Equipe> creerEquipes(Connection con, Ronde ronde) throws SQLException {
 
-    // 1) Taille des équipes grâce au tournoi
-    int tailleEquipe = ronde.getTournoi().getNb_joueurs_equipe();
+            // 1) Taille des équipes grâce au tournoi
+            int tailleEquipe = Tournoi.getNb_joueurs_equipe();
 
-    // 2) On récupère tous les joueurs existants
-    List<Joueur> joueurs = Joueur.tousLesJoueur(con);
+            // 2) On récupère tous les joueurs existants
+            List<Joueur> joueurs = Joueur.tousLesJoueur(con);
 
-    // 3) Mélanger pour que ce soit aléatoire
-    Collections.shuffle(joueurs);
+            // 3) Mélanger pour que ce soit aléatoire
+            Collections.shuffle(joueurs);
 
-    List<Equipe> equipesCreees = new ArrayList<>();
+            List<Equipe> equipesCreees = new ArrayList<>();
 
-    // 4) Nombre d’équipes complètes possibles
-    int nbEquipesCompletes = joueurs.size() / tailleEquipe;
+            // 4) Nombre d’équipes complètes possibles
+            int nbEquipesCompletes = joueurs.size() / tailleEquipe;
 
-    try {
-        con.setAutoCommit(false);
+            try {
+                con.setAutoCommit(false);
 
-        // 5) Préparer l’insertion dans composition
-        try (PreparedStatement pstCompo = con.prepareStatement(
-                "insert into composition (idequipe,idjoueur) values (?,?)")) {
+                // 5) Préparer l’insertion dans composition
+                try (PreparedStatement pstCompo = con.prepareStatement(
+                        "insert into composition (idequipe,idjoueur) values (?,?)")) {
 
-            int indexJoueur = 0;
+                    int indexJoueur = 0;
 
-            for (int i = 0; i < nbEquipesCompletes; i++) {
+                    for (int i = 0; i < nbEquipesCompletes; i++) {
 
-                // Créer une nouvelle équipe pour cette ronde
-                // Score = 0, ronde = l’objet passé en paramètre
-                Equipe e = new Equipe(0, ronde);
-                e.saveInDB(con); // insère en BD et récupère l'id
-                equipesCreees.add(e);
+                        // Créer une nouvelle équipe pour cette ronde
+                        // Score = 0, ronde = l’objet passé en paramètre
+                        Equipe e = new Equipe(0, ronde);
+                        e.saveInDB(con); // insère en BD et récupère l'id
+                        equipesCreees.add(e);
 
-                // Remplir l’équipe avec 'tailleEquipe' joueurs
-                for (int k = 0; k < tailleEquipe; k++) {
-                    Joueur j = joueurs.get(indexJoueur++);
+                        // Remplir l’équipe avec 'tailleEquipe' joueurs
+                        for (int k = 0; k < tailleEquipe; k++) {
+                            Joueur j = joueurs.get(indexJoueur++);
 
-                    pstCompo.setInt(1, e.getId());
-                    pstCompo.setInt(2, j.getId());
-                    pstCompo.executeUpdate();
+                            pstCompo.setInt(1, e.getId());
+                            pstCompo.setInt(2, j.getId());
+                            pstCompo.executeUpdate();
+                        }
+                    }
                 }
+
+                con.commit();
+            } catch (SQLException ex) {
+                con.rollback();
+                throw ex;
+            } finally {
+                con.setAutoCommit(true);
             }
+
+            return equipesCreees;
         }
-
-        con.commit();
-    } catch (SQLException ex) {
-        con.rollback();
-        throw ex;
-    } finally {
-        con.setAutoCommit(true);
-    }
-
-    return equipesCreees;
-}
 
 
 public static List<Equipe> toutesLesEquipes(Connection con) throws SQLException {

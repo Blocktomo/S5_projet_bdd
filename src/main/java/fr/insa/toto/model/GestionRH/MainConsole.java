@@ -9,6 +9,7 @@ import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
 import fr.insa.beuvron.utils.database.ResultSetUtils;
 import fr.insa.beuvron.utils.exceptions.ExceptionsUtils;
 import fr.insa.beuvron.utils.list.ListUtils;
+import fr.insa.toto.model.Jeu.Matchs;
 import fr.insa.toto.model.Jeu.Tournoi;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -111,6 +112,7 @@ public class MainConsole {
             System.out.println((i++) + ") menu joueurs");
             System.out.println((i++) + ") menu Ronde");
             System.out.println((i++) + ") menu équipes");
+            System.out.println((i++) + ") menu matchs");
 
             System.out.println("0) Fin");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
@@ -126,6 +128,8 @@ public class MainConsole {
                     menuRonde(con);    
                 } else if (rep == j++) {
                     menuEquipe(con);
+                } else if (rep==j++) {
+                    menuMatchs(con);
                 }
             } catch (Exception ex) {
                 System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
@@ -221,9 +225,54 @@ public class MainConsole {
         }
     }
 }
+   
+   public static void menuMatchs(Connection con) {
+    int rep = -1;
+    while (rep != 0) {
+        int i = 1;
+        System.out.println("Menu matchs");
+        System.out.println("================================");
+        System.out.println((i++) + ") créer des matchs et les assigner à leurs terrains pour une ronde");
+        System.out.println((i++) + ") consulter le score d'un match (i.e. le score des équipes)");
+//        System.out.println((i++) + ") supprimer des matchs");
+        System.out.println("0) Retour");
 
+        rep = ConsoleFdB.entreeEntier("Votre choix : ");
+
+        try {
+            int j = 1;
+
+            /* =============================
+                 1) CRÉER LES MATCHS
+               ============================= */
+            if (rep == j++) {
+                int idRonde = ConsoleFdB.entreeEntier("Id de la ronde : ");
+                // On récupère la ronde à partir de son ID
+               Ronde r = Ronde.chercherRondeParId(con, idRonde);
+                if (r == null) {
+                    System.out.println("⚠️  Aucune ronde avec cet id.");
+                    continue;
+                }
+                // Création automatique : la taille d’équipe vient du tournoi
+                Matchs.creerMatchs(con, idRonde);
+                System.out.println(" équipes créées pour la ronde " + idRonde);
+            }
+
+            /* =============================
+                 2) AFFICHER LES ÉQUIPES
+               ============================= */
+            //TODO : faire la partie afficher les matchs, les consulter
+            else if (rep == j++) {
+                
+                System.out.println("cette section n'est pas encore rédigée");
+            }
+
+        } catch (Exception ex) {
+            System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
+        }
+    }
+}
     
-     // TODO : menu à finir
     public static void menuTournoi(Connection con) {
         int rep = -1;
         while (rep != 0) {
