@@ -84,10 +84,10 @@ public class Matchs extends ClasseMiroir {
     public int getRonde() {
         return this.ronde;
     }
-    public int getIdRonde() {
+    /*public int getIdRonde() {
         int result = this.ronde.getId(); //TODO à finir
         return result;
-    }
+    }*/
     
     public int getIdEquipeA() {
         return idEquipeA;
