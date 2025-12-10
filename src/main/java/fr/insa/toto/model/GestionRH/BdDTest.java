@@ -2,9 +2,8 @@
 
 package fr.insa.toto.model.GestionRH;
 
-import fr.insa.toto.model.Jeu.Equipe;
-import fr.insa.toto.model.Jeu.Joueur;
-import fr.insa.toto.model.Jeu.Matchs;
+import fr.insa.toto.model.Jeu.*;
+
 import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
 import fr.insa.toto.model.Jeu.Tournoi;
 import java.sql.Connection;
@@ -72,12 +71,15 @@ public class BdDTest {
  public static void createBdDTestV4(Connection con) throws SQLException {
        
         Tournoi.saveSansId(con);
+        Terrain terrain1 = new Terrain(true, "parc des princes");
+        Terrain terrain2 = new Terrain(true, "stade machin");
         List<Joueur> players = List.of(
                 new Joueur("Pierre", "S", 180),
                 new Joueur("Ahmed", "J", 160),
                 new Joueur("Arthur", null, 177),
                 new Joueur("Thomas", null, 170),
-                new Joueur("Rayan", "J", 190)
+                new Joueur("Rayan", "J", 190),
+                new Joueur("Hypolite", "S", 165)
         );
         for (var u : players) {
             u.saveInDB(con);
