@@ -59,9 +59,8 @@ public class GestionBdD {
                 );
                 st.executeUpdate("create table equipe ( "
                         + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
-                        + " num integer not null,"
                         + " score integer,"
-                        + " idmatch integer not null "
+                        + "idronde integer not null"
                         + ") "
                 
                 );
