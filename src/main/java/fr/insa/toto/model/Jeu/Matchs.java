@@ -69,7 +69,7 @@ public class Matchs extends ClasseMiroir {
         PreparedStatement insert = con.prepareStatement(
                 "insert into matchs (idronde, idEquipeA, idEquipeB, idTerrain) values (?, ?, ?, ?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
-        insert.setInt(1, this.getIdRonde()); //TODO à modifier
+        insert.setInt(1, this.getRonde()); //TODO à modifier //getIdRonde()
         insert.setInt(1, this.getIdEquipeA());
         insert.setInt(1, this.getIdEquipeB());
         insert.setInt(1, this.getIdTerrain());
