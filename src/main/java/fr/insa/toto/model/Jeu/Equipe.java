@@ -200,7 +200,7 @@ public static List<Equipe> toutesLesEquipes(Connection con) throws SQLException 
     
     
     public int getNb_joueurs(){
-        int nb_joueurs_equipe = this.getRonde().getTournoi().getNb_joueurs_equipe();
+        int nb_joueurs_equipe = Tournoi.getNb_joueurs_equipe();
         return nb_joueurs_equipe;
         
     }

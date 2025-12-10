@@ -177,12 +177,16 @@ public class MainConsole {
             else if (rep == j++) {
 
                 String ordre =
-                        "select e.id as idEquipe, e.score, e.idronde, " +
-                        "       j.id as idJoueur, j.surnom " +
-                        "from equipe e " +
-                        "left join composition c on c.idequipe = e.id " +
-                        "left join joueur j on j.id = c.idjoueur " +
-                        "order by e.id, j.id";
+        "select "
+        + "e.id as idEquipe, "
+        + "e.score as scoreEquipe, "
+        + "e.idronde as idRonde, "
+        + "j.id as idJoueur, "
+        + "j.surnom as surnomJoueur "
+        + "from equipe e "
+        + "left join composition c on c.idequipe = e.id "
+        + "left join joueur j on j.id = c.idjoueur "
+        + "order by e.id, j.id";
 
                 try (PreparedStatement pst = con.prepareStatement(ordre)) {
                     try (ResultSet rst = pst.executeQuery()) {
