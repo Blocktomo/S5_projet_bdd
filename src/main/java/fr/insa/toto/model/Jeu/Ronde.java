@@ -76,7 +76,7 @@ public class Ronde extends ClasseMiroir {
         try (ResultSet rs = pst.executeQuery()) {
             if (rs.next()) {
                 return new Ronde(
-                        rs.getInt("id"),
+                        rs.getInt("idronde"),
                         rs.getInt("terminer")
                 );
             } 
