@@ -44,6 +44,12 @@ public class GestionBdD {
                         + "nb_joueurs_equipe integer not null"
                         + ") "
                 );
+                st.executeUpdate("create table terrain ( "
+                        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
+                        + " libre boolean not null,"
+                        + " nom_terrain varchar(30) not null"
+                        + ") "
+                ); //TODO créer table de remplissage des terrains (une table "assignation" qui permet de lister qules matchs ont été joués sur le terrain)
                 
                 st.executeUpdate("create table joueur ( "
                         + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
