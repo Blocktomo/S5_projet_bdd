@@ -108,10 +108,10 @@ public class Ronde extends ClasseMiroir {
         try {
             con.setAutoCommit(false);
             
-            try (PreparedStatement pstMatches = con.prepareStatement(
-                    "DELETE FROM matchs WHERE ronde = ?")) {
-                pstMatches.setInt(1,this.getId());
-                pstMatches.executeUpdate();
+            try (PreparedStatement pstRonde = con.prepareStatement(
+                    "DELETE FROM ronde WHERE idronde = ?")) {
+                pstRonde.setInt(1,this.getId());
+                pstRonde.executeUpdate();
             }
             
             this.entiteSupprimee();
