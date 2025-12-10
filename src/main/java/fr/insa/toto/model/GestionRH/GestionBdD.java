@@ -66,7 +66,7 @@ public class GestionBdD {
                 );
                 st.executeUpdate("create table ronde ( "
                         + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "idronde") + ","
-                        + " Terminer integer CHECK ( Terminer=0 or Terminer=1) "
+                        + " terminer integer CHECK ( terminer=0 or terminer=1) "
                         + ") "
                 );
                 
