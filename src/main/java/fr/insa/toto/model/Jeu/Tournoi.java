@@ -72,9 +72,10 @@ public class Tournoi { //suppression de "extends ClasseMiroir" car cela ne conve
     }
     
     public static void modifTournoi(Connection con) throws SQLException {
-        int i=1;
         boolean sortirDeLa = false;
         while (!sortirDeLa){
+            int i=1;
+
             int choix = ConsoleFdB.entreeEntier("que souhaitez-vous modifier?\n"
                     + (i++) + ") le nom ("+Tournoi.getNom()+") \n"
                     + (i++) + ") l\'annee du tournoi ("+Tournoi.getAnnee()+") \n"
