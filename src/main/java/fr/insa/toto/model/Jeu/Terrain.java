@@ -42,7 +42,6 @@ public class Terrain extends ClasseMiroir {
     public Terrain(int idTerrain, boolean libre, String nom_terrain) {
         super(idTerrain);
         this.libre = libre;
-        this.libre = libre;
         this.nom_terrain = nom_terrain; //proposition : nom_terrain peut être NULL.
         Tournoi.addTerrain(this);
     }

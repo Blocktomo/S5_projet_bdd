@@ -31,26 +31,49 @@ import java.sql.Statement;
 public class Matchs extends ClasseMiroir {
 
     private int ronde;
+    private int idEquipeA;
+    private int idEquipeB;
     private Terrain terrain; ///TODO : est-ce mieux d'avoir un ID Terrain ou un objet Terrain?
     //TODO : MàJ des méthodes de la classe pour ajouter l'attribut Terrain.
 
     
     public Matchs(int ronde) {
-        this.ronde = ronde;
+        this.ronde = ronde;        
     }
     
     public Matchs(int ronde, Terrain terrain) {
         this.ronde = ronde;
         this.terrain = terrain;
     }
+
+    public Matchs(int ronde, int idEquipeA, int idEquipeB, Terrain terrain) {
+        this.ronde = ronde;
+        this.idEquipeA = idEquipeA;
+        this.idEquipeB = idEquipeB;
+        this.terrain = terrain;
+    }
+
+    public Matchs(int ronde, int idEquipeA, int idEquipeB, Terrain terrain, int id) {
+        super(id);
+        this.ronde = ronde;
+        this.idEquipeA = idEquipeA;
+        this.idEquipeB = idEquipeB;
+        this.terrain = terrain;
+    }
+    
+    
     
     
     @Override
     public Statement saveSansId(Connection con) throws SQLException {
         PreparedStatement insert = con.prepareStatement(
-                "insert into matchs (ronde) values (?)",
+                "insert into matchs (idronde, idEquipeA, idEquipeB, idTerrain) values (?, ?, ?, ?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
-        insert.setInt(1, this.getRonde());
+        insert.setInt(1, this.getRonde()); //TODO à modifier //getIdRonde()
+        insert.setInt(1, this.getIdEquipeA());
+        insert.setInt(1, this.getIdEquipeB());
+        insert.setInt(1, this.getIdTerrain());
+
         insert.executeUpdate();
         return insert;
     }
@@ -61,7 +84,27 @@ public class Matchs extends ClasseMiroir {
     public int getRonde() {
         return this.ronde;
     }
+    /*public int getIdRonde() {
+        int result = this.ronde.getId(); //TODO à finir
+        return result;
+    }*/
+    
+    public int getIdEquipeA() {
+        return idEquipeA;
+    }
 
+    public int getIdEquipeB() {
+        return idEquipeB;
+    }
+
+    public int getIdTerrain() {
+        int result = this.terrain.getId();
+        return result;
+    }
+    public Terrain getTerrain() {
+        return this.terrain;
+    }
+    
     /**
      * @param nom the ronde to set
      */
