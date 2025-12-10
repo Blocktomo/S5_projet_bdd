@@ -28,7 +28,7 @@ import com.vaadin.flow.router.Route;
 /**
  *
  * @author francois
- */
+ 
 @Route(value = "")
 @PageTitle("Likes")
 public class VuePrincipale extends VerticalLayout {
@@ -38,3 +38,4 @@ public class VuePrincipale extends VerticalLayout {
     }
 
 }
+*/
