@@ -68,10 +68,10 @@ public class Ronde extends ClasseMiroir {
     }
     
     
-    public static Ronde chercherRondeParId(Connection con, int idRonde) throws SQLException {
+    public static Ronde chercherRondeParId(Connection con, int idronde) throws SQLException {
     try (PreparedStatement pst = con.prepareStatement(
-            "select id, terminer from ronde where id = ?")) {
-        pst.setInt(1, idRonde);
+            "select idronde, terminer from ronde where idronde = ?")) {
+        pst.setInt(1, idronde);
 
         try (ResultSet rs = pst.executeQuery()) {
             if (rs.next()) {
@@ -89,12 +89,12 @@ public class Ronde extends ClasseMiroir {
      */
     public static List<Ronde> toutesLesRondes(Connection con) throws SQLException {
         List<Ronde> res = new ArrayList<>();
-        String query= "SElECT id, terminer FROM ronde ORDER BY id";
+        String query= "SElECT idronde, terminer FROM ronde ORDER BY idronde";
         
         try (PreparedStatement pst = con.prepareStatement(query)) {
             try(ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    res.add(new Ronde (rs.getInt("id"), rs.getInt("Terminer")));
+                    res.add(new Ronde (rs.getInt("idronde"), rs.getInt("terminer")));
                 }
             }
         }
