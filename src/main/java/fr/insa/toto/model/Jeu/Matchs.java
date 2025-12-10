@@ -23,6 +23,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -30,32 +32,32 @@ import java.sql.Statement;
  */
 public class Matchs extends ClasseMiroir {
 
-    private int ronde;
+    private int idRonde;
     private int idEquipeA;
     private int idEquipeB;
     private Terrain terrain; ///TODO : est-ce mieux d'avoir un ID Terrain ou un objet Terrain?
     //TODO : MàJ des méthodes de la classe pour ajouter l'attribut Terrain.
 
     
-    public Matchs(int ronde) {
-        this.ronde = ronde;        
+    public Matchs(int idRonde) {
+        this.idRonde = idRonde;        
     }
     
-    public Matchs(int ronde, Terrain terrain) {
-        this.ronde = ronde;
+    public Matchs(int idRonde, Terrain terrain) {
+        this.idRonde = idRonde;
         this.terrain = terrain;
     }
 
-    public Matchs(int ronde, int idEquipeA, int idEquipeB, Terrain terrain) {
-        this.ronde = ronde;
+    public Matchs(int idRonde, int idEquipeA, int idEquipeB, Terrain terrain) {
+        this.idRonde = idRonde;
         this.idEquipeA = idEquipeA;
         this.idEquipeB = idEquipeB;
         this.terrain = terrain;
     }
 
-    public Matchs(int ronde, int idEquipeA, int idEquipeB, Terrain terrain, int id) {
+    public Matchs(int idRonde, int idEquipeA, int idEquipeB, Terrain terrain, int id) {
         super(id);
-        this.ronde = ronde;
+        this.idRonde = idRonde;
         this.idEquipeA = idEquipeA;
         this.idEquipeB = idEquipeB;
         this.terrain = terrain;
@@ -69,7 +71,7 @@ public class Matchs extends ClasseMiroir {
         PreparedStatement insert = con.prepareStatement(
                 "insert into matchs (idronde, idEquipeA, idEquipeB, idTerrain) values (?, ?, ?, ?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
-        insert.setInt(1, this.getRonde()); //TODO à modifier //getIdRonde()
+        insert.setInt(1, this.getIdRonde()); //TODO à modifier //getIdRonde()
         insert.setInt(1, this.getIdEquipeA());
         insert.setInt(1, this.getIdEquipeB());
         insert.setInt(1, this.getIdTerrain());
@@ -77,17 +79,39 @@ public class Matchs extends ClasseMiroir {
         insert.executeUpdate();
         return insert;
     }
+    
+    /**
+     * crée les matchs d'une ronde. Ne fonctionne qu'avec un nombre pair d'équipes.
+     * @param con: Connection
+     * @param idronde
+     * @throws SQLException 
+     */
+    public static void creerMatchs(Connection con, int idronde) throws SQLException{
+        Ronde rondeActuelle = Ronde.chercherRondeParId(con, idronde);
+        List<Equipe> listeEquipes = rondeActuelle.getEquipesDeLaRonde(con);
+        
+        List<Terrain> listeTerrains = Tournoi.getListe_terrains();
+        //TODO : vérifier qu'il ya assez de terrains pour tous les matchs... ou bien à défaut jouer plus d'un match sur un terrain (l'un à la suite de l'autre)
+        if (listeEquipes.size()%2!=0){
+            throw new Error("nombre impair d'équipes..."); //TODO ? : ajouter une fonctio qui crée des matcsh avec un nombre d'équipes impaires?
+        }
+        
+        for (int i=0; i<listeEquipes.size()/2; i++){
+            Equipe equipeA = listeEquipes.get(i);
+            Equipe equipeB = listeEquipes.get(i+1);
+            i++; //il faut sauter l'objet suivant
+            Terrain terrainMatch= listeTerrains.get(i);
+            Matchs nouveauMatch = new Matchs(idronde, equipeA.getId(), equipeB.getId(), terrainMatch);
+            nouveauMatch.saveInDB(con); 
+        }
+    }
 
     /**
      * @return the ronde
      */
-    public int getRonde() {
-        return this.ronde;
+    public int getIdRonde() {
+        return this.idRonde;
     }
-    /*public int getIdRonde() {
-        int result = this.ronde.getId(); //TODO à finir
-        return result;
-    }*/
     
     public int getIdEquipeA() {
         return idEquipeA;
@@ -106,9 +130,14 @@ public class Matchs extends ClasseMiroir {
     }
     
     /**
-     * @param nom the ronde to set
+     * @param nom the idronde to set
      */
-    public void setRonde(int ronde) {
-        this.ronde = ronde;
+    public void setIdRonde(int idronde) {
+        this.idRonde = idronde;
     }
+
+    public void setTerrain(Terrain terrain) {
+        this.terrain = terrain;
+    }
+    
 }
