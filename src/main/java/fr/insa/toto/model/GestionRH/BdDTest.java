@@ -24,6 +24,9 @@ public class BdDTest {
                 new Joueur("Ahmed", "J", 160),
                 new Joueur("Arthur", null, 177),
                 new Joueur("Thomas", null, 170),
+                new Joueur("Messi", null, 190),
+                new Joueur("Sadio", null, 150),
+                new Joueur("Solar", null, 110),
                 new Joueur("Rayan", "J", 190)
         );
         for (var u : players) {

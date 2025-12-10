@@ -20,9 +20,7 @@ public class Equipe extends ClasseMiroir implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private int num;
     private int score;
-    private int idmatch;
     private Ronde ronde; 
 
     
@@ -180,17 +178,7 @@ public static List<Equipe> toutesLesEquipes(Connection con) throws SQLException 
         con.setAutoCommit(true);
     }
 }
-    public int getNum() {
-        return num;
-    }
-
-    /**
-     * @param num the num to set
-     */
-    public void setNum(int num) {
-        this.num = num;
-    }
-
+   
     /**
      * @return the score
      */
@@ -205,20 +193,7 @@ public static List<Equipe> toutesLesEquipes(Connection con) throws SQLException 
         this.score = score;
     }
 
-    /**
-     * @return the idmatch
-     */
-    public int getIdmatch() {
-        return idmatch;
-    }
-
-    /**
-     * @param idmatch the idmatch to set
-     */
-    public void setIdmatch(int idmatch) {
-        this.idmatch = idmatch;
-    }
-
+   
     public Ronde getRonde() {
         return ronde;
     }
