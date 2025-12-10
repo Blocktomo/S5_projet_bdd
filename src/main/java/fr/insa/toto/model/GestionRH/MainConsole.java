@@ -123,9 +123,9 @@ public class MainConsole {
                 } else if (rep == j++) {
                     menuJoueur(con);
                 } else if (rep == j++) {
-                    menuEquipe(con);    
+                    menuRonde(con);    
                 } else if (rep == j++) {
-                    menuRonde(con);
+                    menuEquipe(con);
                 }
             } catch (Exception ex) {
                 System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
@@ -317,3 +317,4 @@ public class MainConsole {
     
     
   
+
