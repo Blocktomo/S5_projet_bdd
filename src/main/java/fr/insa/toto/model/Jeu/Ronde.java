@@ -38,9 +38,7 @@ import java.util.Optional;
 public class Ronde extends ClasseMiroir {
     
     private int terminer;
-    private Tournoi tournoi;
     
-    //Thomas : on va devoir supprimer ce constructeur, car il faut toujours spécifier un tournoi d'appartenance
     public Ronde(int terminer){
         this.terminer = terminer; 
         Tournoi.addRonde(this);
@@ -101,6 +99,19 @@ public class Ronde extends ClasseMiroir {
         return res;
     }
     
+    public List<Equipe> getEquipesDeLaRonde(Connection con) throws SQLException {
+        List<Equipe> res = new ArrayList<>();
+        String query = "SELECT * from equipe e where e.idronde=" + this.getId();
+        try (PreparedStatement pst = con.prepareStatement(query)) {
+            try(ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    res.add(new Equipe(rs.getInt("id"), rs.getInt("score"), this));
+                }
+            }
+        }
+        return res;
+    }
+    
     public void deleteInDB(Connection con) throws SQLException {
         if (this.getId()== -1 ){
             throw new ClasseMiroir.EntiteNonSauvegardee();
@@ -128,9 +139,6 @@ public class Ronde extends ClasseMiroir {
         return terminer;
     }
 
-    public Tournoi getTournoi() {
-        return tournoi;
-    }
 
     
     public void setTerminer(int terminer) {
