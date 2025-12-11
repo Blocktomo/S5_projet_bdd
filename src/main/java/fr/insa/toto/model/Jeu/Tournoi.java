@@ -18,7 +18,7 @@ import java.util.Collections;
 
 public class Tournoi { //suppression de "extends ClasseMiroir" car cela ne convenait pas
 
-    private static String nom="Tournoi_actuel";
+    private static String nom="Tournoi COPA AMERICANO 2027";
     private static int annee=2025;
     private static int nb_de_rondes=10;
     private static int duree_match=90;
