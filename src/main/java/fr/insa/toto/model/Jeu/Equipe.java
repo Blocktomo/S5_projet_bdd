@@ -178,6 +178,29 @@ public static List<Equipe> toutesLesEquipes(Connection con) throws SQLException 
         con.setAutoCommit(true);
     }
 }
+   public void sauvegarderScore(Connection con) throws SQLException {
+    if (this.getId() == -1) {
+        throw new ClasseMiroir.EntiteNonSauvegardee();
+    }
+
+    try (PreparedStatement pst = con.prepareStatement(
+            "UPDATE equipe SET score = ? WHERE id = ?")) {
+        pst.setInt(1, this.score);
+        pst.setInt(2, this.getId());
+        pst.executeUpdate();
+    }
+}
+   public void ajouterScoreAuxJoueurs(Connection con, int points) throws SQLException {
+
+    String sql = "UPDATE joueur SET score = score + ? "
+               + "WHERE id IN (SELECT idjoueur FROM composition WHERE idequipe = ?)";
+
+    try (PreparedStatement pst = con.prepareStatement(sql)) {
+        pst.setInt(1, points);
+        pst.setInt(2, this.getId());
+        pst.executeUpdate();
+    }
+}
    
     /**
      * @return the score

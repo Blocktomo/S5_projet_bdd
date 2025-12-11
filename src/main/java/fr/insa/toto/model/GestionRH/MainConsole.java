@@ -9,6 +9,7 @@ import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
 import fr.insa.beuvron.utils.database.ResultSetUtils;
 import fr.insa.beuvron.utils.exceptions.ExceptionsUtils;
 import fr.insa.beuvron.utils.list.ListUtils;
+import fr.insa.toto.model.Jeu.Matchs;
 import fr.insa.toto.model.Jeu.Tournoi;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -111,6 +112,7 @@ public class MainConsole {
             System.out.println((i++) + ") menu joueurs");
             System.out.println((i++) + ") menu Ronde");
             System.out.println((i++) + ") menu équipes");
+            System.out.println((i++) + ") menu matchs");
 
             System.out.println("0) Fin");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
@@ -126,8 +128,10 @@ public class MainConsole {
                     menuRonde(con);    
                 } else if (rep == j++) {
                     menuEquipe(con);
+                } else if (rep == j++) {
+                menuMatch(con); }
                 }
-            } catch (Exception ex) {
+             catch (Exception ex) {
                 System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
             }
         }
@@ -309,7 +313,115 @@ public class MainConsole {
     }
                     
                     
-                    
+public static void menuMatch(Connection con) {
+    int rep = -1;
+
+    while (rep != 0) {
+        int i = 1;
+        System.out.println("Menu Matchs");
+        System.out.println("============================");
+        System.out.println((i++) + ") créer automatiquement les matchs d'une ronde");
+        System.out.println((i++) + ") attribuer les scores d'un match");
+        System.out.println((i++) + ") voir tous les matchs");
+        System.out.println("0) Retour");
+
+        rep = ConsoleFdB.entreeEntier("Votre choix : ");
+
+        try {
+            int j = 1;
+
+            // 1) Création auto des matchs
+            if (rep == j++) {
+                int idRonde = ConsoleFdB.entreeEntier("Id de la ronde : ");
+                Ronde r = Ronde.chercherRondeParId(con, idRonde);
+                if (r == null) {
+                    System.out.println("Ronde introuvable");
+                    continue;
+                }
+
+                // récupérer teams
+                String sql = "SELECT * FROM equipe WHERE idronde = ?";
+                List<Equipe> equipes = new ArrayList<>();
+
+                try (PreparedStatement pst = con.prepareStatement(sql)) {
+                    pst.setInt(1, idRonde);
+                    try (ResultSet rs = pst.executeQuery()) {
+                        while (rs.next()) {
+                            equipes.add(new Equipe(
+                                    rs.getInt("id"),
+                                    rs.getInt("score"),
+                                    r
+                            ));
+                        }
+                    }
+                }
+
+                if (equipes.size() % 2 != 0) {
+                    System.out.println("Nombre d'équipes impair → impossible.");
+                    continue;
+                }
+
+                List<Matchs> matchs = Matchs.creerMatchsAuto(con, r, equipes);
+                System.out.println(matchs.size() + " matchs créés.");
+            }
+
+            // 2) Attribuer scores
+            else if (rep == j++) {
+
+                int idRonde = ConsoleFdB.entreeEntier("Id de la ronde : ");
+                List<Matchs> matchs = Matchs.tousLesMatchsDeLaRonde(con, idRonde);
+
+                if (matchs.isEmpty()) {
+                    System.out.println("Aucun match dans cette ronde.");
+                    continue;
+                }
+
+                Matchs mm = (Matchs) ListUtils.selectOne(
+                        "Choisis un match : ",
+                        matchs,
+                        m -> "Match " + m.getId() + " : équipe " + m.getIdEquipeA() + " VS équipe " + m.getIdEquipeB()
+                );
+
+                int scoreA = ConsoleFdB.entreeEntier("Score équipe A : ");
+                int scoreB = ConsoleFdB.entreeEntier("Score équipe B : ");
+
+                // récupérer équipes
+                Equipe A = Equipe.toutesLesEquipes(con).stream()
+                        .filter(e -> e.getId() == mm.getIdEquipeA())
+                        .findFirst().get();
+
+                Equipe B = Equipe.toutesLesEquipes(con).stream()
+                        .filter(e -> e.getId() == mm.getIdEquipeB())
+                        .findFirst().get();
+
+                // mettre à jour équipes
+                A.setScore(A.getScore() + scoreA);
+                B.setScore(B.getScore() + scoreB);
+
+                A.sauvegarderScore(con);
+                B.sauvegarderScore(con);
+
+                // mettre à jour joueurs
+                A.ajouterScoreAuxJoueurs(con, scoreA);
+                B.ajouterScoreAuxJoueurs(con, scoreB);
+
+                System.out.println("Scores mis à jour !");
+            }
+
+            // 3) Voir matchs
+            else if (rep == j++) {
+                try (PreparedStatement pst = con.prepareStatement("select * from matchs")) {
+                    try (ResultSet rs = pst.executeQuery()) {
+                        System.out.println(ResultSetUtils.formatResultSetAsTxt(rs));
+                    }
+                }
+            }
+
+        } catch (Exception ex) {
+            System.out.println("Erreur : " + ex.getMessage());
+        }
+    }
+}
                             
                 
     

@@ -25,57 +25,70 @@ public class Joueur extends ClasseMiroir implements Serializable {
     private String surnom;
     private String categorie;
     private double taillecm;
+    private int score = 0;
 
     /**
      * pour nouveau joueur en mémoire
      */
-    public Joueur(String surnom, String categorie, double taillecm) {
-        super();
-        this.surnom = surnom;
-        this.categorie = categorie;
-        this.taillecm = taillecm;
-        Tournoi.addJoueur(this);
-    } //TODO : ajouter le traitement de la valeur "null" pour les différentes variables
+    public Joueur(int id, String surnom, String categorie, double taillecm, int score) {
+    super(id);
+    this.surnom = surnom;
+    this.categorie = categorie;
+    this.taillecm = taillecm;
+    this.score = score;
+    Tournoi.addJoueur(this);
+    }
+ //TODO : ajouter le traitement de la valeur "null" pour les différentes variables
 
     /**
      * pour utilisateur récupéré de la base de données
      */
-    public Joueur(int id, String surnom, String categorie, double taillecm) {
-        super(id);
-        this.surnom = surnom;
-        this.categorie = categorie;
-        this.taillecm = taillecm;
-        Tournoi.addJoueur(this);
-    }
+   public Joueur(String surnom, String categorie, double taillecm) {
+    super();
+    this.surnom = surnom;
+    this.categorie = categorie;
+    this.taillecm = taillecm;
+    this.score = 0;
+    Tournoi.addJoueur(this);
+}
     
     @Override
     public Statement saveSansId(Connection con) throws SQLException {
-        PreparedStatement insert = con.prepareStatement(
-                "insert into joueur (surnom,categorie,taillecm) values (?,?,?)",
-                PreparedStatement.RETURN_GENERATED_KEYS);
-        insert.setString(1, this.getSurnom());
-        insert.setString(2, this.getCategorie());
-        if (this.getTaillecm()==-1){ //on assigne -1 à "taillecm" si on ne spécifie pas
+                PreparedStatement insert = con.prepareStatement(
+            "insert into joueur (surnom,categorie,taillecm,score) values (?,?,?,?)",
+            PreparedStatement.RETURN_GENERATED_KEYS);
+
+        insert.setString(1, this.surnom);
+        insert.setString(2, this.categorie);
+        if(this.taillecm == -1){
             insert.setNull(3, Types.DOUBLE);
-        }else{
-        insert.setDouble(3, this.getTaillecm());
-        }        
+        } else {
+            insert.setDouble(3, this.taillecm);
+        }
+        insert.setInt(4, this.score);
         insert.executeUpdate();
         return insert;
     }
 
-    public static List<Joueur> tousLesJoueur(Connection con) throws SQLException {
-        List<Joueur> res = new ArrayList<>();
-        try (PreparedStatement pst = con.prepareStatement("select id,surnom,categorie,taillecm from joueur")) {
-            try (ResultSet allU = pst.executeQuery()) {
-                while (allU.next()) {
-                    res.add(new Joueur(allU.getInt("id"), allU.getString("surnom"),
-                            allU.getString("categorie"), allU.getDouble("taillecm")));
-                }
+  public static List<Joueur> tousLesJoueur(Connection con) throws SQLException {
+    List<Joueur> res = new ArrayList<>();
+    try (PreparedStatement pst = con.prepareStatement(
+        "select id,surnom,categorie,taillecm,score from joueur")) {
+        try (ResultSet allU = pst.executeQuery()) {
+            while (allU.next()) {
+                res.add(new Joueur(
+                    allU.getInt("id"),
+                    allU.getString("surnom"),
+                    allU.getString("categorie"),
+                    allU.getDouble("taillecm"),
+                    allU.getInt("score")
+                ));
             }
         }
-        return res;
     }
+
+    return res;
+} 
 /* TODO : voir si c'est utile
     public static Optional<Joueur> findBySurnomPass(Connection con,String surnom,String pass) throws SQLException {
         try (PreparedStatement pst = con.prepareStatement(
@@ -107,32 +120,20 @@ public class Joueur extends ClasseMiroir implements Serializable {
         }
         try {
             con.setAutoCommit(false);
-            /*try (PreparedStatement pst = con.prepareStatement(
-                    "delete from pratique where idutilisateur = ?")) {
-                pst.setInt(1, this.getId());
-                pst.executeUpdate();
-            }
-            try (PreparedStatement pst = con.prepareStatement(
-                    "delete from apprecie where u1 = ?")) {
-                pst.setInt(1, this.getId());
-                pst.executeUpdate();
-            }
-            try (PreparedStatement pst = con.prepareStatement(
-                    "delete from apprecie where u2 = ?")) {
-                pst.setInt(1, this.getId());
-                pst.executeUpdate();
-            }*/
 
             try (PreparedStatement pst = con.prepareStatement(
                     "delete from joueur where id = ?")) {
                 pst.setInt(1, this.getId());
                 pst.executeUpdate();
             }
+
             this.entiteSupprimee();
             con.commit();
+
         } catch (SQLException ex) {
             con.rollback();
             throw ex;
+
         } finally {
             con.setAutoCommit(true);
         }
@@ -186,5 +187,13 @@ public class Joueur extends ClasseMiroir implements Serializable {
     public void setTaillecm(double taillecm) {
         this.taillecm = taillecm;
     }
+    
+    public int getScore() {
+    return score;
+}
+
+public void setScore(int score) {
+    this.score = score;
+}
 
 }

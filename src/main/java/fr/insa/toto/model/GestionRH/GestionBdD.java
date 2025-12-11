@@ -29,17 +29,14 @@ public class GestionBdD {
                 );
                 
                 st.executeUpdate("create table joueur ( "
-                        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
-                        + " surnom varchar(30) not null unique,"
-                        + " categorie varchar(20),"
-                        + " taillecm double "
-                        + ") "
-                );
-                st.executeUpdate("create table matchs ( "
-                        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
-                        + " ronde integer not null"
-                        + ") "
-                );
+                            + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
+                            + " surnom varchar(30) not null unique,"
+                            + " categorie varchar(20),"
+                            + " taillecm double, "
+                            + " score integer default 0"
+                            + ") ");
+                
+                
                 st.executeUpdate("create table equipe ( "
                         + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
                         + " score integer,"
@@ -52,6 +49,18 @@ public class GestionBdD {
                         + " terminer integer CHECK ( terminer=0 or terminer=1) "
                         + ") "
                 );
+
+                        st.executeUpdate("create table matchs ("
+                + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
+                + " idronde integer not null,"
+                + " idEquipeA integer not null,"
+                + " idEquipeB integer not null,"
+                + " idTerrain integer,"
+                + " foreign key (idronde) references ronde(idronde),"
+                + " foreign key (idEquipeA) references equipe(id),"
+                + " foreign key (idEquipeB) references equipe(id)"
+                + ")");
+                
                 
                 st.executeUpdate("create table composition ( "
                         + " idequipe integer not null,"
