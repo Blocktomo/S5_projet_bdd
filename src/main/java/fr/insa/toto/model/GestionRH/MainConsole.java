@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import fr.insa.toto.model.Jeu.Ronde;
+import fr.insa.toto.model.Jeu.Terrain;
 
 public class MainConsole {
 
@@ -113,6 +114,7 @@ public class MainConsole {
             System.out.println((i++) + ") menu Ronde");
             System.out.println((i++) + ") menu équipes");
             System.out.println((i++) + ") menu matchs");
+            System.out.println((i++) + ") menu terrain");
 
             System.out.println("0) Fin");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
@@ -130,6 +132,10 @@ public class MainConsole {
                     menuEquipe(con);
                 } else if (rep == j++) {
                 menuMatch(con); }
+                else if (rep == j++) {
+                 menuTerrain(con);
+}
+                
                 }
              catch (Exception ex) {
                 System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
@@ -248,6 +254,98 @@ public class MainConsole {
             }
         }
     } 
+    public static void menuTerrain(Connection con) {
+    int rep = -1;
+
+    while (rep != 0) {
+        int i = 1;
+        System.out.println("Menu Terrain");
+        System.out.println("============================");
+        System.out.println((i++) + ") ajouter un terrain");
+        System.out.println((i++) + ") afficher tous les terrains");
+        System.out.println((i++) + ") supprimer un terrain");
+        System.out.println((i++) + ") marquer un terrain comme occupé / libre");
+        System.out.println("0) Retour");
+
+        rep = ConsoleFdB.entreeEntier("Votre choix : ");
+
+        try {
+            int j = 1;
+
+            // 1) Ajouter un terrain
+            if (rep == j++) {
+                String nom = ConsoleFdB.entreeString("Nom du terrain : ");
+                Terrain t = new Terrain(nom);
+                t.saveInDB(con);
+                System.out.println("Terrain ajouté (ID = " + t.getId() + ")");
+            }
+
+            // 2) Afficher tous les terrains
+            else if (rep == j++) {
+                List<Terrain> tous = Terrain.tousLesTerrains(con);
+
+                if (tous.isEmpty()) {
+                    System.out.println("Aucun terrain trouvé.");
+                } else {
+                    System.out.println("Liste des terrains :");
+                    for (Terrain t : tous) {
+                        System.out.println(
+                                "ID=" + t.getId() +
+                                " | Nom=" + t.getNom() +
+                                " | " + (t.getOccupe() == 1 ? "Occupé" : "Libre")
+                        );
+                    }
+                }
+            }
+
+            // 3) Supprimer un terrain
+            else if (rep == j++) {
+                List<Terrain> tous = Terrain.tousLesTerrains(con);
+
+                if (tous.isEmpty()) {
+                    System.out.println("Aucun terrain à supprimer.");
+                    continue;
+                }
+
+                Terrain t = (Terrain) ListUtils.selectOne(
+                        "Choisis un terrain à supprimer : ",
+                        tous,
+                        x -> "Terrain " + x.getId() + " (" + x.getNom() + ")"
+                );
+
+                t.deleteInDB(con);
+                System.out.println("Terrain supprimé !");
+            }
+
+            // 4) Marquer terrain occupé / libre
+            else if (rep == j++) {
+                List<Terrain> tous = Terrain.tousLesTerrains(con);
+
+                if (tous.isEmpty()) {
+                    System.out.println("Aucun terrain trouvé.");
+                    continue;
+                }
+
+                Terrain t = (Terrain) ListUtils.selectOne(
+                        "Quel terrain modifier ?",
+                        tous,
+                        x -> "Terrain " + x.getId() + " | " + x.getNom() +
+                                " | " + (x.getOccupe() == 1 ? "Occupé" : "Libre")
+                );
+
+                boolean occupe = ConsoleFdB.entreeEntier(
+                        "1 = occupé, 0 = libre : ") == 1;
+
+                t.setOccupe(con, occupe);
+
+                System.out.println("Terrain mis à jour !");
+            }
+
+        } catch (Exception ex) {
+            System.out.println("Erreur : " + ex.getMessage());
+        }
+    }
+}
     
     public static void menuRonde(Connection con){
         int rep= -1;
@@ -274,16 +372,18 @@ public class MainConsole {
                     // afficher  Ronde et detail
                     int idRonde = ConsoleFdB.entreeEntier("Quel est l'ID de la ronde à afficher ?");
                     
-                    String ordre=
-                        "SELECT m.id as MatchID, m.ronde, " +
-                        "       e.id as Equipe ID, e.score, " +
-                        "       j.surnom as Joueur " +
-                        "From matchs m" +
-                        "LEFT JOIN equipe e ON e.idmatch = m.id" +
-                        "LEFT JOIN composition c ON c.idequipe = e.id " +
-                        "LEFT JOIN joueur j ON j.id = c.idjoueur" +
-                        "WHERE JOIN joueur j ON j.id = c.idjoueur" +
-                        "ORDER BY m.id, e.id";
+                        String ordre =
+                        "SELECT m.id AS matchID, "
+                        + "m.idronde AS rondeID, "
+                        + "e.id AS equipeID, "
+                        + "e.score AS scoreEquipe, "
+                        + "j.surnom AS joueur "
+                        + "FROM matchs m "
+                        + "LEFT JOIN equipe e ON (e.id = m.idEquipeA OR e.id = m.idEquipeB) "
+                        + "LEFT JOIN composition c ON c.idequipe = e.id "
+                        + "LEFT JOIN joueur j ON j.id = c.idjoueur "
+                        + "WHERE m.idronde = ? "
+                        + "ORDER BY m.id, e.id, j.id";
                     System.out.println("Details Ronde"+ idRonde);
                     try (PreparedStatement pst = con.prepareStatement(ordre)) {
                         pst.setInt(1, idRonde);
@@ -406,6 +506,9 @@ public static void menuMatch(Connection con) {
                 B.ajouterScoreAuxJoueurs(con, scoreB);
 
                 System.out.println("Scores mis à jour !");
+                            if (mm.getTerrain() != null) {
+                mm.getTerrain().setOccupe(con, false);
+            }
             }
 
             // 3) Voir matchs

@@ -69,19 +69,42 @@ public class Matchs extends ClasseMiroir {
             insert.executeUpdate();
             return insert;
         }
-    public static List<Matchs> tousLesMatchsDeLaRonde(Connection con, int idRonde) throws SQLException {
+public static List<Matchs> tousLesMatchsDeLaRonde(Connection con, int idRonde) throws SQLException {
     List<Matchs> res = new ArrayList<>();
 
     String sql = "SELECT id, idEquipeA, idEquipeB, idTerrain FROM matchs WHERE idronde = ?";
     try (PreparedStatement pst = con.prepareStatement(sql)) {
         pst.setInt(1, idRonde);
+
         try (ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
+
+                // Charger le terrain si présent
+                Terrain t = null;
+                int idT = rs.getInt("idTerrain");
+                if (!rs.wasNull()) {
+                    try (PreparedStatement pstT = con.prepareStatement(
+                            "SELECT id, nom, occupe FROM terrain WHERE id = ?")) {
+
+                        pstT.setInt(1, idT);
+
+                        try (ResultSet rsT = pstT.executeQuery()) {
+                            if (rsT.next()) {
+                                t = new Terrain(
+                                        rsT.getInt("id"),
+                                        rsT.getString("nom"),
+                                        rsT.getInt("occupe")
+                                );
+                            }
+                        }
+                    }
+                }
+
                 res.add(new Matchs(
                         idRonde,
                         rs.getInt("idEquipeA"),
                         rs.getInt("idEquipeB"),
-                        null,
+                        t,                            // <<< terrain chargé !
                         rs.getInt("id")
                 ));
             }
@@ -90,21 +113,47 @@ public class Matchs extends ClasseMiroir {
     return res;
 }
     
-    public static List<Matchs> creerMatchsAuto(Connection con, Ronde r, List<Equipe> equipes) throws SQLException {
+public static List<Matchs> creerMatchsAuto(Connection con, Ronde r, List<Equipe> equipes) throws SQLException {
 
     List<Matchs> matchs = new ArrayList<>();
 
-    // On suppose que les équipes sont 2 par 2
     for (int i = 0; i < equipes.size(); i += 2) {
+
         int idA = equipes.get(i).getId();
         int idB = equipes.get(i + 1).getId();
 
-        Matchs m = new Matchs(r.getId(), idA, idB, null);
+        // Chercher un terrain libre
+        Terrain t = terrainLibre(con);
+        if (t == null) {
+            System.out.println("❌ Aucun terrain libre disponible !");
+            break;
+        }
+
+        // Marquer le terrain comme occupé
+        t.setOccupe(con, true);
+
+        Matchs m = new Matchs(r.getId(), idA, idB, t);
         m.saveInDB(con);
         matchs.add(m);
     }
 
     return matchs;
+}
+    
+    public static Terrain terrainLibre(Connection con) throws SQLException {
+    try (PreparedStatement pst = con.prepareStatement(
+            "SELECT id, nom, occupe FROM terrain WHERE occupe = 0 LIMIT 1")) {
+        try (ResultSet rs = pst.executeQuery()) {
+            if (rs.next()) {
+                return new Terrain(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getInt("occupe")
+                );
+            }
+        }
+    }
+    return null;
 }
 
 
@@ -127,10 +176,9 @@ public class Matchs extends ClasseMiroir {
         return idEquipeB;
     }
 
-    public int getIdTerrain() {
-        int result = this.terrain.getId();
-        return result;
-    }
+   public Integer getIdTerrain() {
+    return (terrain != null) ? terrain.getId() : null;
+}
     public Terrain getTerrain() {
         return this.terrain;
     }

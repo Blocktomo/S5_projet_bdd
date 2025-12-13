@@ -49,17 +49,24 @@ public class GestionBdD {
                         + " terminer integer CHECK ( terminer=0 or terminer=1) "
                         + ") "
                 );
+                
+              st.executeUpdate("create table terrain ( "
+        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
+        + " nom varchar(30) not null, "
+        + " occupe integer default 0 check (occupe = 0 or occupe = 1)"
+        + ")");
 
                         st.executeUpdate("create table matchs ("
-                + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
-                + " idronde integer not null,"
-                + " idEquipeA integer not null,"
-                + " idEquipeB integer not null,"
-                + " idTerrain integer,"
-                + " foreign key (idronde) references ronde(idronde),"
-                + " foreign key (idEquipeA) references equipe(id),"
-                + " foreign key (idEquipeB) references equipe(id)"
-                + ")");
+        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
+        + " idronde integer not null,"
+        + " idEquipeA integer not null,"
+        + " idEquipeB integer not null,"
+        + " idTerrain integer,"
+        + " foreign key (idronde) references ronde(idronde),"
+        + " foreign key (idEquipeA) references equipe(id),"
+        + " foreign key (idEquipeB) references equipe(id),"
+        + " foreign key (idTerrain) references terrain(id)"
+        + ")");
                 
                 
                 st.executeUpdate("create table composition ( "
@@ -130,6 +137,11 @@ public class GestionBdD {
                 st.executeUpdate("drop table ronde");
             } catch (SQLException ex) {
             }
+            try {
+                    st.executeUpdate("drop table terrain");
+                } catch (SQLException ex) {
+                }
+            
             try {
                 st.executeUpdate("drop table composition");
             } catch (SQLException ex) {

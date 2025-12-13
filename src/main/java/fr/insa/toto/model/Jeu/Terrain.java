@@ -19,70 +19,80 @@ import java.util.Optional;
  *
  * @author tbeverly01
  */
+
 public class Terrain extends ClasseMiroir {
 
-    private boolean libre;
-    private String nom_terrain = "";
+    private String nom;
+    private int occupe; // 0 = libre, 1 = occupé
 
-    public Terrain(boolean libre) {
-        this.libre = libre;
-        Tournoi.addTerrain(this);
+    // constructeur pour nouveau terrain
+    public Terrain(String nom) {
+        super();
+        this.nom = nom;
+        this.occupe = 0; // libre par défaut
     }
 
-    public Terrain(boolean libre, String nom_terrain) {
-        this(libre);
-        this.nom_terrain = nom_terrain;
-        Tournoi.addTerrain(this);
-    }
-
-    /**
-     * pour récupérer de la BDD un terrain
-     * si le terrain n'a pas de nom, la valeur de nom_terrain est "".
-     */
-    public Terrain(int idTerrain, boolean libre, String nom_terrain) {
-        super(idTerrain);
-        this.libre = libre;
-        this.nom_terrain = nom_terrain; //proposition : nom_terrain peut être NULL.
-        Tournoi.addTerrain(this);
+    // constructeur pour BDD
+    public Terrain(int id, String nom, int occupe) {
+        super(id);
+        this.nom = nom;
+        this.occupe = occupe;
     }
 
     @Override
     public Statement saveSansId(Connection con) throws SQLException {
-        PreparedStatement insert = con.prepareStatement(
-                "insert into terrain (libre, nom_terrain) values (?, ?)",
-                PreparedStatement.RETURN_GENERATED_KEYS);
-        insert.setBoolean(1, this.isLibre());
-        insert.setString(2, this.getNom_terrain());
-        insert.executeUpdate();
-        return insert;
+        PreparedStatement pst = con.prepareStatement(
+            "INSERT INTO terrain (nom, occupe) VALUES (?,?)",
+            PreparedStatement.RETURN_GENERATED_KEYS
+        );
+        pst.setString(1, this.nom);
+        pst.setInt(2, this.occupe);
+        pst.executeUpdate();
+        return pst;
     }
 
-    /* 
-    public static List<Ronde> creerRondes{
-            Connection con,
-            int idMatch,
-            int idJoueur,
-        List<Joueur> joueurs = Joueur.tousLesJoueur (con);
-        
-    }
-     */
+    public static List<Terrain> tousLesTerrains(Connection con) throws SQLException {
+        List<Terrain> res = new ArrayList<>();
 
-    public boolean isLibre() {
-        return libre;
-    }
-
-    public String getNom_terrain() {
-        return nom_terrain;
+        try (PreparedStatement pst = con.prepareStatement("SELECT * FROM terrain")) {
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                res.add(new Terrain(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getInt("occupe")
+                ));
+            }
+        }
+        return res;
     }
 
-    public void setLibre(boolean libre) {
-        this.libre = libre;
+    public void setOccupe(Connection con, boolean occupe) throws SQLException {
+        this.occupe = occupe ? 1 : 0;
+
+        try (PreparedStatement pst = con.prepareStatement(
+                "UPDATE terrain SET occupe = ? WHERE id = ?")) {
+            pst.setInt(1, this.occupe);
+            pst.setInt(2, this.getId());
+            pst.executeUpdate();
+        }
     }
 
-    public void setNom_terrain(String nom_terrain) {
-        this.nom_terrain = nom_terrain;
+    public void deleteInDB(Connection con) throws SQLException {
+        if (this.getId() == -1) throw new ClasseMiroir.EntiteNonSauvegardee();
+
+        try (PreparedStatement pst = con.prepareStatement(
+                "DELETE FROM terrain WHERE id = ?")) {
+            pst.setInt(1, this.getId());
+            pst.executeUpdate();
+        }
     }
 
-    
+    public String getNom() {
+        return nom;
+    }
 
+    public int getOccupe() {
+        return occupe;
+    }
 }
