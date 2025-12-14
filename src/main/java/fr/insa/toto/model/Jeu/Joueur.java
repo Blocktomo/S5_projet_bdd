@@ -189,8 +189,8 @@ public class Joueur extends ClasseMiroir implements Serializable {
     }
     
     public int getScore() {
-    return score;
-}
+        return score;
+    }
 
 public void setScore(int score) {
     this.score = score;

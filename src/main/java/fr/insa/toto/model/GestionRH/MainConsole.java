@@ -39,7 +39,7 @@ public class MainConsole {
                     List<Joueur> tous = Joueur.tousLesJoueur(con);
                     System.out.println(tous.size() + " joueurs trouvés :");
                     System.out.println(ListUtils.formatList(tous, "---- tous les joueurs\n",
-                            "\n", "\n", u -> u.getId() + " : " + u.getSurnom()));
+                            "\n", "\n", u -> u.getId() + " : " + u.getSurnom() + ", score = " + u.getScore()));
                 } else if (rep == j++) { //j++ incrémente j au sein de la condition, si je comprends bien
                     System.out.println("Nouveau Joueur : ");
                     Joueur u = Joueur.entreeConsole();

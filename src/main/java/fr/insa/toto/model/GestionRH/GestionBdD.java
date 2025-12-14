@@ -5,6 +5,7 @@ import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import fr.insa.beuvron.utils.database.* ;
 
 /**
  *
@@ -50,13 +51,13 @@ public class GestionBdD {
                         + ") "
                 );
                 
-              st.executeUpdate("create table terrain ( "
+                 st.executeUpdate("create table terrain ( "
         + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
         + " nom varchar(30) not null, "
         + " occupe integer default 0 check (occupe = 0 or occupe = 1)"
         + ")");
 
-                        st.executeUpdate("create table matchs ("
+                st.executeUpdate("create table matchs ("
         + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
         + " idronde integer not null,"
         + " idEquipeA integer not null,"
