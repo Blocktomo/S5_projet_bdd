@@ -25,7 +25,6 @@ Créer/modifier chaque classe pour que cela corresponde au diagramme UML
 ## Joueurs : 
 - consulter la lste des joueurs et leur score
 - modifier les caractéristiques d'un joueur
-- créer/supprimer joueurs
 
 ## Terrains : 
 - "ajouter" des terrains
@@ -33,6 +32,14 @@ Créer/modifier chaque classe pour que cela corresponde au diagramme UML
 
 
 # VAADIN
+
+## Menu "Joueurs"
+- afficher la liste des joueurs, avec leur score. 
+     - plus tard : option de cliquer sur un joueur pour avoir des infos détaillées sur lui, p.ex. le nombre de matchs qu'il a joués, avec qui d'autres il a joué... jsp
+## Menu "Rondes"
+- créer une ronde > créer les équipes > créer les matchs (+assignation aux terrains), tout dans le même menu je pense
+- consulter les rondes terminées, avec un affichage d'une liste des matchs par exemple
+    consulter la ronde en cours; entrer les scores pour un match depuis ce menu
 
  # A modifier : 
  - Supprimer l'attribut # dans joueur (C'est le même que ID)
