@@ -5,30 +5,32 @@ A FAIRE :
 # Classes
 Créer/modifier chaque classe pour que cela corresponde au diagramme UML 
 - classe équipe : --?
-- Thomas : classe tournoi  : créer les tables pour gérer les listes suivantes :  liste des rondes ; **liste des terrains**
+- classe tournoi --?    **Extension : créer plusieurs tournois et les gérer**
 - classe matchs : les deux équipes qui s'affrontent (parmi les équipes de la ronde)
-- Rayan : classe ronde : liste de toutes les équipes de cette ronde; liste des joueurs exclus (??) ; **assignation des matchs aux terrains**
-- classe terrain : méthodes pour créer le terrain dans la BDD; intégrer ces méthodes dans MainConsole.
-- classe utilisateur : classe mère dont admin, et joueur héritent. Il faut donc créer la classe admin. On peut aussi créer une classe utilisateur_standard...
+- Rayan : classe ronde : liste de toutes les équipes de cette ronde; liste des joueurs exclus (??)
+- **classe utilisateur : classe mère dont admin, et joueur héritent. Il faut donc créer la classe admin. On peut aussi créer une classe utilisateur_standard...**
 - on doit pouvoir créer le tournoi ou simplement ronde par ronde en spécifiant si on veut des matchs séparés pour les seniors et les juniors, ou bien si on veut mélanger les deux catégories dans les matchs
+- extension sauvegarde :
+-      créer un fichier texte avec toutes les informations d'un tournoi --> pour garder une trace
+-       pouvoir lire un fichier .csv de joueurs ; peut-être aussi que ce fichier contiendra des sauvegardes sur les matchs et équipes et rondes...
+-  extension : quand on crée le tournoi à partir des joueurs, on doit pouvoir créer un tournoi avec seuls les joueurs d'une catégorie (option)
+-        
 
 # menu textuel gestion bdd
 ## Ronde : 
-- consulter les matchs de la ronde
-- consulter les équipes
-- consulter les scores des équipes
-- créer une ronde (et les équipes et les matchs en même temps alétoirement -->les assigner à un terrain)
+- avoir un option qui affiche toutes les rondes et leur statut
+- option à implémenter : créer une ronde et les équipes et les matchs en même temps alétoirement -->les assigner à un terrain
 
 ## tournoi : 
-- afficher le nombre de terrains disponibles, mais aussi le nombre actuel de joueurs et de rondes terminées...
+- dans l'entêtre de menuprincipal : afficher le nombre de terrains disponibles, mais aussi le nombre actuel de joueurs et de rondes terminées...
 
 ## Joueurs : 
-- consulter la lste des joueurs et leur score
-- modifier les caractéristiques d'un joueur
 
 ## Terrains : 
-- "ajouter" des terrains
 - consulter la liste des matchs ayant été joués sur un terrain.
+
+## créer une classe admin et utilisateur
+- directement dans vaadin en vrai
 
 
 # VAADIN
@@ -39,7 +41,9 @@ Créer/modifier chaque classe pour que cela corresponde au diagramme UML
 ## Menu "Rondes"
 - créer une ronde > créer les équipes > créer les matchs (+assignation aux terrains), tout dans le même menu je pense
 - consulter les rondes terminées, avec un affichage d'une liste des matchs par exemple
-    consulter la ronde en cours; entrer les scores pour un match depuis ce menu
+- consulter la ronde en cours; entrer les scores pour un match depuis ce menu
+
+## menu utilisateur.admin (connexion)
 
  # A modifier : 
  - Supprimer l'attribut # dans joueur (C'est le même que ID)
