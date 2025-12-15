@@ -263,6 +263,7 @@ public class MainConsole {
         System.out.println("============================");
         System.out.println((i++) + ") ajouter un terrain");
         System.out.println((i++) + ") afficher tous les terrains");
+        System.out.println((i++) + ") historique matchs sur le terrain");
         System.out.println((i++) + ") supprimer un terrain");
         System.out.println((i++) + ") marquer un terrain comme occupé / libre");
         System.out.println("0) Retour");
@@ -296,6 +297,35 @@ public class MainConsole {
                         );
                     }
                 }
+            }
+            else if (rep == j++) {
+                int idterrain = ConsoleFdB.entreeEntier("entrez l'id du terrain que vous souhaitez regarder?");
+                
+                
+                String sql =
+                        "SELECT " +
+                        "   m.id AS MatchID, " +
+                        "   m.idronde AS RondeID, " +
+                        "   m.idEquipeA AS EquipeA_ID, " +
+                        "   ea.score AS Score_A, " +
+                        "   m.idEquipeB AS EquipeB_ID, " +
+                        "   eb.score AS Score_B " +
+                        "FROM matchs m " +
+                        "JOIN equipe ea ON m.idEquipeA = ea.id " +
+                        "JOIN equipe eb ON m.idEquipeB = eb.id " +
+                        "WHERE m.idTerrain = ? " +
+                        "ORDER BY m.idronde, m.id ";
+                
+                try(PreparedStatement pst = con.prepareStatement(sql)) {
+                    pst.setInt(1, idterrain);
+                    try(ResultSet rs =  pst.executeQuery()) {
+                        System.out.println("=== Matchs joues sur le terrain " + idterrain + "===");
+                        System.out.println("=== !!! => le premier id correspond a idmatchs ===");
+                        System.out.println(ResultSetUtils.formatResultSetAsTxt(rs));
+                    }
+                    
+                }
+                
             }
 
             // 3) Supprimer un terrain
@@ -355,7 +385,7 @@ public class MainConsole {
             System.out.println("======================================");
             System.out.println((i++) + ") creer Ronde");
             System.out.println((i++) + ")Afficher Ronde et detail");
-            System.out.println((i++) + ")Modifier etat Ronde");
+            System.out.println((i++) + ")Afficher/Modifier etat Ronde");
             System.out.println((i++) + ")Supprimer Ronde");
             System.out.println("0) Retour");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
