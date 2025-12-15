@@ -36,7 +36,13 @@ public class GestionBdD {
                             + " taillecm double, "
                             + " score integer default 0"
                             + ") ");
-                
+                st.executeUpdate("create table utilisateur ( "
+                        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
+                        + " surnom varchar(30) not null unique,"
+                        + " pass varchar(30) not null,"
+                        + " role integer not null CONSTRAINT CHK_role CHECK (role=1 OR role=2)"
+                        + ") "
+                );
                 
                 st.executeUpdate("create table equipe ( "
                         + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
@@ -124,6 +130,17 @@ public class GestionBdD {
             }
             try {
                 st.executeUpdate("drop table joueur");
+            } catch (SQLException ex) {
+            }
+            
+            try {
+                st.executeUpdate(
+                        "alter table utilisateur "
+                        + "drop constraint CHK_role");
+            } catch (SQLException ex) {
+            }
+            try {
+                st.executeUpdate("drop table utilisateur");
             } catch (SQLException ex) {
             }
             try {
