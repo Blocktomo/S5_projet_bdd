@@ -46,7 +46,7 @@ public class Application extends SpringBootServletInitializer implements AppShel
         } catch (SQLException ex) {
             throw new Error(ex);
         }
-
+ 
 //        try{
 //            GestionBdD.razBdd(con);
 //            System.out.print("the raz was done");

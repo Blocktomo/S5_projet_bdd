@@ -154,14 +154,37 @@ public class Utilisateur extends ClasseMiroir implements Serializable {
     public static Utilisateur entreeConsole() {
         String nom = ConsoleFdB.entreeString("surnom de l'utilisateur : ");
         String pass = ConsoleFdB.entreeString("password : ");
+        int role = ConsoleFdB.entreeEntier("role (admin :1, standard: 2) : ");
         return new Utilisateur(nom, pass, 2);
     }
-
+    
+    public void modifierUtilisateurConsole(Connection con) {
+        System.out.println("utilisateur à modifier : " + this.toString());
+        String nouveauNom = ConsoleFdB.entreeString("nouveau surnom de l'utilisateur : ");
+        String nouveauPass = ConsoleFdB.entreeString("nouveau MdP : ");
+        int nouveauRole = ConsoleFdB.entreeEntier("nouveau role (admin :1, standard: 2) : ");
+        try(PreparedStatement pst = con.prepareStatement("""
+                                                              update utilisateur
+                                                              set surnom = ?, pass = ?, role = ?
+                                                              where id = ?""")) {
+                pst.setString(1, nouveauNom);
+                pst.setString(2, nouveauPass);                
+                pst.setInt(3, nouveauRole);
+                pst.setInt(4, this.getId());
+                pst.executeUpdate();
+        } catch (SQLException ex) {
+        }
+    }
     /**
      * @return the surnom
      */
     public String getSurnom() {
-        return surnom;
+        if (this==null){
+            return "Personne";
+        }
+        else{
+            return surnom;
+        }
     }
 
     /**
