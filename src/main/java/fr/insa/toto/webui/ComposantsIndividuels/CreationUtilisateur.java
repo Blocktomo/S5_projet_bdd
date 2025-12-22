@@ -57,6 +57,7 @@ public class CreationUtilisateur extends FormLayout {
             Notification.show("Problème : " + ex.getLocalizedMessage());
         }
         UI.getCurrent().refreshCurrentRoute(true);
+        //TODO : problème 22/12/2025 : il semble que la BdD en ligne ne se mette pas réellement à jour lorsqu'on clique sur "save"... lorsqu'on consulte la BBD rien ne se passe
     }
 
 }

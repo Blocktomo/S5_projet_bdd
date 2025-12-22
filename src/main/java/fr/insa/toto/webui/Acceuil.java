@@ -21,6 +21,22 @@ public class Acceuil extends VerticalLayout {
 
     public Acceuil() {
 
+        
+        /* ======= UTILISATEUR CONNECTE =======*/
+        //NOM UTILISATEUR CONNECTE
+        String nomCurUser;
+        int idCurUser = -1;
+        int roleCurUser = -1;
+        Optional<Utilisateur> curUser = SessionInfo.curUser();
+        if (curUser.isEmpty()){
+            nomCurUser = "Personne";
+            //role = -1 ; idCurUser = -1 (par défaut)
+        }else{
+            nomCurUser = curUser.get().getSurnom();
+            idCurUser = curUser.get().getId();
+            roleCurUser = curUser.get().getRole();
+        }
+        
         /* ======= STYLE DE LA PAGE ======= */
 
         // Dégradé BG moderne
@@ -78,17 +94,9 @@ public class Acceuil extends VerticalLayout {
 
         /* ======= AJOUTS ======= */
 
-        card.add(titre, joueursBtn, equipesBtn, rondesBtn, utilisateurBtn);
-        
-        //NOM UTILISATEUR CONNECTE
-        String nomCurUser;
-        int idCurUser = -1;
-        Optional<Utilisateur> curUser = SessionInfo.curUser();
-        if (curUser.isEmpty()){
-            nomCurUser = "Personne";
-        }else{
-            nomCurUser = curUser.get().getSurnom();
-            idCurUser = curUser.get().getId();
+        card.add(titre, joueursBtn, utilisateurBtn);
+        if (roleCurUser != -1){
+            card.add(equipesBtn, rondesBtn);
         }
         H2 quiEstConnecte = new H2("Utilisateur connecté : "+ nomCurUser +" (id: " + idCurUser +")");
         
