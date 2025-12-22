@@ -6,6 +6,7 @@ import fr.insa.toto.model.Jeu.Equipe;
 import fr.insa.toto.model.Jeu.Joueur;
 import fr.insa.toto.model.Jeu.Matchs;
 import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
+import fr.insa.toto.model.Jeu.Terrain;
 import fr.insa.toto.model.Jeu.Tournoi;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -79,9 +80,26 @@ public class BdDTest {
                 new Joueur("Thomas", null, 170),
                 new Joueur("Rayan", "J", 190)
         );
-        for (var u : players) {
+        for (var p : players) {
+            p.saveInDB(con);
+        }
+        
+        List<Terrain> terrains = List.of(
+                new Terrain("parc des princes"),
+                new Terrain("stade municipal")
+        );
+        for (var t : terrains) {
+            t.saveInDB(con);
+        }
+        
+        List<Utilisateur> utilisateurs = List.of(
+                new Utilisateur("thomas", "insa67", 1),
+                new Utilisateur("tartenpion", "insa67", 2)
+        );
+        for (var u : utilisateurs) {
             u.saveInDB(con);
         }
+        
 //        List<Matchs> matchs = List.of( // ?? on ne eut pas créer des matchs avant des rondes
 //                new Matchs(1),
 //                new Matchs(1)

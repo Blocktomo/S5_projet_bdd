@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import fr.insa.toto.model.Jeu.Ronde;
 import fr.insa.toto.model.Jeu.Terrain;
+import java.util.Optional;
 
 public class MainConsole {
 
@@ -115,6 +116,7 @@ public class MainConsole {
             System.out.println((i++) + ") menu équipes");
             System.out.println((i++) + ") menu matchs");
             System.out.println((i++) + ") menu terrain");
+            System.out.println((i++) + ") menu utilisateur");
 
             System.out.println("0) Fin");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
@@ -133,11 +135,13 @@ public class MainConsole {
                 } else if (rep == j++) {
                 menuMatch(con); }
                 else if (rep == j++) {
-                 menuTerrain(con);
-}
-                
+                    menuTerrain(con);
                 }
-             catch (Exception ex) {
+                else if (rep == j++) {
+                    menuUtilisateur(con);
+                }
+            }
+            catch (Exception ex) {
                 System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
             }
         }
@@ -562,33 +566,56 @@ public class MainConsole {
         String utilisateur_connecte = "personne";
         while (rep != 0) {
             int i = 1;
-            System.out.println("Menu utilisateurs");
+            System.out.println("Menu utilisateur");
             System.out.println("============================");
             System.out.println("utilisateur actuellement connecté : " + utilisateur_connecte);
             System.out.println((i++) + ") liste des utilisateurs");
             System.out.println((i++) + ") ajouter un utilisateur");
-            System.out.println((i++) + ") se connecter");
+            System.out.println((i++) + ") supprimer un utilisateur");
+            System.out.println((i++) + ") se connecter");            
             System.out.println((i++) + ") modifier un utilisateur (admin)");            
             System.out.println("0) Retour");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
             try {
                 int j = 1;
                 if (rep == j++) {
-                    List<Joueur> tous = Joueur.tousLesJoueur(con);
-                    System.out.println(tous.size() + " joueurs trouvés :");
-                    System.out.println(ListUtils.formatList(tous, "---- tous les joueurs\n",
-                            "\n", "\n", u -> u.getId() + " : " + u.getSurnom() + ", score = " + u.getScore()));
+                    List<Utilisateur> tous = Utilisateur.tousLesUtilisateur(con);
+                    System.out.println(tous.size() + " utilisateurs trouvés :");
+                    System.out.println(ListUtils.formatList(tous, "---- tous les utilisateurs\n",
+                            "\n", "\n", u -> u.getId() + " : " + u.getSurnom() + ", pass = " + u.getPass() + ", role : "+ u.getRole()));
                 } else if (rep == j++) { //j++ incrémente j au sein de la condition, si je comprends bien
-                    System.out.println("Nouveau Joueur : ");
-                    Joueur u = Joueur.entreeConsole();
+                    System.out.println("Nouvel Utilisateur : ");
+                    Utilisateur u = Utilisateur.entreeConsole();
                     u.saveInDB(con);
-                } else if (rep == j++) {
-                    List<Joueur> tous = Joueur.tousLesJoueur(con);
-                    List<Joueur> selected = ListUtils.selectMultiple(
-                            "selectionnez les joueurs à supprimer : ", tous, 
+                } else if (rep == j++) { //SUPPRIMER
+                    List<Utilisateur> tous = Utilisateur.tousLesUtilisateur(con);
+                    List<Utilisateur> selected = ListUtils.selectMultiple(
+                            "selectionnez les utilisateurs à supprimer : ", tous, 
                             u -> u.getId() + " : " + u.getSurnom());
                     for (var u : selected) {
                         u.deleteInDB(con);
+                    }
+                }else if (rep == j++) { //CONNEXION A UN UTIILISATEUR
+                    String surnomU = ConsoleFdB.entreeString("surnom");
+                    String passwordU = ConsoleFdB.entreeString("votre MdP");
+                    try {
+                        Optional<Utilisateur> trouve = Utilisateur.findBySurnomPass(con, surnomU, passwordU);
+                        if (trouve.isEmpty()) {
+                            System.out.println("Surnom ou pass incorrect");
+                        } else {
+                            utilisateur_connecte = trouve.get().getSurnom();
+                            System.out.println("votre rôle est : " + trouve.get().getRole());
+                        }
+                    } catch (SQLException ex) {
+                    }
+                }
+                else if (rep == j++) { //MODIFICATION UTILISATEUR
+                    List<Utilisateur> tous = Utilisateur.tousLesUtilisateur(con);
+                    List<Utilisateur> selected = ListUtils.selectMultiple(
+                            "selectionnez les utilisateurs à modifier : ", tous, 
+                            u -> u.getId() + " : " + u.getSurnom());
+                    for (var u : selected) {
+                        u.modifierUtilisateurConsole(con);
                     }
                 }
             } catch (Exception ex) {
