@@ -18,6 +18,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ *ceci est un FormLayout : c'est un "composant individuel" que l'on peut ajouter sur une page web
+ * Par "composant individuel", on entend que c'est un élément, un bloc, qui peut être ajouté n'import où
+ *
+ */
 public class CreationUtilisateur extends FormLayout {
 
     private TextField surnom;
