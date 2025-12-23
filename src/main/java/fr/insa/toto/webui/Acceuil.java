@@ -4,16 +4,18 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.StreamResource;
-import fr.insa.toto.model.GestionRH.Utilisateur;
 import fr.insa.toto.model.Jeu.Tournoi;
-import fr.insa.toto.webui.PagesMenus.*;
+import fr.insa.toto.webui.session.LoginDialog;
 import fr.insa.toto.webui.session.SessionInfo;
+import fr.insa.toto.model.GestionRH.Utilisateur;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+
 import java.util.Optional;
 
 @Route("")
@@ -21,38 +23,73 @@ public class Acceuil extends VerticalLayout {
 
     public Acceuil() {
 
-        
-        /* ======= UTILISATEUR CONNECTE =======*/
-        //NOM UTILISATEUR CONNECTE
-        String nomCurUser;
-        int idCurUser = -1;
-        int roleCurUser = -1;
-        Optional<Utilisateur> curUser = SessionInfo.curUser();
-        if (curUser.isEmpty()){
-            nomCurUser = "Personne";
-            //role = -1 ; idCurUser = -1 (par défaut)
-        }else{
-            nomCurUser = curUser.get().getSurnom();
-            idCurUser = curUser.get().getId();
-            roleCurUser = curUser.get().getRole();
-        }
-        
-        /* ======= STYLE DE LA PAGE ======= */
-
-        // Dégradé BG moderne
-        getStyle().set("background", "linear-gradient(135deg, #004e92, #000428)");
+        /* ======= STYLE GLOBAL ======= */
         setSizeFull();
-        setSpacing(false);
         setPadding(false);
-        setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        setSpacing(false);
+        setDefaultHorizontalComponentAlignment(FlexComponent.Alignment.CENTER);
+        getStyle().set("background", "linear-gradient(135deg, #004e92, #000428)");
+
+                /* ======= ICÔNE PARAMÈTRES EN HAUT À DROITE ======= */
+                Icon settings = VaadinIcon.COG.create();
+                settings.setColor("white");
+                settings.setSize("28px");
+                settings.getStyle()
+                        .set("cursor", "pointer")
+                        .set("position", "absolute")
+                        .set("top", "20px")
+                        .set("right", "20px");
+
+                add(settings);
+            /* ===== MENU PARAMÈTRES ===== */
+
+            ContextMenu menu = new ContextMenu();
+            menu.setTarget(settings);     // On lie le menu à l’icône
+            menu.setOpenOnClick(true);    // Il s’ouvre quand on clique
+
+            if (!SessionInfo.userConnected()) {
+
+                menu.addItem("Se connecter", e -> {
+                    LoginDialog dialog = new LoginDialog();
+                    dialog.open();
+                });
+
+            } else {
+    Utilisateur user = SessionInfo.curUser().get();
+
+    menu.addItem("Espace utilisateur",
+        e -> this.getUI().ifPresent(ui -> ui.navigate("utilisateurs")));
+
+    menu.addItem("Se déconnecter", e -> {
+        SessionInfo.logout();
+        this.getUI().ifPresent(ui -> {
+            ui.navigate("");
+            ui.getPage().reload();
+        });
+    });
+}
+
+        add(settings);
+
+
+        /* ======= TEXTE UTILISATEUR CONNECTÉ ======= */
+        String nom = SessionInfo.curUser().map(u -> u.getSurnom() + " (id: " + u.getId() + ")")
+                .orElse("Personne (id: -1)");
+
+        H2 userInfo = new H2("Utilisateur connecté : " + nom);
+        userInfo.getStyle()
+                .set("color", "white")
+                .set("margin-top", "80px");
+
+        add(userInfo);
+
 
         /* ======= CARTE CENTRALE ======= */
-
         VerticalLayout card = new VerticalLayout();
         card.setWidth("450px");
         card.setPadding(true);
         card.setSpacing(true);
-        card.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        card.setDefaultHorizontalComponentAlignment(FlexComponent.Alignment.CENTER);
 
         card.getStyle()
                 .set("background", "white")
@@ -61,54 +98,31 @@ public class Acceuil extends VerticalLayout {
                 .set("box-shadow", "0 10px 30px rgba(0,0,0,0.2)");
 
         /* ======= TITRE ======= */
-
-        H1 titre = new H1(Tournoi.getNom());
-        
+        H1 titre = new H1("Liste des tournois");
         titre.getStyle()
-                .set("font-size", "40px")
-                .set("margin-bottom", "30px")
-                .set("color", "#333")
-                .set("text-align", "center");
+                .set("font-size", "35px")
+                .set("color", "#333");
 
-        /* ======= BOUTONS STYLÉS ======= */
+        /* ======= BOUTON TOURNOI ======= */
+        Button btnTournoi = new Button(Tournoi.getNom());
+        btnTournoi.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
-        Button joueursBtn = new Button("Gérer les joueurs");
-        Button equipesBtn = new Button("Gérer les équipes");
-        Button rondesBtn = new Button("Gérer les rondes");
-        Button utilisateurBtn = new Button("Gérer les utilisateurs");
+        btnTournoi.getStyle()
+                .set("font-size", "18px")
+                .set("border-radius", "10px")
+                .set("white-space", "nowrap")     // empêche le texte d’être coupé
+                .set("width", "auto")             // le bouton s’adapte à la taille du texte
+                .set("padding-left", "25px")
+                .set("padding-right", "25px");
 
-
-        for (Button b : new Button[]{joueursBtn, equipesBtn, rondesBtn, utilisateurBtn}) {
-            b.setWidth("250px");
-            b.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            b.getStyle()
-                    .set("font-size", "18px")
-                    .set("border-radius", "10px");
-        }
-
-        joueursBtn.addClickListener(e -> joueursBtn.getUI().ifPresent(ui -> ui.navigate(PageJoueur.class)));
-        equipesBtn.addClickListener(e -> equipesBtn.getUI().ifPresent(ui -> ui.navigate("equipes")));
-        rondesBtn.addClickListener(e -> rondesBtn.getUI().ifPresent(ui -> ui.navigate("rondes")));
-        utilisateurBtn.addClickListener(e -> utilisateurBtn.getUI().ifPresent(ui -> ui.navigate("utilisateurs")));
-        
+        btnTournoi.addClickListener(e ->
+                btnTournoi.getUI().ifPresent(ui -> ui.navigate("menu-tournoi"))
+        );
 
         /* ======= AJOUTS ======= */
-
-        card.add(titre, joueursBtn, utilisateurBtn);
-        if (roleCurUser != -1){
-            card.add(equipesBtn, rondesBtn);
-        }
-        H2 quiEstConnecte = new H2("Utilisateur connecté : "+ nomCurUser +" (id: " + idCurUser +")");
-        
-        quiEstConnecte.getStyle()
-                .set("font-size", "20px")
-                .set("margin-bottom", "30px")
-                .set("color", "#e8092e")
-                .set("text-align", "left");
-        this.add(quiEstConnecte);
+        card.add(titre, btnTournoi);
         add(card);
 
-        // Centrer verticalement
-        setJustifyContentMode(JustifyContentMode.CENTER);
+        setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
     }
 }

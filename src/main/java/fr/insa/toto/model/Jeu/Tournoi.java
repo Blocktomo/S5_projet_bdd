@@ -150,6 +150,22 @@ public class Tournoi { //suppression de "extends ClasseMiroir" car cela ne conve
                         + "nombre de joueurs par equipe : " + Tournoi.getNb_joueurs_equipe()
                 );
     }
+    
+    public static List<Tournoi> tousLesTournois(Connection con) throws SQLException {
+    List<Tournoi> res = new ArrayList<>();
+    try (PreparedStatement pst = con.prepareStatement(
+            "SELECT id, nom, annee FROM tournoi"
+    )) {
+        ResultSet rs = pst.executeQuery();
+        while (rs.next()) {
+            Tournoi t = new Tournoi();
+            t.setNom(rs.getString("nom"));
+            t.setAnnee(rs.getInt("annee"));
+            res.add(t);
+        }
+    }
+    return res;
+}
 
     public static String getNom() {
         return Tournoi.nom;

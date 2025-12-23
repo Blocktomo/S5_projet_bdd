@@ -100,31 +100,7 @@ public class BdDTest {
             u.saveInDB(con);
         }
         
-//        List<Matchs> matchs = List.of( // ?? on ne eut pas créer des matchs avant des rondes
-//                new Matchs(1),
-//                new Matchs(1)
-//        );
-//        for (var mat : matchs) {
-//            mat.saveInDB(con);
-//        }
-        
-//        List<Equipe> equipe = List.of(
-//                
-//        );
-//        for (var eq : equipe) {
-//            eq.saveInDB(con);
-//        }
-//        int[][] composition = new int[][]{
-//
-//            };
-//        try (PreparedStatement compo = con.prepareStatement(
-//                "insert into composition (idequipe,idjoueur) values (?,?)")) {
-//            for (int[] cmp : composition) {
-//                compo.setInt(1, cmp[0]);
-//                compo.setInt(2, cmp[1]);
-//                compo.executeUpdate();
-//            }
-//        }
+
     }
  
     public static void main(String[] args) {
