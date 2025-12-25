@@ -21,49 +21,86 @@ import java.util.List;
 public class CreationJoueur extends FormLayout {
 
     private TextField surnom;
-//    private PasswordField password;
     private ComboBox<String> categorie;
     private TextField taillecm;
-    //ajouter taille ,etc.
     private Button save;
-    
-    public CreationJoueur() {        
-        this.surnom = new TextField("surnom");
-//        this.password = new PasswordField("password");
-        this.categorie = new ComboBox<>("categorie");
-        this.categorie.setItems(List.of("Junior","Senior"));
-        this.categorie.setValue("Junior");
-        
-        this.taillecm= new TextField("taille (cm)");    
-        this.save = new Button("save");
-        this.save.addClickListener((t) -> {
-            this.doSave();
-        });
+    private Runnable onSuccess; 
 
-        this.setAutoResponsive(true);
-        this.add(new H3("ajouteur un joueur"));
-        this.addFormRow(this.surnom,this.categorie, this.taillecm);
-        this.addFormRow(this.save);
-    }
-    
-    public void doSave() {
-        try (Connection con = ConnectionPool.getConnection()) {
-            String surnom = this.surnom.getValue();
-//            String pass = this.password.getValue();
-            String categorie = "J";
-            if (this.categorie.getValue() != null && this.categorie.getValue().equals("Senio")) {
-                categorie = "S";
-            }
-            double taillecm = Double.parseDouble(this.taillecm.getValue());
-            
-            Joueur j = new Joueur(surnom, categorie, taillecm);
-            j.saveInDB(con);  
-            System.out.println("l\'utilisateur "+SessionInfo.curUser() + " a ajouté le joueur" + j.getSurnom() );
-            Notification.show("joueur "+ surnom + " créé");
-        } catch (SQLException ex) {
-            Notification.show("Problème : " + ex.getLocalizedMessage());
+        public CreationJoueur(Runnable onSuccess) {
+        this.onSuccess = onSuccess;
+
+        // sécurité : admin uniquement
+        if (!SessionInfo.adminConnected()) {
+            add(new H3("Accès réservé à l'administrateur"));
+            return;
         }
-        UI.getCurrent().refreshCurrentRoute(true);
+
+        this.surnom = new TextField("Surnom");
+        this.surnom.setRequired(true);
+
+        this.categorie = new ComboBox<>("Catégorie");
+        this.categorie.setItems("Junior", "Senior");
+        this.categorie.setValue("Junior");
+
+        this.taillecm = new TextField("Taille (cm)");
+        this.taillecm.setPlaceholder("ex : 175");
+
+        this.save = new Button("Ajouter le joueur");
+        this.save.addClickListener(e -> doSave());
+
+        add(
+            new H3("Ajouter un joueur"),
+            surnom,
+            categorie,
+            taillecm,
+            save
+        );
     }
 
+    private void doSave() {
+        
+        
+
+        if (surnom.isEmpty() || taillecm.isEmpty()) {
+            Notification.show("Tous les champs sont obligatoires");
+            return;
+        }
+
+        double taille;
+        try {
+            taille = Double.parseDouble(taillecm.getValue());
+        } catch (NumberFormatException e) {
+            Notification.show("La taille doit être un nombre");
+            return;
+        }
+
+        String catCode = categorie.getValue().equals("Senior") ? "S" : "J";
+
+        try (Connection con = ConnectionPool.getConnection()) {
+            
+            con.setAutoCommit(true);
+
+            Joueur j = new Joueur(
+                surnom.getValue(),
+                catCode,
+                taille
+            );
+            j.saveInDB(con);
+            //UI.getCurrent().getPage().reload();
+
+            Notification.show("Joueur ajouté : " + j.getSurnom());
+            
+            if (onSuccess != null) {
+    onSuccess.run();   //  prévient le panneau
+}
+
+            // reset formulaire
+            surnom.clear();
+            taillecm.clear();
+            categorie.setValue("Junior");
+
+        } catch (SQLException ex) {
+            Notification.show("Erreur BDD : " + ex.getMessage());
+        }
+    }
 }

@@ -41,18 +41,24 @@ public class ConnectionPool {
     // un bloc static directement dans une classe est exécuté au chargement
     // de la classe
     // pour une BdD en mémoire en utilisant le sgbd H2
-    static {
-        config.setJdbcUrl("jdbc:h2:mem:pourCoursVaadin");
-        // peut être pas indispensable, mais dans le doute...
-        config.setUsername("inutilePourH2Mem");
-        config.setPassword("inutilePourH2Mem");
-        config.setMaximumPoolSize(10);
-        config.addDataSourceProperty("cachePrepStmts", "true");
-        config.addDataSourceProperty("prepStmtCacheSize", "250");
-        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        config.setTransactionIsolation("TRANSACTION_SERIALIZABLE");
-        ds = new HikariDataSource(config);
-    }
+        static {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+            } catch (ClassNotFoundException ex) {
+                throw new Error("driver mysql not found", ex);
+            }
+
+            config.setJdbcUrl("jdbc:mysql://92.222.25.165:3306/m3_tbeverly01");
+            config.setUsername("m3_tbeverly01");
+            config.setPassword("71884255");
+            config.setMaximumPoolSize(10);
+            config.addDataSourceProperty("cachePrepStmts", "true");
+            config.addDataSourceProperty("useServerPrepStmts", "true");
+            config.addDataSourceProperty("prepStmtCacheSize", "250");
+            config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+            config.setTransactionIsolation("TRANSACTION_SERIALIZABLE");
+            ds = new HikariDataSource(config);
+        }
     // pour une BdD en utilisant le sgbd mysql pour module M3
 //    static {
 //        try {

@@ -76,8 +76,8 @@ public class BdDTest {
         List<Joueur> players = List.of(
                 new Joueur("Pierre", "S", 180),
                 new Joueur("Ahmed", "J", 160),
-                new Joueur("Arthur", null, 177),
-                new Joueur("Thomas", null, 170),
+                new Joueur("Arthur", "J", 177),
+                new Joueur("Thomas", "S", 170),
                 new Joueur("Rayan", "J", 190)
         );
         for (var p : players) {

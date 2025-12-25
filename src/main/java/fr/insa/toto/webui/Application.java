@@ -40,12 +40,12 @@ public class Application extends SpringBootServletInitializer implements AppShel
 //            throw new Error(ex);
 //        }
 
-        try (Connection con = ConnectionPool.getConnection()) {
+     /* try (Connection con = ConnectionPool.getConnection()) {
             GestionBdD.razBdd(con);
             BdDTest.createBdDTestV4(con);
         } catch (SQLException ex) {
             throw new Error(ex);
-        }
+       }*/
  
 //        try{
 //            GestionBdD.razBdd(con);
