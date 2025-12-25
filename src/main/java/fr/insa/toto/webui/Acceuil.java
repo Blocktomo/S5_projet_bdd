@@ -116,7 +116,7 @@ public class Acceuil extends VerticalLayout {
                 .set("padding-right", "25px");
 
         btnTournoi.addClickListener(e ->
-                btnTournoi.getUI().ifPresent(ui -> ui.navigate("menu-tournoi"))
+                btnTournoi.getUI().ifPresent(ui -> ui.navigate("tournoi"))
         );
 
         /* ======= AJOUTS ======= */
