@@ -1,128 +1,221 @@
 package fr.insa.toto.webui;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.*;
 import com.vaadin.flow.router.Route;
+import fr.insa.beuvron.utils.database.ConnectionPool;
 import fr.insa.toto.model.Jeu.Tournoi;
+import fr.insa.toto.webui.ComposantsIndividuels.EditionTournoiDialog;
+import fr.insa.toto.webui.ComposantsIndividuels.ModeEditionTournoi;
 import fr.insa.toto.webui.session.LoginDialog;
 import fr.insa.toto.webui.session.SessionInfo;
-import fr.insa.toto.model.GestionRH.Utilisateur;
-import com.vaadin.flow.component.contextmenu.ContextMenu;
 
-import java.util.Optional;
+import java.sql.Connection;
+import java.util.List;
 
 @Route("")
 public class Acceuil extends VerticalLayout {
 
+    private VerticalLayout listeTournois;
+
     public Acceuil() {
 
-        /* ======= STYLE GLOBAL ======= */
+        /* =======================
+           STYLE GLOBAL
+           ======================= */
         setSizeFull();
         setPadding(false);
         setSpacing(false);
-        setDefaultHorizontalComponentAlignment(FlexComponent.Alignment.CENTER);
+        setAlignItems(Alignment.CENTER);
+        setJustifyContentMode(JustifyContentMode.CENTER);
         getStyle().set("background", "linear-gradient(135deg, #004e92, #000428)");
 
-                /* ======= ICÔNE PARAMÈTRES EN HAUT À DROITE ======= */
-                Icon settings = VaadinIcon.COG.create();
-                settings.setColor("white");
-                settings.setSize("28px");
-                settings.getStyle()
-                        .set("cursor", "pointer")
-                        .set("position", "absolute")
-                        .set("top", "20px")
-                        .set("right", "20px");
-
-                add(settings);
-            /* ===== MENU PARAMÈTRES ===== */
-
-            ContextMenu menu = new ContextMenu();
-            menu.setTarget(settings);     // On lie le menu à l’icône
-            menu.setOpenOnClick(true);    // Il s’ouvre quand on clique
-
-            if (!SessionInfo.userConnected()) {
-
-                menu.addItem("Se connecter", e -> {
-                    LoginDialog dialog = new LoginDialog();
-                    dialog.open();
-                });
-
-            } else {
-    Utilisateur user = SessionInfo.curUser().get();
-
-    menu.addItem("Espace utilisateur",
-        e -> this.getUI().ifPresent(ui -> ui.navigate("utilisateurs")));
-
-    menu.addItem("Se déconnecter", e -> {
-        SessionInfo.logout();
-        this.getUI().ifPresent(ui -> {
-            ui.navigate("");
-            ui.getPage().reload();
-        });
-    });
-}
-
+        /* =======================
+           ICÔNE PARAMÈTRES
+           ======================= */
+        Icon settings = VaadinIcon.COG.create();
+        settings.setColor("white");
+        settings.setSize("28px");
+        settings.getStyle()
+                .set("cursor", "pointer")
+                .set("position", "absolute")
+                .set("top", "20px")
+                .set("right", "20px");
         add(settings);
 
+        ContextMenu menu = new ContextMenu(settings);
+        menu.setOpenOnClick(true);
 
-        /* ======= TEXTE UTILISATEUR CONNECTÉ ======= */
-        String nom = SessionInfo.curUser().map(u -> u.getSurnom() + " (id: " + u.getId() + ")")
-                .orElse("Personne (id: -1)");
+        if (!SessionInfo.userConnected()) {
+            menu.addItem("Se connecter", e -> new LoginDialog().open());
+        } else {
+            menu.addItem("Espace utilisateur",
+                    e -> getUI().ifPresent(ui -> ui.navigate("utilisateurs")));
+            menu.addItem("Se déconnecter", e -> {
+                SessionInfo.logout();
+                getUI().ifPresent(ui -> ui.getPage().reload());
+            });
+        }
+
+        /* =======================
+           INFO UTILISATEUR
+           ======================= */
+        String nom = SessionInfo.curUser()
+                .map(u -> u.getSurnom())
+                .orElse("Personne");
 
         H2 userInfo = new H2("Utilisateur connecté : " + nom);
         userInfo.getStyle()
                 .set("color", "white")
-                .set("margin-top", "80px");
+                .set("margin-bottom", "30px");
 
-        add(userInfo);
-
-
-        /* ======= CARTE CENTRALE ======= */
+        /* =======================
+           CARTE CENTRALE
+           ======================= */
         VerticalLayout card = new VerticalLayout();
-        card.setWidth("450px");
+        card.setWidth("520px");
         card.setPadding(true);
         card.setSpacing(true);
-        card.setDefaultHorizontalComponentAlignment(FlexComponent.Alignment.CENTER);
-
+        card.setAlignItems(Alignment.STRETCH);
         card.getStyle()
                 .set("background", "white")
                 .set("padding", "40px")
                 .set("border-radius", "20px")
-                .set("box-shadow", "0 10px 30px rgba(0,0,0,0.2)");
+                .set("box-shadow", "0 10px 30px rgba(0,0,0,0.25)");
 
-        /* ======= TITRE ======= */
         H1 titre = new H1("Liste des tournois");
+
+        /* =======================
+           LISTE DES TOURNOIS
+           ======================= */
+        listeTournois = new VerticalLayout();
+        listeTournois.setSpacing(true);
+
+        card.add(titre, listeTournois);
+
+        /* =======================
+           BOUTON AJOUT (ADMIN)
+           ======================= */
+        if (SessionInfo.adminConnected()) {
+            Button ajouter = new Button("➕ Ajouter un tournoi");
+            ajouter.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            ajouter.setWidthFull();
+
+            ajouter.addClickListener(e -> {
+                Tournoi nouveau = new Tournoi(
+                        "",
+                        2025,
+                        1,
+                        90,
+                        2
+                );
+
+                new EditionTournoiDialog(
+                        nouveau,
+                        ModeEditionTournoi.CREATE,
+                        this::refreshTournois
+                ).open();
+            });
+
+            card.add(ajouter);
+        }
+
+        /* =======================
+           AJOUT FINAL À LA PAGE
+           ======================= */
+        add(userInfo, card);
+
+        refreshTournois();
+    }
+
+    /* =======================
+       RAFRAÎCHIR LA LISTE
+       ======================= */
+    private void refreshTournois() {
+        listeTournois.removeAll();
+
+        try (Connection con = ConnectionPool.getConnection()) {
+            List<Tournoi> tournois = Tournoi.tousLesTournois(con);
+
+            for (Tournoi t : tournois) {
+                listeTournois.add(ligneTournoi(t));
+            }
+
+        } catch (Exception ex) {
+            Notification.show("Erreur chargement tournois : " + ex.getMessage());
+        }
+    }
+
+    /* =======================
+       UNE LIGNE TOURNOI
+       ======================= */
+    private Component ligneTournoi(Tournoi tournoi) {
+
+        HorizontalLayout ligne = new HorizontalLayout();
+        ligne.setWidthFull();
+        ligne.setAlignItems(Alignment.CENTER);
+        ligne.setJustifyContentMode(JustifyContentMode.BETWEEN);
+
+        /* ===== TITRE (BOUTON) ===== */
+        Button titre = new Button(tournoi.toString());
+        titre.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+
         titre.getStyle()
-                .set("font-size", "35px")
-                .set("color", "#333");
+                .set("border", "1.5px solid #2563eb")
+                .set("color", "#1e3a8a")
+                .set("font-size", "16px")
+                .set("border-radius", "8px")
+                .set("background", "white");
 
-        /* ======= BOUTON TOURNOI ======= */
-        Button btnTournoi = new Button(Tournoi.getNom());
-        btnTournoi.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            titre.addClickListener(e ->
+              getUI().ifPresent(ui ->
+                      ui.navigate("tournoi/" + tournoi.getId()))
+      );
 
-        btnTournoi.getStyle()
-                .set("font-size", "18px")
-                .set("border-radius", "10px")
-                .set("white-space", "nowrap")     // empêche le texte d’être coupé
-                .set("width", "auto")             // le bouton s’adapte à la taille du texte
-                .set("padding-left", "25px")
-                .set("padding-right", "25px");
+        /* ===== ACTIONS ===== */
+        HorizontalLayout actions = new HorizontalLayout();
+        actions.setAlignItems(Alignment.CENTER);
+        actions.setSpacing(false);
 
-        btnTournoi.addClickListener(e ->
-                btnTournoi.getUI().ifPresent(ui -> ui.navigate("tournoi"))
+        Button view = new Button(new Icon(VaadinIcon.EYE));
+        view.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
+        view.getElement().setAttribute("title", "Voir le tournoi");
+
+        view.addClickListener(e ->
+                new EditionTournoiDialog(
+                        tournoi,
+                        ModeEditionTournoi.VIEW,
+                        null
+                ).open()
         );
 
-        /* ======= AJOUTS ======= */
-        card.add(titre, btnTournoi);
-        add(card);
+        actions.add(view);
 
-        setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        if (SessionInfo.adminConnected()) {
+            Button edit = new Button(new Icon(VaadinIcon.EDIT));
+            edit.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
+            edit.getElement().setAttribute("title", "Modifier le tournoi");
+
+            edit.addClickListener(e ->
+                    new EditionTournoiDialog(
+                            tournoi,
+                            ModeEditionTournoi.EDIT,
+                            this::refreshTournois
+                    ).open()
+            );
+
+            actions.add(edit);
+        }
+
+        ligne.add(titre, actions);
+        return ligne;
     }
 }

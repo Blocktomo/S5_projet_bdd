@@ -1,232 +1,212 @@
-
 package fr.insa.toto.model.Jeu;
 
-import fr.insa.toto.model.Jeu.Joueur;
-import fr.insa.beuvron.utils.ConsoleFdB;
 import fr.insa.beuvron.utils.database.ClasseMiroir;
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.Collections;
-
+import java.util.List;
 
 public class Equipe extends ClasseMiroir implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private int score;
-    private Ronde ronde; 
+    private Ronde ronde;
 
-    
-    
-    
+    /* =======================
+       CONSTRUCTEURS
+       ======================= */
+
+    // Nouvelle équipe en mémoire
+    public Equipe(int score, Ronde ronde) {
+        super();
+        this.score = score;
+        this.ronde = ronde;
+    }
+
+    // Équipe depuis la base
+    public Equipe(int id, int score, Ronde ronde) {
+        super(id);
+        this.score = score;
+        this.ronde = ronde;
+    }
+
+    /* =======================
+       PERSISTENCE
+       ======================= */
+
+    @Override
+    public Statement saveSansId(Connection con) throws SQLException {
+        PreparedStatement pst = con.prepareStatement(
+                """
+                INSERT INTO equipe (score, idronde)
+                VALUES (?, ?)
+                """,
+                Statement.RETURN_GENERATED_KEYS
+        );
+
+        pst.setInt(1, score);
+        pst.setInt(2, ronde.getId());
+        pst.executeUpdate();
+        return pst;
+    }
+
+    /* =======================
+       MÉTIER
+       ======================= */
+
     /**
-     * pour nouvelle équipe en mémoire
+     * Création automatique des équipes pour une ronde donnée
      */
-  
-public Equipe(int score, Ronde ronde) {
-    super();
-    this.score = score;
-    this.ronde = ronde;
-}
+    public static List<Equipe> creerEquipes(Connection con, Ronde ronde) throws SQLException {
 
-    /**
-     * pour équipe récupérée de la base de données
-     */
-  
-    
-  public Equipe(int id, int score, Ronde ronde) {
-    super(id);
-    this.score = score;
-    this.ronde = ronde;
-}
-  
-  
- @Override
-public Statement saveSansId(Connection con) throws SQLException {
-    PreparedStatement insert = con.prepareStatement(
-            "insert into equipe (score, idronde) values (?, ?)",
-            PreparedStatement.RETURN_GENERATED_KEYS);
+        //  taille équipe depuis le tournoi de la ronde
+        int tailleEquipe = ronde.getTournoi().getNbJoueursEquipe();
 
-    insert.setInt(1, this.score);
-    insert.setInt(2, this.ronde.getId());  
+        List<Joueur> joueurs = Joueur.tousLesJoueurs(con);
+        Collections.shuffle(joueurs);
 
-    insert.executeUpdate();
-    return insert;
-}
-    
-   
-    public static List<Equipe> creerEquipes(
-        Connection con,
-        Ronde ronde) throws SQLException {
+        List<Equipe> equipes = new ArrayList<>();
+        int nbEquipes = joueurs.size() / tailleEquipe;
 
-    // 1) Taille des équipes grâce au tournoi
-    int tailleEquipe = ronde.getTournoi().getNb_joueurs_equipe();
+        try {
+            con.setAutoCommit(false);
 
-    // 2) On récupère tous les joueurs existants
-    List<Joueur> joueurs = Joueur.tousLesJoueur(con);
+            try (PreparedStatement pstCompo = con.prepareStatement(
+                    "INSERT INTO composition (idequipe, idjoueur) VALUES (?, ?)")) {
 
-    // 3) Mélanger pour que ce soit aléatoire
-    Collections.shuffle(joueurs);
+                int index = 0;
 
-    List<Equipe> equipesCreees = new ArrayList<>();
+                for (int i = 0; i < nbEquipes; i++) {
+                    Equipe e = new Equipe(0, ronde);
+                    e.saveInDB(con);
+                    equipes.add(e);
 
-    // 4) Nombre d’équipes complètes possibles
-    int nbEquipesCompletes = joueurs.size() / tailleEquipe;
+                    for (int j = 0; j < tailleEquipe; j++) {
+                        Joueur joueur = joueurs.get(index++);
+                        pstCompo.setInt(1, e.getId());
+                        pstCompo.setInt(2, joueur.getId());
+                        pstCompo.executeUpdate();
+                    }
+                }
+            }
 
-    try {
-        con.setAutoCommit(false);
+            con.commit();
+        } catch (SQLException ex) {
+            con.rollback();
+            throw ex;
+        } finally {
+            con.setAutoCommit(true);
+        }
 
-        // 5) Préparer l’insertion dans composition
-        try (PreparedStatement pstCompo = con.prepareStatement(
-                "insert into composition (idequipe,idjoueur) values (?,?)")) {
+        return equipes;
+    }
 
-            int indexJoueur = 0;
+    /* =======================
+       LECTURE
+       ======================= */
 
-            for (int i = 0; i < nbEquipesCompletes; i++) {
+    public static List<Equipe> toutesLesEquipes(Connection con) throws SQLException {
+        List<Equipe> res = new ArrayList<>();
 
-                // Créer une nouvelle équipe pour cette ronde
-                // Score = 0, ronde = l’objet passé en paramètre
-                Equipe e = new Equipe(0, ronde);
-                e.saveInDB(con); // insère en BD et récupère l'id
-                equipesCreees.add(e);
+        try (PreparedStatement pst = con.prepareStatement(
+                "SELECT id, score, idronde FROM equipe")) {
 
-                // Remplir l’équipe avec 'tailleEquipe' joueurs
-                for (int k = 0; k < tailleEquipe; k++) {
-                    Joueur j = joueurs.get(indexJoueur++);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    int score = rs.getInt("score");
+                    int idRonde = rs.getInt("idronde");
 
-                    pstCompo.setInt(1, e.getId());
-                    pstCompo.setInt(2, j.getId());
-                    pstCompo.executeUpdate();
+                    Ronde ronde = Ronde.chercherRondeParId(con, idRonde);
+                    res.add(new Equipe(id, score, ronde));
                 }
             }
         }
-
-        con.commit();
-    } catch (SQLException ex) {
-        con.rollback();
-        throw ex;
-    } finally {
-        con.setAutoCommit(true);
+        return res;
     }
 
-    return equipesCreees;
-}
+    /* =======================
+       SUPPRESSION
+       ======================= */
 
+    public void supprimer(Connection con) throws SQLException {
+        if (getId() == -1) {
+            throw new ClasseMiroir.EntiteNonSauvegardee();
+        }
 
-public static List<Equipe> toutesLesEquipes(Connection con) throws SQLException {
-    List<Equipe> res = new ArrayList<>();
+        try {
+            con.setAutoCommit(false);
 
-    try (PreparedStatement pst = con.prepareStatement(
-            "select id, score, idronde from equipe")) {
-
-        try (ResultSet rs = pst.executeQuery()) {
-            while (rs.next()) {
-
-                int idEquipe = rs.getInt("id");
-                int score = rs.getInt("score");
-                int idRonde = rs.getInt("idronde");
-
-                //  On doit reconstruire la Ronde correspondant à idRonde
-                Ronde ronde = Ronde.chercherRondeParId(con, idRonde);
-
-                res.add(new Equipe(
-                        idEquipe,
-                        score,
-                        ronde
-                ));
+            try (PreparedStatement pst = con.prepareStatement(
+                    "DELETE FROM composition WHERE idequipe = ?")) {
+                pst.setInt(1, getId());
+                pst.executeUpdate();
             }
+
+            try (PreparedStatement pst = con.prepareStatement(
+                    "DELETE FROM equipe WHERE id = ?")) {
+                pst.setInt(1, getId());
+                pst.executeUpdate();
+            }
+
+            entiteSupprimee();
+            con.commit();
+        } catch (SQLException ex) {
+            con.rollback();
+            throw ex;
+        } finally {
+            con.setAutoCommit(true);
         }
     }
-    return res;
-}
- 
 
-    public void SuppEquipe(Connection con) throws SQLException {
-    if (this.getId() == -1) {
-        throw new ClasseMiroir.EntiteNonSauvegardee();
-    }
-    try {
-        con.setAutoCommit(false);
+    /* =======================
+       SCORE
+       ======================= */
 
-        // On supprimee les lignes de composition qui utilisent cette équipe
+    public void sauvegarderScore(Connection con) throws SQLException {
+        if (getId() == -1) {
+            throw new ClasseMiroir.EntiteNonSauvegardee();
+        }
+
         try (PreparedStatement pst = con.prepareStatement(
-                "delete from composition where idequipe = ?")) {
-            pst.setInt(1, this.getId());
+                "UPDATE equipe SET score = ? WHERE id = ?")) {
+            pst.setInt(1, score);
+            pst.setInt(2, getId());
             pst.executeUpdate();
         }
+    }
 
-        // Puis supprimer l'équipe elle-même
+    public void ajouterScoreAuxJoueurs(Connection con, int points) throws SQLException {
         try (PreparedStatement pst = con.prepareStatement(
-                "delete from equipe where id = ?")) {
-            pst.setInt(1, this.getId());
+                """
+                UPDATE joueur
+                SET score = score + ?
+                WHERE id IN (
+                    SELECT idjoueur FROM composition WHERE idequipe = ?
+                )
+                """)) {
+            pst.setInt(1, points);
+            pst.setInt(2, getId());
             pst.executeUpdate();
         }
-
-        this.entiteSupprimee();
-        con.commit();
-    } catch (SQLException ex) {
-        con.rollback();
-        throw ex;
-    } finally {
-        con.setAutoCommit(true);
-    }
-}
-   public void sauvegarderScore(Connection con) throws SQLException {
-    if (this.getId() == -1) {
-        throw new ClasseMiroir.EntiteNonSauvegardee();
     }
 
-    try (PreparedStatement pst = con.prepareStatement(
-            "UPDATE equipe SET score = ? WHERE id = ?")) {
-        pst.setInt(1, this.score);
-        pst.setInt(2, this.getId());
-        pst.executeUpdate();
-    }
-}
-   public void ajouterScoreAuxJoueurs(Connection con, int points) throws SQLException {
+    /* =======================
+       GETTERS
+       ======================= */
 
-    String sql = "UPDATE joueur SET score = score + ? "
-               + "WHERE id IN (SELECT idjoueur FROM composition WHERE idequipe = ?)";
-
-    try (PreparedStatement pst = con.prepareStatement(sql)) {
-        pst.setInt(1, points);
-        pst.setInt(2, this.getId());
-        pst.executeUpdate();
-    }
-}
-   
-    /**
-     * @return the score
-     */
     public int getScore() {
         return score;
     }
 
-    /**
-     * @param score the score to set
-     */
     public void setScore(int score) {
         this.score = score;
     }
 
-   
     public Ronde getRonde() {
         return ronde;
     }
-    
-    
-    public int getNb_joueurs(){
-        int nb_joueurs_equipe = Tournoi.getNb_joueurs_equipe();
-        return nb_joueurs_equipe;
-        
-    }
-   
-
 }
+

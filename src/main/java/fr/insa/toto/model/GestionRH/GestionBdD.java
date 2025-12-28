@@ -1,182 +1,161 @@
-
 package fr.insa.toto.model.GestionRH;
 
 import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import fr.insa.beuvron.utils.database.* ;
 
 /**
+ * Gestion de la création et suppression du schéma de la base de données.
+ * Version stable (DDL hors transaction).
  *
  * @author thomas_insa
  */
 public class GestionBdD {
-    public static void creeSchema(Connection con)
-            throws SQLException {
-        try {
-            con.setAutoCommit(false);
-            try (Statement st = con.createStatement()) {
-                // creation des tables
-                
-                st.executeUpdate("create table tournoi ( "
-                        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
-                        + " nom varchar(30) not null,"
-                        + " annee integer not null,"
-                        + " nb_de_rondes integer not null,"
-                        + " duree_match integer not null, "
-                        + "nb_joueurs_equipe integer not null"
-                        + ") "
-                );
-                
-                st.executeUpdate("create table joueur ( "
-                            + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
-                            + " surnom varchar(30) not null unique,"
-                            + " categorie varchar(20),"
-                            + " taillecm double, "
-                            + " score integer default 0"
-                            + ") ");
-                st.executeUpdate("create table utilisateur ( "
-                        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
-                        + " surnom varchar(30) not null unique,"
-                        + " pass varchar(30) not null,"
-                        + " role integer not null CONSTRAINT CHK_role CHECK (role=1 OR role=2)"
-                        + ") "
-                );
-                
-                st.executeUpdate("create table equipe ( "
-                        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
-                        + " score integer,"
-                        + "idronde integer not null"
-                        + ") "
-                
-                );
-                st.executeUpdate("create table ronde ( "
-                        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "idronde") + ","
-                        + " terminer integer CHECK ( terminer=0 or terminer=1) "
-                        + ") "
-                );
-                
-                 st.executeUpdate("create table terrain ( "
-        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
-        + " nom varchar(30) not null, "
-        + " occupe integer default 0 check (occupe = 0 or occupe = 1)"
-        + ")");
 
-                st.executeUpdate("create table matchs ("
-        + ConnectionSimpleSGBD.sqlForGeneratedKeys(con, "id") + ","
-        + " idronde integer not null,"
-        + " idEquipeA integer not null,"
-        + " idEquipeB integer not null,"
-        + " idTerrain integer,"
-        + " foreign key (idronde) references ronde(idronde),"
-        + " foreign key (idEquipeA) references equipe(id),"
-        + " foreign key (idEquipeB) references equipe(id),"
-        + " foreign key (idTerrain) references terrain(id)"
-        + ")");
-                
-                
-                st.executeUpdate("create table composition ( "
-                        + " idequipe integer not null,"
-                        + " idjoueur integer not null"
-                        + ") "
-                );
+    /* =======================
+       CRÉATION DU SCHÉMA
+       ======================= */
+    public static void creeSchema(Connection con) throws SQLException {
 
-                st.executeUpdate("alter table composition\n"
-                        + "  add constraint fk_composition_idequipe\n"
-                        + "  foreign key (idequipe) references equipe(id)"
-                );
-                st.executeUpdate("alter table composition\n"
-                        + "  add constraint fk_composition_idjoueur\n"
-                        + "  foreign key (idjoueur) references joueur(id)"
-                );
-               
-                con.commit();
-                }
-        } catch (SQLException ex) {
-            con.rollback();
-            throw ex;
-        } finally {
-            con.setAutoCommit(true);
-        }
-    }
-
-    /**
-     *
-     * @param con
-     * @throws SQLException
-     */ 
-    public static void deleteSchema(Connection con) throws SQLException {
         try (Statement st = con.createStatement()) {
-            
-            
-            
-            try {
-                st.executeUpdate(
-                        "alter table composition "
-                        + "drop constraint fk_composition_idequipe");
-            } catch (SQLException ex) {
-            }
-            try {
-                st.executeUpdate(
-                        "alter table composition "
-                        + "drop constraint fk_composition_idjoueur");
-            } catch (SQLException ex) {
-            }
-            
-            try {
-                st.executeUpdate("drop table tournoi");
-            } catch (SQLException ex) {
-            }
-            try {
-                st.executeUpdate("drop table joueur");
-            } catch (SQLException ex) {
-            }
-            
-            try {
-                st.executeUpdate(
-                        "alter table utilisateur "
-                        + "drop constraint CHK_role");
-            } catch (SQLException ex) {
-            }
-            try {
-                st.executeUpdate("drop table utilisateur");
-            } catch (SQLException ex) {
-            }
-            try {
-                st.executeUpdate("drop table matchs");
-            } catch (SQLException ex) {
-            }
-            try {
-                st.executeUpdate("drop table equipe");
-            } catch (SQLException ex) {
-            }
-            try {
-                st.executeUpdate("drop table ronde");
-            } catch (SQLException ex) {
-            }
-            try {
-                    st.executeUpdate("drop table terrain");
-                } catch (SQLException ex) {
-                }
-            
-            try {
-                st.executeUpdate("drop table composition");
-            } catch (SQLException ex) {
-            }
+
+            /* ========= TOURNOI ========= */
+            st.executeUpdate("""
+                CREATE TABLE tournoi (
+                    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                    nom VARCHAR(30) NOT NULL,
+                    annee INTEGER NOT NULL,
+                    nb_de_rondes INTEGER NOT NULL,
+                    duree_match INTEGER NOT NULL,
+                    nb_joueurs_equipe INTEGER NOT NULL
+                )
+            """);
+
+            /* ========= JOUEUR ========= */
+            st.executeUpdate("""
+                CREATE TABLE joueur (
+                    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                    surnom VARCHAR(30) NOT NULL UNIQUE,
+                    categorie VARCHAR(20),
+                    taillecm DOUBLE,
+                    score INTEGER DEFAULT 0
+                )
+            """);
+
+            /* ========= PARTICIPATION (N–N) ========= */
+            st.executeUpdate("""
+                CREATE TABLE participation (
+                    idjoueur INTEGER NOT NULL,
+                    idtournoi INTEGER NOT NULL,
+                    PRIMARY KEY (idjoueur, idtournoi),
+                    FOREIGN KEY (idjoueur) REFERENCES joueur(id),
+                    FOREIGN KEY (idtournoi) REFERENCES tournoi(id)
+                )
+            """);
+
+            /* ========= UTILISATEUR ========= */
+            st.executeUpdate("""
+                CREATE TABLE utilisateur (
+                    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                    surnom VARCHAR(30) NOT NULL UNIQUE,
+                    pass VARCHAR(30) NOT NULL,
+                    role INTEGER NOT NULL CHECK (role = 1 OR role = 2)
+                )
+            """);
+
+            /* ========= RONDE ========= */
+            st.executeUpdate("""
+                CREATE TABLE ronde (
+                    idronde INTEGER AUTO_INCREMENT PRIMARY KEY,
+                    terminer INTEGER CHECK (terminer = 0 OR terminer = 1)
+                )
+            """);
+
+            /* ========= EQUIPE ========= */
+            st.executeUpdate("""
+                CREATE TABLE equipe (
+                    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                    score INTEGER,
+                    idronde INTEGER NOT NULL,
+                    FOREIGN KEY (idronde) REFERENCES ronde(idronde)
+                )
+            """);
+
+            /* ========= COMPOSITION ========= */
+            st.executeUpdate("""
+                CREATE TABLE composition (
+                    idequipe INTEGER NOT NULL,
+                    idjoueur INTEGER NOT NULL,
+                    PRIMARY KEY (idequipe, idjoueur),
+                    FOREIGN KEY (idequipe) REFERENCES equipe(id),
+                    FOREIGN KEY (idjoueur) REFERENCES joueur(id)
+                )
+            """);
+
+            /* ========= TERRAIN ========= */
+            st.executeUpdate("""
+                CREATE TABLE terrain (
+                    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                    nom VARCHAR(30) NOT NULL,
+                    occupe INTEGER DEFAULT 0 CHECK (occupe = 0 OR occupe = 1)
+                )
+            """);
+
+            /* ========= MATCHS ========= */
+            st.executeUpdate("""
+                CREATE TABLE matchs (
+                    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                    idronde INTEGER NOT NULL,
+                    idEquipeA INTEGER NOT NULL,
+                    idEquipeB INTEGER NOT NULL,
+                    idTerrain INTEGER,
+                    FOREIGN KEY (idronde) REFERENCES ronde(idronde),
+                    FOREIGN KEY (idEquipeA) REFERENCES equipe(id),
+                    FOREIGN KEY (idEquipeB) REFERENCES equipe(id),
+                    FOREIGN KEY (idTerrain) REFERENCES terrain(id)
+                )
+            """);
         }
     }
-    
+
+    /* =======================
+       SUPPRESSION DU SCHÉMA
+       ======================= */
+    public static void deleteSchema(Connection con) throws SQLException {
+
+        try (Statement st = con.createStatement()) {
+
+            // ⚠️ ordre inverse des dépendances
+            try { st.executeUpdate("DROP TABLE matchs"); } catch (SQLException e) {}
+            try { st.executeUpdate("DROP TABLE composition"); } catch (SQLException e) {}
+            try { st.executeUpdate("DROP TABLE equipe"); } catch (SQLException e) {}
+            try { st.executeUpdate("DROP TABLE ronde"); } catch (SQLException e) {}
+            try { st.executeUpdate("DROP TABLE participation"); } catch (SQLException e) {}
+            try { st.executeUpdate("DROP TABLE terrain"); } catch (SQLException e) {}
+            try { st.executeUpdate("DROP TABLE joueur"); } catch (SQLException e) {}
+            try { st.executeUpdate("DROP TABLE utilisateur"); } catch (SQLException e) {}
+            try { st.executeUpdate("DROP TABLE tournoi"); } catch (SQLException e) {}
+        }
+    }
+
+    /* =======================
+       RAZ BDD
+       ======================= */
     public static void razBdd(Connection con) throws SQLException {
         deleteSchema(con);
         creeSchema(con);
     }
-    
+
+    /* =======================
+       MAIN (TEST)
+       ======================= */
     public static void main(String[] args) {
         try (Connection con = ConnectionSimpleSGBD.defaultCon()) {
             razBdd(con);
+            System.out.println("✅ Base de données recréée avec succès");
         } catch (SQLException ex) {
-            throw new Error(ex);
+            ex.printStackTrace();
         }
     }
 }

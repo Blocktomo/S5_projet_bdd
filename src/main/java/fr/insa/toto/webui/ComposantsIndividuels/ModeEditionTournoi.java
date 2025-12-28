@@ -16,25 +16,18 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with CoursBeuvron.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.insa.toto.webui;
-
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+package fr.insa.toto.webui.ComposantsIndividuels;
 
 /**
  *
- * @author tbeverly
+ * @author macbookpro
  */
-@Route(value = "vueprincipale")
-@PageTitle("VuePrincipale")
-public class VuePrincipale extends VerticalLayout {
 
-    public VuePrincipale() {
-        this.add(new H2("TODO_projetBDD"));
-    }
-
+/**
+ * Mode d'ouverture du dialog de tournoi
+ */
+public enum ModeEditionTournoi {
+    VIEW,    // lecture seule
+    EDIT,    // modification
+    CREATE   // création d’un nouveau tournoi
 }

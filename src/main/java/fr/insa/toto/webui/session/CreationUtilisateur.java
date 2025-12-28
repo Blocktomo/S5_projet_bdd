@@ -1,5 +1,5 @@
 
-package fr.insa.toto.webui.ComposantsIndividuels;
+package fr.insa.toto.webui.session;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;

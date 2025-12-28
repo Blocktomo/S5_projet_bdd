@@ -1,4 +1,4 @@
-package fr.insa.toto.webui.PagesMenus;
+package fr.insa.toto.webui.session;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -13,7 +13,7 @@ import fr.insa.beuvron.utils.database.ConnectionPool;
 import fr.insa.beuvron.vaadin.utils.dataGrid.ResultSetGrid;
 import fr.insa.toto.model.GestionRH.Utilisateur;
 import fr.insa.toto.webui.Acceuil;
-import fr.insa.toto.webui.ComposantsIndividuels.CreationUtilisateur;
+import fr.insa.toto.webui.session.CreationUtilisateur;
 import fr.insa.toto.webui.session.SessionInfo;
 import fr.insa.toto.webui.session.LoginDialog;
 

@@ -1,52 +1,51 @@
 package fr.insa.toto.webui.ComposantsIndividuels;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import fr.insa.beuvron.utils.database.ConnectionPool;
-import fr.insa.toto.model.Jeu.*;
+import fr.insa.toto.model.Jeu.Joueur;
 import fr.insa.toto.webui.session.SessionInfo;
-//import fr.insa.toto.webui.MainLayout;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
+
+import java.util.function.Consumer;
 
 public class CreationJoueur extends FormLayout {
+
+    private final Consumer<Joueur> onCreate;
 
     private TextField surnom;
     private ComboBox<String> categorie;
     private TextField taillecm;
     private Button save;
-    private Runnable onSuccess; 
 
-        public CreationJoueur(Runnable onSuccess) {
-        this.onSuccess = onSuccess;
+    public CreationJoueur(Consumer<Joueur> onCreate) {
+        this.onCreate = onCreate;
 
-        // sécurité : admin uniquement
+        /* =======================
+           SÉCURITÉ
+           ======================= */
         if (!SessionInfo.adminConnected()) {
             add(new H3("Accès réservé à l'administrateur"));
             return;
         }
 
-        this.surnom = new TextField("Surnom");
-        this.surnom.setRequired(true);
+        /* =======================
+           CHAMPS
+           ======================= */
+        surnom = new TextField("Surnom");
+        surnom.setRequired(true);
 
-        this.categorie = new ComboBox<>("Catégorie");
-        this.categorie.setItems("Junior", "Senior");
-        this.categorie.setValue("Junior");
+        categorie = new ComboBox<>("Catégorie");
+        categorie.setItems("Junior", "Senior");
+        categorie.setValue("Junior");
 
-        this.taillecm = new TextField("Taille (cm)");
-        this.taillecm.setPlaceholder("ex : 175");
+        taillecm = new TextField("Taille (cm)");
+        taillecm.setPlaceholder("ex : 175");
 
-        this.save = new Button("Ajouter le joueur");
-        this.save.addClickListener(e -> doSave());
+        save = new Button("Ajouter le joueur");
+        save.addClickListener(e -> creerJoueur());
 
         add(
             new H3("Ajouter un joueur"),
@@ -57,9 +56,10 @@ public class CreationJoueur extends FormLayout {
         );
     }
 
-    private void doSave() {
-        
-        
+    /* =======================
+       CRÉATION LOGIQUE
+       ======================= */
+    private void creerJoueur() {
 
         if (surnom.isEmpty() || taillecm.isEmpty()) {
             Notification.show("Tous les champs sont obligatoires");
@@ -76,31 +76,18 @@ public class CreationJoueur extends FormLayout {
 
         String catCode = categorie.getValue().equals("Senior") ? "S" : "J";
 
-        try (Connection con = ConnectionPool.getConnection()) {
-            
-            con.setAutoCommit(true);
-
-            Joueur j = new Joueur(
+        Joueur joueur = new Joueur(
                 surnom.getValue(),
                 catCode,
                 taille
-            );
-            j.saveInDB(con);
-            //UI.getCurrent().getPage().reload();
+        );
 
-            Notification.show("Joueur ajouté : " + j.getSurnom());
-            
-            if (onSuccess != null) {
-    onSuccess.run();   //  prévient le panneau
-}
+        /* 👉 On RENVOIE le joueur au parent */
+        onCreate.accept(joueur);
 
-            // reset formulaire
-            surnom.clear();
-            taillecm.clear();
-            categorie.setValue("Junior");
-
-        } catch (SQLException ex) {
-            Notification.show("Erreur BDD : " + ex.getMessage());
-        }
+        /* Reset formulaire */
+        surnom.clear();
+        taillecm.clear();
+        categorie.setValue("Junior");
     }
 }

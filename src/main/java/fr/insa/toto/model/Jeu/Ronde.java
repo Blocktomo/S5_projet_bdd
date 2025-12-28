@@ -18,105 +18,151 @@ along with CoursBeuvron.  If not, see <http://www.gnu.org/licenses/>.
  */
 package fr.insa.toto.model.Jeu;
 
-
-import fr.insa.beuvron.utils.ConsoleFdB;
 import fr.insa.beuvron.utils.database.ClasseMiroir;
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-/**
- *
- * @author rdorgli01
- */
-public class Ronde extends ClasseMiroir {
-    
-    private int terminer;
+
+public class Ronde extends ClasseMiroir implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private int terminer;        // 0 = en cours, 1 = terminée
     private Tournoi tournoi;
-    
-    //Thomas : on va devoir supprimer ce constructeur, car il faut toujours spécifier un tournoi d'appartenance
-    public Ronde(int terminer){
-        this.terminer = terminer; 
-        Tournoi.addRonde(this);
-        
+
+    /* =======================
+       CONSTRUCTEURS
+       ======================= */
+
+    /** Nouvelle ronde en mémoire */
+    public Ronde(int terminer, Tournoi tournoi) {
+        super();
+        this.terminer = terminer;
+        this.tournoi = tournoi;
     }
-    
-    /**pour récupérer une ronde depuis la BDD
-     * @param terminer : int // 0 ou 1
-     */
-    public Ronde (int idronde, int terminer){
-            super(idronde);
-            this.terminer = terminer;
-            Tournoi.addRonde(this);
+
+    /** Ronde récupérée depuis la BDD */
+    public Ronde(int id, int terminer, Tournoi tournoi) {
+        super(id);
+        this.terminer = terminer;
+        this.tournoi = tournoi;
     }
-    
-    
+
+    /* =======================
+       PERSISTENCE
+       ======================= */
+
     @Override
     public Statement saveSansId(Connection con) throws SQLException {
-        PreparedStatement insert = con.prepareStatement(
-                "insert into ronde (terminer) values (?)",
-                PreparedStatement.RETURN_GENERATED_KEYS);
-        insert.setInt(1, this.getTerminer());
-        insert.executeUpdate();
-        return insert;
-    }
-    
-    
-    public static Ronde chercherRondeParId(Connection con, int idronde) throws SQLException {
-    try (PreparedStatement pst = con.prepareStatement(
-            "select idronde, terminer from ronde where idronde = ?")) {
-        pst.setInt(1, idronde);
+        PreparedStatement pst = con.prepareStatement(
+                """
+                INSERT INTO ronde (terminer, idtournoi)
+                VALUES (?, ?)
+                """,
+                Statement.RETURN_GENERATED_KEYS
+        );
 
-        try (ResultSet rs = pst.executeQuery()) {
-            if (rs.next()) {
-                return new Ronde(
-                        rs.getInt("idronde"),
-                        rs.getInt("terminer")
-                );
-            } 
-        }
+        pst.setInt(1, terminer);
+        pst.setInt(2, tournoi.getId());
+        pst.executeUpdate();
+        return pst;
     }
-    return null; // ou exception
-}
-    
-    /**permet de récupérer les rondes depuis la BDD, en plus de Tournoi.getListe_rondes().
-     */
+
+    /* =======================
+       REQUÊTES STATIQUES
+       ======================= */
+
+    public static Ronde chercherRondeParId(Connection con, int id) throws SQLException {
+        try (PreparedStatement pst = con.prepareStatement(
+                """
+                SELECT r.id, r.terminer,
+                       t.id AS tid, t.nom, t.annee,
+                       t.nb_de_rondes, t.duree_match, t.nb_joueurs_equipe
+                FROM ronde r
+                JOIN tournoi t ON r.idtournoi = t.id
+                WHERE r.id = ?
+                """
+        )) {
+            pst.setInt(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    Tournoi tournoi = new Tournoi(
+                            rs.getInt("tid"),
+                            rs.getString("nom"),
+                            rs.getInt("annee"),
+                            rs.getInt("nb_de_rondes"),
+                            rs.getInt("duree_match"),
+                            rs.getInt("nb_joueurs_equipe")
+                    );
+
+                    return new Ronde(
+                            rs.getInt("id"),
+                            rs.getInt("terminer"),
+                            tournoi
+                    );
+                }
+            }
+        }
+        return null;
+    }
+
     public static List<Ronde> toutesLesRondes(Connection con) throws SQLException {
         List<Ronde> res = new ArrayList<>();
-        String query= "SElECT idronde, terminer FROM ronde ORDER BY idronde";
-        
-        try (PreparedStatement pst = con.prepareStatement(query)) {
-            try(ResultSet rs = pst.executeQuery()) {
+
+        try (PreparedStatement pst = con.prepareStatement(
+                """
+                SELECT r.id, r.terminer,
+                       t.id AS tid, t.nom, t.annee,
+                       t.nb_de_rondes, t.duree_match, t.nb_joueurs_equipe
+                FROM ronde r
+                JOIN tournoi t ON r.idtournoi = t.id
+                ORDER BY r.id
+                """
+        )) {
+            try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    res.add(new Ronde (rs.getInt("idronde"), rs.getInt("terminer")));
+                    Tournoi tournoi = new Tournoi(
+                            rs.getInt("tid"),
+                            rs.getString("nom"),
+                            rs.getInt("annee"),
+                            rs.getInt("nb_de_rondes"),
+                            rs.getInt("duree_match"),
+                            rs.getInt("nb_joueurs_equipe")
+                    );
+
+                    res.add(new Ronde(
+                            rs.getInt("id"),
+                            rs.getInt("terminer"),
+                            tournoi
+                    ));
                 }
             }
         }
         return res;
     }
-    
+
+    /* =======================
+       SUPPRESSION
+       ======================= */
+
     public void deleteInDB(Connection con) throws SQLException {
-        if (this.getId()== -1 ){
+        if (getId() == -1) {
             throw new ClasseMiroir.EntiteNonSauvegardee();
         }
+
         try {
             con.setAutoCommit(false);
-            
-            try (PreparedStatement pstRonde = con.prepareStatement(
-                    "DELETE FROM ronde WHERE idronde = ?")) {
-                pstRonde.setInt(1,this.getId());
-                pstRonde.executeUpdate();
+
+            try (PreparedStatement pst = con.prepareStatement(
+                    "DELETE FROM ronde WHERE id = ?")) {
+                pst.setInt(1, getId());
+                pst.executeUpdate();
             }
-            
-            this.entiteSupprimee();
+
+            entiteSupprimee();
             con.commit();
-        } catch (SQLException ex){
+        } catch (SQLException ex) {
             con.rollback();
             throw ex;
         } finally {
@@ -124,20 +170,20 @@ public class Ronde extends ClasseMiroir {
         }
     }
 
+    /* =======================
+       GETTERS / SETTERS
+       ======================= */
+
     public int getTerminer() {
         return terminer;
+    }
+
+    public void setTerminer(int terminer) {
+        this.terminer = terminer;
     }
 
     public Tournoi getTournoi() {
         return tournoi;
     }
-
-    
-    public void setTerminer(int terminer) {
-        this.terminer = terminer;
-    }
-    
-   
-    
-    
 }
+

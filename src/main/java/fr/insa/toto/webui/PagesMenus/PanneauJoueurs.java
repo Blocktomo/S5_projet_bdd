@@ -8,129 +8,123 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import fr.insa.beuvron.utils.database.ConnectionPool;
 import fr.insa.toto.model.Jeu.Joueur;
+import fr.insa.toto.model.Jeu.Tournoi;
 import fr.insa.toto.webui.ComposantsIndividuels.CreationJoueur;
 import fr.insa.toto.webui.session.SessionInfo;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.List;
 
 public class PanneauJoueurs extends VerticalLayout {
 
+    private final Tournoi tournoi;
     private Grid<Joueur> grid;
-    private VerticalLayout adminZone;
 
-    public PanneauJoueurs() {
+    public PanneauJoueurs(Tournoi tournoi) {
+        this.tournoi = tournoi;
+
         setPadding(true);
         setSpacing(true);
         setWidthFull();
 
-        add(new H3("Joueurs du tournoi"));
+        add(new H3("Joueurs du tournoi : " + tournoi));
 
         /* =======================
-           TABLE DES JOUEURS
+           TABLE
            ======================= */
         grid = new Grid<>(Joueur.class, false);
-
         grid.addColumn(Joueur::getSurnom).setHeader("Surnom");
         grid.addColumn(Joueur::getCategorie).setHeader("Catégorie");
         grid.addColumn(Joueur::getTaillecm).setHeader("Taille (cm)");
         grid.addColumn(Joueur::getScore).setHeader("Score");
 
-        grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         grid.setWidthFull();
         grid.setHeight("400px");
 
         add(grid);
 
         /* =======================
-           ZONE ADMIN
+           ADMIN
            ======================= */
-        adminZone = new VerticalLayout();
-        adminZone.setSpacing(true);
-        add(adminZone);
+        if (SessionInfo.adminConnected()) {
+            Button ajouter = new Button("➕ Ajouter joueur au tournoi");
+            Button supprimer = new Button("🗑 Supprimer joueur du tournoi");
 
-        refreshJoueurs();
-        refreshAdminZone();
+            add(ajouter, supprimer);
+
+            ajouter.addClickListener(e -> ouvrirAjout());
+            supprimer.addClickListener(e -> supprimerDuTournoi());
+        }
+
+        refresh();
     }
 
     /* =======================
-       RAFRAÎCHIR LES JOUEURS
+       RAFRAÎCHIR
        ======================= */
-    private void refreshJoueurs() {
+    private void refresh() {
         try (Connection con = ConnectionPool.getConnection()) {
-            List<Joueur> joueurs = Joueur.tousLesJoueur(con);
+            List<Joueur> joueurs = Joueur.joueursDuTournoi(con, tournoi);
             grid.setItems(joueurs);
-        } catch (Exception e) {
-            Notification.show(
-                "Erreur chargement joueurs : " + e.getMessage(),
-                3000,
-                Notification.Position.BOTTOM_END
-            );
+        } catch (Exception ex) {
+            Notification.show("Erreur : " + ex.getMessage());
         }
     }
 
     /* =======================
-       RAFRAÎCHIR LA ZONE ADMIN
+       AJOUT
        ======================= */
-    private void refreshAdminZone() {
-        adminZone.removeAll();
+    private void ouvrirAjout() {
+        Dialog dialog = new Dialog();
+        dialog.setWidth("400px");
 
-        if (!SessionInfo.adminConnected()) {
+        CreationJoueur form = new CreationJoueur(joueur -> {
+            try (Connection con = ConnectionPool.getConnection()) {
+
+                joueur.saveInDB(con);
+
+                try (PreparedStatement pst = con.prepareStatement(
+                        "INSERT INTO participation (idtournoi, idjoueur) VALUES (?, ?)"
+                )) {
+                    pst.setInt(1, tournoi.getId());
+                    pst.setInt(2, joueur.getId());
+                    pst.executeUpdate();
+                }
+
+                refresh();
+                dialog.close();
+
+            } catch (Exception ex) {
+                Notification.show("Erreur : " + ex.getMessage());
+            }
+        });
+
+        dialog.add(form);
+        dialog.open();
+    }
+
+    /* =======================
+       SUPPRESSION
+       ======================= */
+    private void supprimerDuTournoi() {
+        Joueur j = grid.asSingleSelect().getValue();
+        if (j == null) {
+            Notification.show("Sélectionnez un joueur");
             return;
         }
 
-        adminZone.add(new H3("Gestion des joueurs"));
-
-        Button ajouter = new Button("➕ Ajouter joueur");
-        Button supprimer = new Button("🗑 Supprimer joueur");
-
-        adminZone.add(ajouter, supprimer);
-
-        /* === AJOUTER JOUEUR === */
-        ajouter.addClickListener(e -> {
-            Dialog dialog = new Dialog();
-            dialog.setWidth("400px");
-
-            CreationJoueur form = new CreationJoueur(() -> {
-                refreshJoueurs();
-                dialog.close();
-            });
-
-            dialog.add(form);
-            dialog.open();
-        });
-
-        /* === SUPPRIMER JOUEUR === */
-        supprimer.addClickListener(e -> {
-            Joueur selection = grid.asSingleSelect().getValue();
-
-            if (selection == null) {
-                Notification.show(
-                    "Sélectionnez un joueur",
-                    2000,
-                    Notification.Position.BOTTOM_END
-                );
-                return;
+        try (Connection con = ConnectionPool.getConnection()) {
+            try (PreparedStatement pst = con.prepareStatement(
+                    "DELETE FROM participation WHERE idtournoi = ? AND idjoueur = ?"
+            )) {
+                pst.setInt(1, tournoi.getId());
+                pst.setInt(2, j.getId());
+                pst.executeUpdate();
             }
-
-            try (Connection con = ConnectionPool.getConnection()) {
-                selection.deleteInDB(con);
-
-                Notification.show(
-                    "Joueur supprimé : " + selection.getSurnom(),
-                    2000,
-                    Notification.Position.BOTTOM_END
-                );
-
-                refreshJoueurs();
-
-            } catch (Exception ex) {
-                Notification.show(
-                    "Erreur suppression : " + ex.getMessage(),
-                    3000,
-                    Notification.Position.BOTTOM_END
-                );
-            }
-        });
+            refresh();
+        } catch (Exception ex) {
+            Notification.show("Erreur : " + ex.getMessage());
+        }
     }
 }
