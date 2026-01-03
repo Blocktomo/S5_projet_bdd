@@ -2,6 +2,7 @@ package fr.insa.toto.model.GestionRH;
 
 import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
 import fr.insa.toto.model.Jeu.Joueur;
+import fr.insa.toto.model.Jeu.Ronde;
 import fr.insa.toto.model.Jeu.Terrain;
 import fr.insa.toto.model.Jeu.Tournoi;
 
@@ -26,6 +27,7 @@ public class BdDTest {
                 11
         );
         can.saveInDB(con);
+        Ronde.creerRondesVides(can, con);
 
         Tournoi tennis = new Tournoi(
                 "Tournoi Tennis Duo",
@@ -35,7 +37,8 @@ public class BdDTest {
                 2
         );
         tennis.saveInDB(con);
-
+        Ronde.creerRondesVides(tennis, con);
+        
         /* =======================
            JOUEURS CAN (44)
            ======================= */
@@ -88,6 +91,8 @@ public class BdDTest {
 
         for (Terrain t : terrains) {
             t.saveInDB(con);
+            ajouterTerrainsTournois(con, t.getId(), tennis.getId());
+            ajouterTerrainsTournois(con, t.getId(), can.getId());
         }
 
         /* =======================
@@ -118,6 +123,20 @@ public class BdDTest {
             pst.executeUpdate();
         }
     }
+    /* =======================
+       TERRAINS_TOURNOIS
+       ======================= */
+    private static void ajouterTerrainsTournois(Connection con, int idTerrain, int idTournoi)
+            throws SQLException {
+
+        try (PreparedStatement pst = con.prepareStatement(
+                "INSERT INTO terrains_tournois (idterrain, idtournoi) VALUES (?, ?)"
+        )) {
+            pst.setInt(1, idTerrain);
+            pst.setInt(2, idTournoi);
+            pst.executeUpdate();
+        }
+    }
 
     public static void main(String[] args) {
         try (Connection con = ConnectionSimpleSGBD.defaultCon()) {
@@ -126,6 +145,7 @@ public class BdDTest {
             System.out.println("✅ BdDTest V4 initialisée avec succès");
         } catch (SQLException ex) {
             throw new Error(ex);
+
         }
     }
 }
