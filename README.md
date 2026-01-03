@@ -8,13 +8,12 @@ Créer/modifier chaque classe pour que cela corresponde au diagramme UML
 - classe tournoi --?    **Extension : créer plusieurs tournois et les gérer**
 - classe matchs : les deux équipes qui s'affrontent (parmi les équipes de la ronde)
 - Rayan : classe ronde : liste de toutes les équipes de cette ronde; liste des joueurs exclus (??)
-- **classe utilisateur : classe mère dont admin, et joueur héritent. Il faut donc créer la classe admin. On peut aussi créer une classe utilisateur_standard...**
 - on doit pouvoir créer le tournoi ou simplement ronde par ronde en spécifiant si on veut des matchs séparés pour les seniors et les juniors, ou bien si on veut mélanger les deux catégories dans les matchs
 - extension sauvegarde :
 -      créer un fichier texte avec toutes les informations d'un tournoi --> pour garder une trace
 -       pouvoir lire un fichier .csv de joueurs ; peut-être aussi que ce fichier contiendra des sauvegardes sur les matchs et équipes et rondes...
 -  extension : quand on crée le tournoi à partir des joueurs, on doit pouvoir créer un tournoi avec seuls les joueurs d'une catégorie (option)
--        
+- 
 
 # menu textuel gestion bdd
 ## Ronde : 
@@ -28,9 +27,6 @@ Créer/modifier chaque classe pour que cela corresponde au diagramme UML
 
 ## Terrains : 
 - consulter la liste des matchs ayant été joués sur un terrain.
-
-## créer une classe admin et utilisateur
-- directement dans vaadin en vrai
 
 
 # VAADIN
