@@ -77,6 +77,32 @@ public class Terrain extends ClasseMiroir {
             pst.executeUpdate();
         }
     }
+    
+    public static List<Terrain> terrainsDuTournoi(Connection con, Tournoi tournoi) throws SQLException {
+        List<Terrain> res = new ArrayList<>();
+
+        try (PreparedStatement pst = con.prepareStatement(
+            """
+            SELECT ter.id, ter.nom, ter.occupe
+            FROM terrain ter
+            JOIN terrains_tournois p ON ter.id = p.idterrain
+            WHERE p.idtournoi = ?
+            """
+        )) {
+            pst.setInt(1, tournoi.getId());
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    res.add(new Terrain(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getInt("occupe")
+                    ));
+                }
+            }
+        }
+        return res;
+    }
 
     public void deleteInDB(Connection con) throws SQLException {
         if (this.getId() == -1) throw new ClasseMiroir.EntiteNonSauvegardee();

@@ -12,6 +12,8 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.*;
 import com.vaadin.flow.router.Route;
 import fr.insa.beuvron.utils.database.ConnectionPool;
+import fr.insa.toto.model.GestionRH.BdDTest;
+import fr.insa.toto.model.GestionRH.GestionBdD;
 import fr.insa.toto.model.Jeu.Tournoi;
 import fr.insa.toto.webui.ComposantsIndividuels.EditionTournoiDialog;
 import fr.insa.toto.webui.ComposantsIndividuels.ModeEditionTournoi;
@@ -64,7 +66,31 @@ public class Acceuil extends VerticalLayout {
                 getUI().ifPresent(ui -> ui.getPage().reload());
             });
         }
+        
+        /* =======================
+           RAZ BDD
+           ======================= */
+        Button raz_bdd = new Button("RAZ_BDD");
+        raz_bdd.getStyle()
+                .set("cursor", "pointer")
+                .set("position", "absolute")
+                .set("top", "50px")
+                .set("right", "20px");
+        add(raz_bdd);
+        raz_bdd.addClickListener(e -> {
+            try (Connection con = ConnectionPool.getConnection()) {
+                GestionBdD.razBdd(con);
+                Notification.show("RAZ BDD effectué.");
+                System.out.println("razBdd effectué.");
+                BdDTest.createBdDTestV4(con);
+                Notification.show(" Init createBdDTestV4 effectuée");
 
+            } catch (Exception ex) {
+                Notification.show("Erreur pour la RAZ BDD : " + ex.getMessage());
+                System.out.println("Erreur pour la RAZ BDD : " + ex.getMessage());
+            }
+        });
+        
         /* =======================
            INFO UTILISATEUR
            ======================= */
