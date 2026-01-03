@@ -68,7 +68,8 @@ public class GestionBdD {
             st.executeUpdate("""
                 CREATE TABLE ronde (
                     idronde INTEGER AUTO_INCREMENT PRIMARY KEY,
-                    terminer INTEGER CHECK (terminer = 0 OR terminer = 1)
+                    terminer INTEGER CHECK (terminer = 0 OR terminer = 1),
+                    idtournoi INTEGER not null
                 )
             """);
 
@@ -82,7 +83,7 @@ public class GestionBdD {
                 )
             """);
 
-            /* ========= COMPOSITION ========= */
+            /* ========= COMPOSITION (equipe-joueurs) ========= */
             st.executeUpdate("""
                 CREATE TABLE composition (
                     idequipe INTEGER NOT NULL,
@@ -99,6 +100,17 @@ public class GestionBdD {
                     id INTEGER AUTO_INCREMENT PRIMARY KEY,
                     nom VARCHAR(30) NOT NULL,
                     occupe INTEGER DEFAULT 0 CHECK (occupe = 0 OR occupe = 1)
+                )
+            """);
+            
+            /* ======== TERRAINS_TOURNOIS ===============*/ //bon je n'ai pas trouvé de meilleur nom
+            st.executeUpdate("""
+                CREATE TABLE terrains_tournois ( 
+                    idtournoi INTEGER NOT NULL,
+                    idterrain INTEGER NOT NULL,
+                    PRIMARY KEY (idtournoi, idterrain),
+                    FOREIGN KEY (idtournoi) REFERENCES tournoi(id),
+                    FOREIGN KEY (idterrain) REFERENCES terrain(id)
                 )
             """);
 
@@ -132,10 +144,12 @@ public class GestionBdD {
             try { st.executeUpdate("DROP TABLE equipe"); } catch (SQLException e) {}
             try { st.executeUpdate("DROP TABLE ronde"); } catch (SQLException e) {}
             try { st.executeUpdate("DROP TABLE participation"); } catch (SQLException e) {}
-            try { st.executeUpdate("DROP TABLE terrain"); } catch (SQLException e) {}
+            try { st.executeUpdate("DROP TABLE terrains_tournois"); } catch (SQLException e) {}            
+            try { st.executeUpdate("DROP TABLE terrain");} catch (SQLException e) {}
             try { st.executeUpdate("DROP TABLE joueur"); } catch (SQLException e) {}
             try { st.executeUpdate("DROP TABLE utilisateur"); } catch (SQLException e) {}
-            try { st.executeUpdate("DROP TABLE tournoi"); } catch (SQLException e) {}
+            try { st.executeUpdate("DROP TABLE tournoi"); } catch (SQLException e) { e.printStackTrace();} //afficher l'ensemble des erreurus SQL
+            
         }
     }
 
