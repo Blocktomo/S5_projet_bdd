@@ -68,6 +68,17 @@ public class Ronde extends ClasseMiroir implements Serializable {
         pst.executeUpdate();
         return pst;
     }
+    
+    /**
+     * cette fonction crée toutes les rondes du tournoi (nbRondes : attribut du tournoi)
+     */
+    public static void creerRondesVides(Tournoi tournoi, Connection con) throws SQLException{
+        int nbrondes = tournoi.getNbDeRondes();
+        for (int i=0; i < nbrondes; i++){
+            Ronde newRonde = new Ronde(0, tournoi);
+            newRonde.saveInDB(con);
+        }
+    }
 
     /* =======================
        REQUÊTES STATIQUES
@@ -112,12 +123,12 @@ public class Ronde extends ClasseMiroir implements Serializable {
 
         try (PreparedStatement pst = con.prepareStatement(
                 """
-                SELECT r.id, r.terminer,
+                SELECT r.idronde, r.terminer,
                        t.id AS tid, t.nom, t.annee,
                        t.nb_de_rondes, t.duree_match, t.nb_joueurs_equipe
                 FROM ronde r
                 JOIN tournoi t ON r.idtournoi = t.id
-                ORDER BY r.id
+                ORDER BY r.idronde
                 """
         )) {
             try (ResultSet rs = pst.executeQuery()) {
@@ -132,7 +143,7 @@ public class Ronde extends ClasseMiroir implements Serializable {
                     );
 
                     res.add(new Ronde(
-                            rs.getInt("id"),
+                            rs.getInt("idronde"),
                             rs.getInt("terminer"),
                             tournoi
                     ));
@@ -141,7 +152,36 @@ public class Ronde extends ClasseMiroir implements Serializable {
         }
         return res;
     }
+    public static List<Ronde> rondesDuTournoi(Connection con, Tournoi tournoi) throws SQLException {
+        List<Ronde> res = new ArrayList<>();
 
+        try (PreparedStatement pst = con.prepareStatement(
+            """
+            SELECT ron.idronde, ron.terminer, ron.idtournoi
+            FROM ronde ron
+            WHERE ron.idtournoi= ? 
+            """
+        )) {
+            pst.setInt(1, tournoi.getId());
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    int t_id = rs.getInt("idtournoi");
+                    Tournoi tournoiParId = Tournoi.chercherParId(con, t_id);
+                    Ronde newR = new Ronde(
+                        rs.getInt("idronde"),
+                        rs.getInt("terminer"),
+                        tournoiParId
+                    );
+                        
+                    res.add(newR);
+                }
+            }
+        }
+        return res;
+    }
+
+        
     /* =======================
        SUPPRESSION
        ======================= */
@@ -174,6 +214,9 @@ public class Ronde extends ClasseMiroir implements Serializable {
        GETTERS / SETTERS
        ======================= */
 
+    public int getIdronde(){
+        return this.getId();
+    }
     public int getTerminer() {
         return terminer;
     }
