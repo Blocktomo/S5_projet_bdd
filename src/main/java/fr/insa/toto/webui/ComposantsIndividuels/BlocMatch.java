@@ -8,6 +8,8 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import fr.insa.beuvron.utils.database.ConnectionPool;
@@ -21,13 +23,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class BlocMatch extends VerticalLayout {
    
     private final Matchs matchs;
     private VerticalLayout pageInfos;
-    private List<Ronde> rondesTournoi;
 
     public BlocMatch(Matchs matchs) throws SQLException {
         this.matchs = matchs;
@@ -44,11 +47,9 @@ public class BlocMatch extends VerticalLayout {
             add(titreTerrain, titreIdMatch);
 
             pageInfos = new VerticalLayout();
-
-            
             
             /*=============
-            pagesInfos : contient les ifos sur l'equipe
+            pagesInfos : contient les infos sur l'equipe
             ==========*/
             Equipe equipeA = Equipe.chercherParId(con, matchs.getIdEquipeA());
             Equipe equipeB = Equipe.chercherParId(con, matchs.getIdEquipeB());
@@ -62,9 +63,20 @@ public class BlocMatch extends VerticalLayout {
             pageInfos.add(new Span(ligne1Formate));
             pageInfos.add(new Span(ligne2Formate));
             
+            add(pageInfos);
+            
+            /*==============
+            modification des scores
+            =============*/
             Button boutonModifScore = new Button("Modifier les scores");
             add(boutonModifScore);
-            boutonModifScore.addClickListener(e ->modifScore());
+            boutonModifScore.addClickListener(e ->{
+                try {
+                    modifScore(con, equipeA, equipeB);
+                } catch (SQLException ex) {
+                    Notification.show(ex.getMessage());
+                }
+            });
             
 //            this.refresh();
         }catch (Exception ex){
@@ -72,9 +84,58 @@ public class BlocMatch extends VerticalLayout {
         }
     }
 
-    private void modifScore(){
+    private void modifScore(Connection con, Equipe equipeA, Equipe equipeB)throws SQLException{
         Dialog dialogModifScore = new Dialog();
+        VerticalLayout contenu = new VerticalLayout();
         Notification.show("action : modif score");
+        
+        HorizontalLayout deuxNumberField = new HorizontalLayout();
+        
+        contenu.add(new H3("modifier les scores"));
+        contenu.add(deuxNumberField);
+        
+        IntegerField scoreEquipeA = new IntegerField();
+        IntegerField scoreEquipeB = new IntegerField();
+        deuxNumberField.add(scoreEquipeA, scoreEquipeB);
+        
+        scoreEquipeA.setLabel("Equipe A");
+        scoreEquipeA.setValue(equipeA.getScore());
+        scoreEquipeA.setRequired(true);
+        
+        scoreEquipeB.setLabel("Equipe B");
+        scoreEquipeB.setValue(equipeB.getScore());
+        scoreEquipeB.setRequired(true);
+        
+        Button valider = new Button();
+        contenu.add(valider);
+        valider.addClickListener(e->{
+            try{
+                if (scoreEquipeA.isEmpty() || scoreEquipeB.isEmpty()) {
+                Notification.show("Merci de remplir les champs");
+                return;
+                }
+
+                int  newScoreA;
+                int  newScoreB;
+
+                newScoreA = scoreEquipeA.getValue();
+                newScoreB = scoreEquipeB.getValue();
+
+                equipeA.setScore(newScoreA);
+                equipeB.setScore(newScoreB);
+                equipeA.sauvegarderScore(con);
+                equipeB.sauvegarderScore(con);
+                
+                Notification.show(String.format("nouveaux scores : A : %s, B : %s",equipeA.getScore(), equipeB.getScore()));
+                dialogModifScore.close();
+            }catch (SQLException ex){
+                Notification.show(ex.getMessage());
+            }
+        });
+        
+        dialogModifScore.add(contenu);
+        
+        dialogModifScore.open();
     }
 //    private void refresh() {
 //        try (Connection con = ConnectionPool.getConnection()) {
@@ -86,10 +147,5 @@ public class BlocMatch extends VerticalLayout {
 //        }
 //    }
 
-    /* =======================
-       DIALOG INITIALISER LA RONDE
-       ======================= */
-    private void initialiserLaRonde() {
-        Notification.show("action : initialiser la ronde");
-    }
+    
 }
