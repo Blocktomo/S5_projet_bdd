@@ -8,15 +8,11 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import fr.insa.beuvron.utils.database.ConnectionPool;
-import fr.insa.toto.model.Jeu.Ronde;
-import fr.insa.toto.model.Jeu.Tournoi;
+import fr.insa.toto.model.Jeu.*;
 import fr.insa.toto.webui.session.SessionInfo;
-import fr.insa.toto.model.Jeu.Joueur;
-import fr.insa.toto.model.Jeu.Equipe;
-import fr.insa.toto.model.Jeu.Matchs;
-
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +55,7 @@ public class PanneauRonde extends VerticalLayout {
 
         if (SessionInfo.adminConnected()) {
             Button initRonde = new Button("⚙ Initialiser la ronde");
+            initRonde.addClickListener(e -> initialiserRonde());
             add(new HorizontalLayout(voirRonde, initRonde));
         } else {
             add(voirRonde);
@@ -94,7 +91,82 @@ public class PanneauRonde extends VerticalLayout {
     }
 
     /* =======================
-       CLASSE INTERNE D’AFFICHAGE
+       INITIALISATION RONDE
+       ======================= */
+private void initialiserRonde() {
+
+    RondeAffichage sel = grid.asSingleSelect().getValue();
+
+    if (sel == null) {
+        Notification.show("Sélectionnez une ronde");
+        return;
+    }
+
+    Ronde ronde = sel.getRonde();
+
+    if (ronde.getTerminer() == 1) {
+        Notification.show("Cette ronde est déjà initiée");
+        return;
+    }
+
+    try (Connection con = ConnectionPool.getConnection()) {
+
+        /* 1️⃣ Récupérer UNIQUEMENT les joueurs du tournoi */
+        List<Joueur> joueurs = Joueur.joueursDuTournoi(con, tournoi);
+
+        int tailleEquipe = tournoi.getNbJoueursEquipe();
+
+        if (joueurs.size() < tailleEquipe * 2) {
+            Notification.show("Pas assez de joueurs pour créer des équipes");
+            return;
+        }
+
+        /* 2️⃣ Calculer nombre d'équipes et de matchs */
+        int nbEquipes = joueurs.size() / tailleEquipe;
+        int nbMatchs = nbEquipes / 2;
+
+        /* 3️⃣ Vérifier terrains disponibles */
+        List<Terrain> terrains = Terrain.terrainsDuTournoi(con, tournoi);
+        long terrainsLibres = terrains.stream()
+                .filter(t -> t.getOccupe() == 0)
+                .count();
+
+        if (terrainsLibres < nbMatchs) {
+            Notification.show(
+                    "Pas assez de terrains libres (" + terrainsLibres +
+                    ") pour " + nbMatchs + " matchs"
+            );
+            return;
+        }
+
+        /* 4️⃣ Créer les équipes (via la logique métier existante) */
+        List<Equipe> equipes =
+        Equipe.creerEquipesPourTournoi(con, ronde, tournoi);
+
+        /* 5️⃣ Créer les matchs + associer terrains */
+        Matchs.creerMatchsAuto(con, ronde, equipes);
+
+        /* 6️⃣ Marquer la ronde comme initiée */
+        try (var pst = con.prepareStatement(
+                "UPDATE ronde SET terminer = 1 WHERE idronde = ?"
+        )) {
+            pst.setInt(1, ronde.getIdronde());
+            pst.executeUpdate();
+        }
+
+        Notification.show("Ronde initialisée avec succès");
+        refresh();
+
+    } catch (Exception ex) {
+        Notification.show("Erreur initialisation : " + ex.getMessage());
+        ex.printStackTrace();
+    }
+}
+
+
+
+    /* =======================
+       CLASSE INTERNE AFFICHAGE
        ======================= */
     private static class RondeAffichage {
 

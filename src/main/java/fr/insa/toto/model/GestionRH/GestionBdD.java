@@ -3,7 +3,7 @@ package fr.insa.toto.model.GestionRH;
 import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;//gyutuf
+import java.sql.Statement;
 
 /**
  * Gestion de la création et suppression du schéma de la base de données.

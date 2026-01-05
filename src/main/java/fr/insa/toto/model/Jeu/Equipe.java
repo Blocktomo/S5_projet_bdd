@@ -218,6 +218,62 @@ public class Equipe extends ClasseMiroir implements Serializable {
             pst.executeUpdate();
         }
     }
+public static List<Equipe> creerEquipesPourTournoi(
+        Connection con,
+        Ronde ronde,
+        Tournoi tournoi
+) throws SQLException {
+
+    int tailleEquipe = tournoi.getNbJoueursEquipe();
+
+    // ✅ UNIQUEMENT joueurs du tournoi
+    List<Joueur> joueurs = Joueur.joueursDuTournoi(con, tournoi);
+
+    if (joueurs.size() < tailleEquipe * 2) {
+        throw new SQLException("Pas assez de joueurs dans le tournoi");
+    }
+
+    Collections.shuffle(joueurs);
+
+    List<Equipe> equipes = new ArrayList<>();
+    int nbEquipes = joueurs.size() / tailleEquipe;
+
+    try {
+        con.setAutoCommit(false);
+
+        try (PreparedStatement pstCompo = con.prepareStatement(
+                "INSERT INTO composition (idequipe, idjoueur) VALUES (?, ?)"
+        )) {
+
+            int index = 0;
+
+            for (int i = 0; i < nbEquipes; i++) {
+
+                Equipe e = new Equipe(0, ronde);
+                e.saveInDB(con);
+                equipes.add(e);
+
+                for (int j = 0; j < tailleEquipe; j++) {
+                    Joueur joueur = joueurs.get(index++);
+                    pstCompo.setInt(1, e.getId());
+                    pstCompo.setInt(2, joueur.getId());
+                    pstCompo.executeUpdate();
+                }
+            }
+        }
+
+        con.commit();
+
+    } catch (SQLException ex) {
+        con.rollback();
+        throw ex;
+    } finally {
+        con.setAutoCommit(true);
+    }
+
+    return equipes;
+}
+
 
     /* =======================
        GETTERS
