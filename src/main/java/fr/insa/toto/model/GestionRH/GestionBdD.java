@@ -68,7 +68,7 @@ public class GestionBdD {
             st.executeUpdate("""
                 CREATE TABLE ronde (
                     idronde INTEGER AUTO_INCREMENT PRIMARY KEY,
-                    terminer INTEGER CHECK (terminer = 0 OR terminer = 1),
+                    terminer INTEGER CHECK (terminer = 0 OR terminer = 1 OR terminer = 2),
                     idtournoi INTEGER not null
                 )
             """);

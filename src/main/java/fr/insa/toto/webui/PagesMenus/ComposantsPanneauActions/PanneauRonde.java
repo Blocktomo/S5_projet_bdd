@@ -53,6 +53,26 @@ public class PanneauRonde extends VerticalLayout {
            ======================= */
         Button voirRonde = new Button("📂 Voir la ronde");
 
+        voirRonde.addClickListener(e -> {
+            RondeAffichage sel = grid.asSingleSelect().getValue();
+            if (sel == null) {
+                Notification.show("Sélectionnez une ronde");
+                return;
+            }
+
+            getUI().ifPresent(ui -> {
+                // 🔥 Fermer le Dialog AVANT navigation
+                getParent()
+                    .filter(p -> p instanceof com.vaadin.flow.component.dialog.Dialog)
+                    .ifPresent(p -> ((com.vaadin.flow.component.dialog.Dialog) p).close());
+
+                ui.navigate("ronde/" + sel.getRonde().getId());
+            });
+        });
+
+
+
+
         if (SessionInfo.adminConnected()) {
             Button initRonde = new Button("⚙ Initialiser la ronde");
             initRonde.addClickListener(e -> initialiserRonde());
@@ -68,27 +88,37 @@ public class PanneauRonde extends VerticalLayout {
     /* =======================
        RAFRAÎCHIR
        ======================= */
+
     private void refresh() {
-        try (Connection con = ConnectionPool.getConnection()) {
+    try (Connection con = ConnectionPool.getConnection()) {
 
-            List<Ronde> rondes = Ronde.rondesDuTournoi(con, tournoi);
-            data = new ArrayList<>();
+        List<Ronde> rondes = Ronde.rondesDuTournoi(con, tournoi);
+        data = new ArrayList<>();
 
-            int num = 1;
-            for (Ronde r : rondes) {
-                data.add(new RondeAffichage(
-                        num++,
-                        r.getTerminer() == 0 ? "non initiée" : "initiée",
-                        r
-                ));
+        int num = 1;
+        for (Ronde r : rondes) {
+
+            String etat;
+            switch (r.getTerminer()) {
+                case 0 -> etat = "non initiée";
+                case 1 -> etat = "en cours";
+                case 2 -> etat = "terminée";
+                default -> etat = "état inconnu";
             }
 
-            grid.setItems(data);
-
-        } catch (Exception ex) {
-            Notification.show("Erreur chargement rondes : " + ex.getMessage());
+            data.add(new RondeAffichage(
+                    num++,
+                    etat,
+                    r
+            ));
         }
+
+        grid.setItems(data);
+
+    } catch (Exception ex) {
+        Notification.show("Erreur chargement rondes : " + ex.getMessage());
     }
+}
 
     /* =======================
        INITIALISATION RONDE

@@ -84,39 +84,42 @@ public class Ronde extends ClasseMiroir implements Serializable {
        REQUÊTES STATIQUES
        ======================= */
 
-    public static Ronde chercherRondeParId(Connection con, int id) throws SQLException {
-        try (PreparedStatement pst = con.prepareStatement(
-                """
-                SELECT r.id, r.terminer,
-                       t.id AS tid, t.nom, t.annee,
-                       t.nb_de_rondes, t.duree_match, t.nb_joueurs_equipe
-                FROM ronde r
-                JOIN tournoi t ON r.idtournoi = t.id
-                WHERE r.id = ?
-                """
-        )) {
-            pst.setInt(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    Tournoi tournoi = new Tournoi(
-                            rs.getInt("tid"),
-                            rs.getString("nom"),
-                            rs.getInt("annee"),
-                            rs.getInt("nb_de_rondes"),
-                            rs.getInt("duree_match"),
-                            rs.getInt("nb_joueurs_equipe")
-                    );
+public static Ronde chercherRondeParId(Connection con, int idRonde) throws SQLException {
+    try (PreparedStatement pst = con.prepareStatement(
+            """
+            SELECT r.idronde, r.terminer,
+                   t.id AS tid, t.nom, t.annee,
+                   t.nb_de_rondes, t.duree_match, t.nb_joueurs_equipe
+            FROM ronde r
+            JOIN tournoi t ON r.idtournoi = t.id
+            WHERE r.idronde = ?
+            """
+    )) {
+        pst.setInt(1, idRonde);
 
-                    return new Ronde(
-                            rs.getInt("id"),
-                            rs.getInt("terminer"),
-                            tournoi
-                    );
-                }
+        try (ResultSet rs = pst.executeQuery()) {
+            if (rs.next()) {
+
+                Tournoi tournoi = new Tournoi(
+                        rs.getInt("tid"),
+                        rs.getString("nom"),
+                        rs.getInt("annee"),
+                        rs.getInt("nb_de_rondes"),
+                        rs.getInt("duree_match"),
+                        rs.getInt("nb_joueurs_equipe")
+                );
+
+                return new Ronde(
+                        rs.getInt("idronde"),
+                        rs.getInt("terminer"),
+                        tournoi
+                );
             }
         }
-        return null;
     }
+    return null;
+}
+
 
     public static List<Ronde> toutesLesRondes(Connection con) throws SQLException {
         List<Ronde> res = new ArrayList<>();
