@@ -1,5 +1,6 @@
 package fr.insa.toto.model.Jeu;
 
+import fr.insa.beuvron.utils.ConsoleFdB;
 import fr.insa.beuvron.utils.database.ClasseMiroir;
 import java.io.Serializable;
 import java.sql.*;
@@ -13,24 +14,15 @@ import java.util.List;
 public class Tournoi extends ClasseMiroir implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    /* =======================
-       ATTRIBUTS
-       ======================= */
+    
     private String nom;
     private int annee;
     private int nbDeRondes;
     private int dureeMatch;
     private int nbJoueursEquipe;
+    private int nbJoueursMax; // Nombre maximum de joueurs (0 = illimité)
 
-    /** Nombre maximum de joueurs (0 = illimité) */
-    private int nbJoueursMax;
-
-    /* =======================
-       CONSTRUCTEURS
-       ======================= */
-
-    /** Nouveau tournoi (avec limite) */
+    /** Nouveau tournoi */
     public Tournoi(String nom, int annee, int nbDeRondes,
                    int dureeMatch, int nbJoueursEquipe, int nbJoueursMax) {
         super();
@@ -42,7 +34,7 @@ public class Tournoi extends ClasseMiroir implements Serializable {
         this.nbJoueursMax = nbJoueursMax;
     }
 
-    /** Compatibilité ancienne version (illimité) */
+    /** Compatibilité ancienne version (nbjoueurs illimité) */
     public Tournoi(String nom, int annee, int nbDeRondes,
                    int dureeMatch, int nbJoueursEquipe) {
         this(nom, annee, nbDeRondes, dureeMatch, nbJoueursEquipe, 0);
@@ -61,7 +53,7 @@ public class Tournoi extends ClasseMiroir implements Serializable {
     }
 
     /* =======================
-       PERSISTENCE
+       METHODES DB
        ======================= */
 
     @Override
@@ -109,6 +101,7 @@ public class Tournoi extends ClasseMiroir implements Serializable {
         }
     }
 
+    
     /* =======================
        REQUÊTES STATIQUES
        ======================= */
@@ -169,10 +162,9 @@ public class Tournoi extends ClasseMiroir implements Serializable {
     }
 
     /* =======================
-       MÉTHODES MÉTIER (⭐ NOUVEAU)
-       ======================= */
+       MÉTHODES SUR INSTANCE
+       ======================= */ 
 
-    /** Nombre de joueurs inscrits au tournoi */
     public int getNbJoueursInscrits(Connection con) throws SQLException {
         return Joueur.joueursDuTournoi(con, this).size();
     }
@@ -185,13 +177,11 @@ public class Tournoi extends ClasseMiroir implements Serializable {
         return nbJoueursMax - getNbJoueursInscrits(con);
     }
 
-    /** Le tournoi est-il complet ? */
     public boolean isComplet(Connection con) throws SQLException {
         if (nbJoueursMax <= 0) return false;
         return getNbJoueursInscrits(con) >= nbJoueursMax;
     }
 
-    /** Le tournoi a-t-il une limite de joueurs ? */
     public boolean hasLimiteJoueurs() {
         return nbJoueursMax > 0;
     }
@@ -226,4 +216,81 @@ public class Tournoi extends ClasseMiroir implements Serializable {
     public String toString() {
         return nom + " (" + annee + ")";
     }
+    
+    
+    /* ====================
+    pour MainConsole (utilisation désuète)
+    ======================= */
+    
+    public void modifTournoi(Connection con) throws SQLException {
+        boolean sortirDeLa = false;
+        while (!sortirDeLa){
+            int i=1;
+
+            int choix = ConsoleFdB.entreeEntier("que souhaitez-vous modifier?\n"
+                    + (i++) + ") le nom ("+this.getNom()+") \n"
+                    + (i++) + ") l\'annee du tournoi ("+this.getAnnee()+") \n"
+                    + (i++) + ") le nombres de rondes ("+this.getNbDeRondes() +") \n"
+                    + (i++) + ") la duree des matchs (" + this.getDureeMatch() + ") \n"
+                    + (i++) + ") le nombre de joueurs par equipe (" + this.getNbJoueursEquipe() + ") \n"
+                    + "0) retour en arrière"
+                    ); 
+            try {
+                con.setAutoCommit(false);
+                PreparedStatement commit_modif = con.prepareStatement(
+                    "update tournoi "
+                            + "set ? = ?");
+                String nom_colonne = "";
+                String res_string = "";
+                int res_int;
+                switch (choix) {
+                        case 1 :  
+                            nom_colonne = "nom";
+                            res_string = ConsoleFdB.entreeString("nom du tournoi : ");
+                            this.setNom(res_string);
+                            commit_modif.setString(2, res_string);
+                            break;
+                        case 2 : 
+                            nom_colonne = "annee";
+                            res_int = ConsoleFdB.entreeInt("quelle est l'année de ce tournoi?");
+                            this.setAnnee(res_int);
+                            commit_modif.setInt(2, res_int);
+                            break;
+                        case 3 : 
+                            nom_colonne = "nb_de_rondes";
+                            res_int = ConsoleFdB.entreeInt("combien de rondes pour ce tournoi? Votre choix :  ");
+                            this.setNbDeRondes(res_int);
+                            commit_modif.setInt(2, res_int);    
+                            break;
+                        case 4 : 
+                            nom_colonne = "duree_match";
+                            res_int = ConsoleFdB.entreeInt("combien de temps durent les matchs (nombre entier, donc en minutes). Votre choix : ");
+                            this.setDureeMatch(res_int);
+                            commit_modif.setInt(2, res_int);
+                            break;
+                        case 5 : 
+                            nom_colonne = "nb_joueurs_equipe";
+                            res_int = ConsoleFdB.entreeInt("combien de joueurs par équipe? Votre choix : ");
+                            this.setNbJoueursEquipe(res_int);
+                            commit_modif.setInt(2, res_int);
+                            break;
+                        case 0 : sortirDeLa=true;
+                            break;
+                        default : sortirDeLa=true; break;
+                }
+                if (sortirDeLa==true){
+                    con.rollback();
+                }else{ //on ne fait le commit que si tout s'est bien passé.
+                commit_modif.setString(1, nom_colonne);
+                con.commit();
+                }
+            }catch (SQLException ex){
+                con.rollback();
+                throw new Error(ex) ;
+            }finally{
+                con.setAutoCommit(true);
+            }
+        }
+    }
+    
 }

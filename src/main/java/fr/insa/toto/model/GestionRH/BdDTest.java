@@ -20,14 +20,14 @@ public class BdDTest {
            TOURNOIS
            ======================= */
 
-        // 🔴 CAN : volontairement FULL (44 inscrits / 32 max)
+        // tournoi CAN : volontairement FULL (44 inscrits / 32 max)
         Tournoi can = new Tournoi(
                 "Tournoi CAN",
                 2025,
                 10,
                 90,
                 11,
-                44   // 🔥 nb_joueurs_max
+                44   // nb_joueurs_max
         );
         can.saveInDB(con);
         Ronde.creerRondesVides(can, con);
@@ -58,15 +58,14 @@ public class BdDTest {
         Beatmaking.saveInDB(con);
         Ronde.creerRondesVides(Beatmaking, con);
 
-     // 🟡 Tennis Duo : pile FULL (12 / 12)
-        
+        // Tennis Duo : FULL (12 / 12)
         Tournoi tennis = new Tournoi(
                 "Tournoi Tennis Duo",
                 2027,
                 3,
                 60,
                 2,
-                12   // 🔥 nb_joueurs_max
+                12   //nb_joueurs_max
         );
         tennis.saveInDB(con);
         Ronde.creerRondesVides(tennis, con);
@@ -120,6 +119,8 @@ public class BdDTest {
         /* =======================
            JOUEURS CAN (44)
            ======================= */
+           
+        //JOUEURS CAN (44)
         List<Joueur> joueursCAN = new ArrayList<>();
 
         for (int i = 1; i <= 40; i++) {
@@ -137,9 +138,8 @@ public class BdDTest {
             ajouterParticipation(con, j.getId(), can.getId());
         }
 
-        /* =======================
-           JOUEURS TENNIS (12)
-           ======================= */
+        
+        //JOUEURS TENNIS (12)
         List<Joueur> joueursTennis = new ArrayList<>();
 
         for (int i = 1; i <= 11; i++) {
@@ -157,9 +157,8 @@ public class BdDTest {
             ajouterParticipation(con, j.getId(), tennis.getId());
         }
 
-        /* =======================
-           TERRAINS
-           ======================= */
+     
+        //TERRAINS
         List<Terrain> terrains = List.of(
                 new Terrain("Parc des Princes"),
                 new Terrain("Stade Municipal"),
@@ -187,9 +186,7 @@ public class BdDTest {
             ajouterTerrainsTournois(con, t.getId(), can.getId());
         }
 
-        /* =======================
-           UTILISATEURS
-           ======================= */
+        //UTILISATEURS
         List<Utilisateur> utilisateurs = List.of(
                 new Utilisateur("thomas", "insa67", 1),
                 new Utilisateur("Ali", "insa67", 1),
@@ -201,9 +198,7 @@ public class BdDTest {
         }
     }
 
-    /* =======================
-       PARTICIPATION
-       ======================= */
+    //PARTICIPATION
     private static void ajouterParticipation(Connection con, int idJoueur, int idTournoi)
             throws SQLException {
 
@@ -216,9 +211,7 @@ public class BdDTest {
         }
     }
 
-    /* =======================
-       TERRAINS_TOURNOIS
-       ======================= */
+    //TERRAINS_TOURNOIS
     private static void ajouterTerrainsTournois(Connection con, int idTerrain, int idTournoi)
             throws SQLException {
 
@@ -229,16 +222,14 @@ public class BdDTest {
             pst.setInt(2, idTournoi);
             pst.executeUpdate();
         }
-    }
+    } 
 
-    /* =======================
-       MAIN (TEST LOCAL)
-       ======================= */
+    //MAIN (TEST LOCAL)
     public static void main(String[] args) {
         try (Connection con = ConnectionSimpleSGBD.defaultCon()) {
             GestionBdD.razBdd(con);
             createBdDTestV4(con);
-            System.out.println("✅ BdDTest V4 initialisée avec succès");
+            System.out.println("BdDTest V4 initialisée avec succès");
         } catch (SQLException ex) {
             throw new Error(ex);
         }

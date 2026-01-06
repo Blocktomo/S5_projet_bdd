@@ -28,7 +28,7 @@ public class BlocMatch extends VerticalLayout {
     private Equipe equipeA;
     private Equipe equipeB;
 
-    private Span scoreSpan; // 🔴 IMPORTANT : pour mise à jour dynamique
+    private Span scoreSpan;
 
     public BlocMatch(Matchs match, boolean rondeTerminee) {
 
@@ -71,9 +71,13 @@ public class BlocMatch extends VerticalLayout {
             HorizontalLayout nomsEquipes = new HorizontalLayout();
             nomsEquipes.add(buttonEquipeA, new Span(" vs "),buttonEquipeB);
             
+            
+            /*==============
+            Ajout d'une fenêtre pop up avec la liste des jouers d'une équipe
+            */
             VerticalLayout joueursEquipeA = new PanneauJoueursEquipe(this.equipeA, "A");
             
-            VerticalLayout joueursEquipeB = new PanneauJoueursEquipe(this.equipeB, "A");
+            VerticalLayout joueursEquipeB = new PanneauJoueursEquipe(this.equipeB, "B");
             
             Popover contenuEquipeA = new Popover();
             contenuEquipeA.setWidth("400px");

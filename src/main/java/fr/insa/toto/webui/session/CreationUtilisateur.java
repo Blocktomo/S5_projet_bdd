@@ -18,11 +18,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- *ceci est un FormLayout : c'est un "composant individuel" que l'on peut ajouter sur une page web
- * Par "composant individuel", on entend que c'est un élément, un bloc, qui peut être ajouté n'import où
- *
- */
+
 public class CreationUtilisateur extends FormLayout {
 
     private TextField surnom;
@@ -62,7 +58,6 @@ public class CreationUtilisateur extends FormLayout {
             Notification.show("Problème : " + ex.getLocalizedMessage());
         }
         UI.getCurrent().refreshCurrentRoute(true);
-        //TODO : problème 22/12/2025 : il semble que la BdD en ligne ne se mette pas réellement à jour lorsqu'on clique sur "save"... lorsqu'on consulte la BBD rien ne se passe
     }
 public String getSurnomValue() {
     return surnom.getValue();

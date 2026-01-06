@@ -29,31 +29,7 @@ voir cet article aussi pour régler le problème sur mac
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
 
     public static void main(String[] args) {
-        // seulement si bdd h2 en memoire
-        
-//        Connection con = null;
-//        try {
-//            con = ConnectionSimpleSGBD.defaultCon();
-//            System.out.println("Connection OK");
-//        } catch (SQLException ex) {
-//            System.out.println("Problème de connection : " + ex.getLocalizedMessage());
-//            throw new Error(ex);
-//        }
-
-     /* try (Connection con = ConnectionPool.getConnection()) {
-            GestionBdD.razBdd(con);
-            BdDTest.createBdDTestV4(con);
-        } catch (SQLException ex) {
-            throw new Error(ex);
-       }*/
- 
-//        try{
-//            GestionBdD.razBdd(con);
-//            System.out.print("the raz was done");
-//            BdDTest.createBdDTestV4(con);
-//        } catch (SQLException ex) {
-//            throw new Error(ex);
-//        }
+       
         SpringApplication.run(Application.class, args);
     }
 

@@ -96,18 +96,14 @@ public class PageRonde extends VerticalLayout implements HasUrlParameter<Integer
         }
     }
 
-    /* =======================
-       TERMINER LA RONDE
-       ======================= */
+    //TERMINER LA RONDE
 private void terminerRonde() {
 
     try (Connection con = ConnectionPool.getConnection()) {
 
         con.setAutoCommit(false);
 
-        /* =======================
-           1️⃣ ATTRIBUER LES SCORES AUX JOUEURS
-           ======================= */
+        //on attribue le score aux joueurs
         List<Equipe> equipes = Equipe.toutesLesEquipes(con);
 
         for (Equipe e : equipes) {
@@ -116,21 +112,17 @@ private void terminerRonde() {
             }
         }
 
-        /* =======================
-           2️⃣ LIBÉRER LES TERRAINS
-           ======================= */
+        //LIBÉRER LES TERRAINS
         List<Matchs> matchs = Matchs.tousLesMatchsDeLaRonde(con, ronde.getId());
 
         for (Matchs m : matchs) {
             Terrain t = m.getTerrain();
             if (t != null) {
-                t.setOccupe(con, false); // 🔓 terrain libre
+                t.setOccupe(con, false); 
             }
         }
 
-        /* =======================
-           3️⃣ MARQUER LA RONDE TERMINÉE
-           ======================= */
+        //MARQUER LA RONDE TERMINÉE
                 try (PreparedStatement pst = con.prepareStatement(
                 "UPDATE ronde SET terminer = 2 WHERE idronde = ?")) {
             pst.setInt(1, ronde.getIdronde());

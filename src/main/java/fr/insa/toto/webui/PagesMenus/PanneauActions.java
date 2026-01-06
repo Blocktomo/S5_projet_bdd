@@ -87,9 +87,7 @@ podium.addClickListener(e -> {
 
 add(podium);}
 
-    /* =======================
-       ÉTAT TOURNOI (copie logique Acceuil)
-       ======================= */
+   
 
     private boolean tournoiEstTermine() {
         try (Connection con = ConnectionPool.getConnection()) {

@@ -62,14 +62,7 @@ public class SessionInfo implements Serializable{
         }
     }
     
-//    public static String curUserName() {
-//        Utilisateur u = getOrCreate().curUser;
-//        if (u == null) {
-//            return "Personne";
-//        } else {
-//            return u.getSurnom();
-//        }
-//    }
+
     
     public static boolean userConnected() {
         return curUser().isPresent();

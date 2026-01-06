@@ -17,6 +17,9 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ceci est le dialogue apparaissant avec le bouton "consulter équipes"
+ */
 public class PanneauConsultEquipe extends VerticalLayout {
 
     private final Tournoi tournoi;
@@ -62,7 +65,6 @@ public class PanneauConsultEquipe extends VerticalLayout {
             }
 
             getUI().ifPresent(ui -> {
-                // 🔥 Fermer le Dialog AVANT navigation
                 getParent()
                     .filter(p -> p instanceof com.vaadin.flow.component.dialog.Dialog)
                     .ifPresent(p -> ((com.vaadin.flow.component.dialog.Dialog) p).close());

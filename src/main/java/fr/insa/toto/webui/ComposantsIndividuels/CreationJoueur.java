@@ -22,10 +22,7 @@ public class CreationJoueur extends FormLayout {
 
     public CreationJoueur(Consumer<Joueur> onCreate) {
         this.onCreate = onCreate;
-
-        /* =======================
-           SÉCURITÉ
-           ======================= */
+        
         if (!SessionInfo.adminConnected()) {
             add(new H3("Accès réservé à l'administrateur"));
             return;
@@ -55,10 +52,7 @@ public class CreationJoueur extends FormLayout {
             save
         );
     }
-
-    /* =======================
-       CRÉATION LOGIQUE
-       ======================= */
+    
     private void creerJoueur() {
 
         if (surnom.isEmpty() || taillecm.isEmpty()) {
