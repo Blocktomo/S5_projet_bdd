@@ -32,22 +32,98 @@ public class BdDTest {
         can.saveInDB(con);
         Ronde.creerRondesVides(can, con);
 
+           // 🔴 Futsal : volontairement FULL 
+
+        Tournoi futsal = new Tournoi(
+                "Futsal Étudiant",
+                2026,
+                2,
+                45,
+                5,
+                40
+        );
+        futsal.saveInDB(con);
+        Ronde.creerRondesVides(futsal, con);
+
+   // 🔴 Beatmaking  : volontairement FULL 
+
+         Tournoi Beatmaking = new Tournoi(
+                "Beatmaking",
+                2026,
+                2,
+                20,
+                3,
+                12
+        );
+        Beatmaking.saveInDB(con);
+        Ronde.creerRondesVides(Beatmaking, con);
+
         // Tennis Duo : FULL (12 / 12)
         Tournoi tennis = new Tournoi(
                 "Tournoi Tennis Duo",
                 2027,
-                5,
+                3,
                 60,
                 2,
                 12   //nb_joueurs_max
         );
         tennis.saveInDB(con);
         Ronde.creerRondesVides(tennis, con);
+
+                /* =======================
+           JOUEURS Beatmaking
+           ======================= */
+
+        List<Joueur> joueursBeatmaking = new ArrayList<>();
+
+        for (int i = 1; i <= 12; i++) {
+            joueursBeatmaking.add(
+                    new Joueur(
+                            "Joueur_beatmaking" + i,
+                            "J",
+                            170 + (i % 10)
+                    )
+            );
+        }
+
+        for (Joueur j : joueursBeatmaking) {
+            j.saveInDB(con);
+            ajouterParticipation(con, j.getId(), Beatmaking.getId());
+        }
+
+                /* =======================
+           JOUEURS Futsal 40
+           ======================= */
+
+        List<Joueur> joueursFutsal = new ArrayList<>();
+
+        for (int i = 1; i <= 36; i++) {
+            joueursFutsal.add(
+                    new Joueur(
+                            "Joueur_Futsal" + i,
+                            "S",
+                            170 + (i % 10)
+                    )
+            );
+        }
+
+        for (Joueur j : joueursFutsal) {
+            j.saveInDB(con);
+            ajouterParticipation(con, j.getId(), futsal.getId());
+        }
+
+
+    
+   
+
+        /* =======================
+           JOUEURS CAN (44)
+           ======================= */
            
         //JOUEURS CAN (44)
         List<Joueur> joueursCAN = new ArrayList<>();
 
-        for (int i = 1; i <= 44; i++) {
+        for (int i = 1; i <= 40; i++) {
             joueursCAN.add(
                     new Joueur(
                             "Joueur_CAN" + i,
@@ -66,7 +142,7 @@ public class BdDTest {
         //JOUEURS TENNIS (12)
         List<Joueur> joueursTennis = new ArrayList<>();
 
-        for (int i = 1; i <= 12; i++) {
+        for (int i = 1; i <= 11; i++) {
             joueursTennis.add(
                     new Joueur(
                             "Joueur_Tennis" + i,
@@ -87,7 +163,21 @@ public class BdDTest {
                 new Terrain("Parc des Princes"),
                 new Terrain("Stade Municipal"),
                 new Terrain("Court Central"),
-                new Terrain("Court Annexe")
+                new Terrain("Court Annexe"),
+                new Terrain("Grand Stade"),
+                new Terrain("Court Paris"),
+                new Terrain("Court Strasbourg"),
+                new Terrain("Oujda salle"),
+                new Terrain("Velodome"),
+                new Terrain("Cacahouète Stade"),
+                new Terrain("La Salle Interdite"),
+                new Terrain("Babouuuuch Stade"),
+                new Terrain("Studio Tonio 424t"),
+                new Terrain("Studio Pizza"),
+                new Terrain("Studio Boulby"),
+                new Terrain("Mario Kart")
+
+
         );
 
         for (Terrain t : terrains) {
@@ -99,7 +189,8 @@ public class BdDTest {
         //UTILISATEURS
         List<Utilisateur> utilisateurs = List.of(
                 new Utilisateur("thomas", "insa67", 1),
-                new Utilisateur("tartenpion", "insa67", 2)
+                new Utilisateur("Ali", "insa67", 1),
+                new Utilisateur("Mada", "insa67", 2)
         );
 
         for (Utilisateur u : utilisateurs) {

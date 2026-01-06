@@ -50,6 +50,31 @@ public class Acceuil extends VerticalLayout {
         setJustifyContentMode(JustifyContentMode.CENTER);
         getStyle().set("background", "linear-gradient(135deg, #004e92, #000428)");
 
+                /* =======================
+           RAZ BDD
+           ======================= */
+        Button raz_bdd = new Button("RAZ_BDD");
+        raz_bdd.getStyle()
+                .set("cursor", "pointer")
+                .set("position", "absolute")
+                .set("top", "50px")
+                .set("right", "20px");
+        add(raz_bdd);
+
+        raz_bdd.addClickListener(e -> {
+            try (Connection con = ConnectionPool.getConnection()) {
+                con.setAutoCommit(false);
+                GestionBdD.razBdd(con);
+                BdDTest.createBdDTestV4(con);
+                con.commit();
+                Notification.show("RAZ BDD + init effectuées");
+                refreshTournois();
+            } catch (Exception ex) {
+                Notification.show("Erreur RAZ BDD : " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        });
+
         /* =======================
            ICÔNE PARAMÈTRES
            ======================= */
@@ -109,9 +134,28 @@ public class Acceuil extends VerticalLayout {
 
         card.add(titre, listeTournois);
 
+                if (SessionInfo.adminConnected()) {
+            Button ajouter = new Button("➕ Ajouter un tournoi");
+            ajouter.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            ajouter.setWidthFull();
+
+            ajouter.addClickListener(e -> {
+                Tournoi nouveau = new Tournoi("", 2025, 1, 90, 2);
+                new EditionTournoiDialog(
+                        nouveau,
+                        ModeEditionTournoi.CREATE,
+                        this::refreshTournois
+                ).open();
+            });
+
+            card.add(ajouter);
+        }
+
         add(userInfo, card);
         refreshTournois();
     }
+    
+    
 
     private void refreshTournois() {
         listeTournois.removeAll();
@@ -123,6 +167,8 @@ public class Acceuil extends VerticalLayout {
             Notification.show("Erreur chargement tournois : " + ex.getMessage());
         }
     }
+
+    
 
     /* =======================
        UNE LIGNE TOURNOI
@@ -276,4 +322,9 @@ private Component ligneTournoi(Tournoi tournoi) {
         if (auMoinsUneInitieeOuTerminee) return "En cours";
         return "Non initié";
     }
+
+
+
+       
+
 }

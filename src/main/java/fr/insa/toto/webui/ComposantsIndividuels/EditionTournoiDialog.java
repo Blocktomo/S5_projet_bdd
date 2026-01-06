@@ -7,6 +7,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import fr.insa.beuvron.utils.database.ConnectionPool;
+import fr.insa.toto.model.Jeu.Ronde;
 import fr.insa.toto.model.Jeu.Tournoi;
 
 import java.sql.Connection;
@@ -82,6 +83,7 @@ public class EditionTournoiDialog extends Dialog {
                                 nbJoueursMax.getValue() // ✅
                         );
                         t.saveInDB(con);
+                            Ronde.creerRondesVides(t, con);
                     } else {
                         tournoi.setNom(nom.getValue());
                         tournoi.setAnnee(annee.getValue());
