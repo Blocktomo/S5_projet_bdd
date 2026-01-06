@@ -181,6 +181,22 @@ public class Joueur extends ClasseMiroir implements Serializable {
             con.setAutoCommit(true);
         }
     }
+    
+    public static int nbJoueursDuTournoi(Connection con, Tournoi tournoi) throws SQLException {
+
+    try (PreparedStatement pst = con.prepareStatement(
+            "SELECT COUNT(*) FROM participation WHERE idtournoi = ?")) {
+
+        pst.setInt(1, tournoi.getId());
+
+        try (ResultSet rs = pst.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+    }
+    return 0;
+}
 
     /* =======================
        CONSOLE
