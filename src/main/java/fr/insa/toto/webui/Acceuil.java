@@ -80,18 +80,22 @@ public class Acceuil extends VerticalLayout {
                 .set("right", "20px");
         add(raz_bdd);
         raz_bdd.addClickListener(e -> {
-            try (Connection con = ConnectionPool.getConnection()) {
-                GestionBdD.razBdd(con);
-                Notification.show("RAZ BDD effectué.");
-                System.out.println("razBdd effectué.");
-                BdDTest.createBdDTestV4(con);
-                Notification.show(" Init createBdDTestV4 effectuée");
+    try (Connection con = ConnectionPool.getConnection()) {
 
-            } catch (Exception ex) {
-                Notification.show("Erreur pour la RAZ BDD : " + ex.getMessage());
-                System.out.println("Erreur pour la RAZ BDD : " + ex.getMessage());
-            }
-        });
+        con.setAutoCommit(false); // optionnel mais propre
+
+        GestionBdD.razBdd(con);
+        BdDTest.createBdDTestV4(con);
+
+        con.commit(); // 🔥 LIGNE CRITIQUE
+
+        Notification.show("RAZ BDD + init effectuées");
+
+    } catch (Exception ex) {
+        Notification.show("Erreur RAZ BDD : " + ex.getMessage());
+        ex.printStackTrace();
+    }
+});
         
         /* =======================
            INFO UTILISATEUR
