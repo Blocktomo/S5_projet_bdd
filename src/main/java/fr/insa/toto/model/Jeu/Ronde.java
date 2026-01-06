@@ -183,6 +183,19 @@ public static Ronde chercherRondeParId(Connection con, int idRonde) throws SQLEx
         }
         return res;
     }
+    
+    public static List<Equipe> equipesRonde(Connection con, Ronde ronde) throws SQLException {
+        List<Equipe> res = new ArrayList<>();
+        
+        List<Equipe> toutesLesEquipes = Equipe.toutesLesEquipes(con);
+        
+        for (Equipe equipe:toutesLesEquipes){
+            if (equipe.getRonde().getId() == ronde.getId()){
+                res.add(equipe);
+            }
+        }
+        return res;
+    }
 
         
     /* =======================

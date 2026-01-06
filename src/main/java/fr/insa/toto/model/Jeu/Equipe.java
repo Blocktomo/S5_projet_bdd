@@ -127,6 +127,30 @@ public class Equipe extends ClasseMiroir implements Serializable {
         return res;
     }
     
+    public List<Joueur> joueursEquipe(Connection con) throws SQLException {
+        List<Joueur> res = new ArrayList();
+        int idequipe = this.getId();
+        try (PreparedStatement pst = con.prepareStatement(
+                """
+                SELECT idjoueur
+                FROM composition
+                WHERE idequipe=?
+                """)) {
+            pst.setInt(1, idequipe);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    int idjoueur = rs.getInt("idjoueur");
+                    Joueur joueur = Joueur.chercherParId(con, idjoueur);
+                    res.add(joueur);
+                }
+                return res;
+            }
+            
+        }catch (SQLException ex){
+        }
+        return null;
+    }
+    
     /** Cherche une équipe par id */
     public static Equipe chercherParId(Connection con, int id) throws SQLException {
         try (PreparedStatement pst = con.prepareStatement(

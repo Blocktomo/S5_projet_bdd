@@ -91,6 +91,31 @@ public class Joueur extends ClasseMiroir implements Serializable {
         return res;
     }
     
+    /** Cherche une joueur par id */
+    public static Joueur chercherParId(Connection con, int id) throws SQLException {
+        try (PreparedStatement pst = con.prepareStatement(
+                """
+                SELECT id, surnom, categorie, taillecm, score
+                FROM joueur
+                WHERE id = ?
+                """
+        )) {
+            pst.setInt(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return new Joueur(
+                            rs.getInt("id"),
+                            rs.getString("surnom"),
+                            rs.getString("categorie"),
+                            rs.getDouble("taillecm"),
+                            rs.getInt("score")
+                    );
+                }
+            }
+        }
+        return null;
+    }
+    
     public static List<Joueur> joueursDuTournoi(Connection con, Tournoi tournoi) throws SQLException {
     List<Joueur> res = new ArrayList<>();
 

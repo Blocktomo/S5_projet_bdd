@@ -2,6 +2,7 @@ package fr.insa.toto.webui.PagesMenus.ComposantsPanneauActions;
 
 import fr.insa.toto.webui.PagesMenus.*;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.notification.Notification;
@@ -15,16 +16,26 @@ import fr.insa.toto.webui.session.SessionInfo;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 
 @Route("ronde/:idronde/equipes")
-public class PageEquipe extends VerticalLayout implements HasUrlParameter<Integer> {
+public class PageEquipe extends VerticalLayout implements BeforeEnterObserver  {
 
     private Ronde ronde;
     
 
     @Override
-    public void setParameter(BeforeEvent event, Integer idRonde) {
+    public void beforeEnter(BeforeEnterEvent event) {
+
+        Integer idRonde = event.getRouteParameters()
+                               .getInteger("idronde")
+                               .orElse(null);
+
+        if (idRonde == null) {
+            event.rerouteToError(NotFoundException.class);
+            return;
+        }
 
         try (Connection con = ConnectionPool.getConnection()) {
 
@@ -32,7 +43,7 @@ public class PageEquipe extends VerticalLayout implements HasUrlParameter<Intege
 
             if (ronde == null) {
                 Notification.show("Ronde introuvable");
-                UI.getCurrent().navigate("");
+                event.rerouteToError(NotFoundException.class);
                 return;
             }
 
@@ -44,14 +55,13 @@ public class PageEquipe extends VerticalLayout implements HasUrlParameter<Intege
         }
     }
 
-    private void buildUI(Connection con) throws Exception {
+
+    private void buildUI(Connection con) throws SQLException {
 
         removeAll();
 
-        boolean rondeTerminee = ronde.getTerminer() == 2;
-
         /* =======================
-           NUMÉRO DE RONDE (SAFE)
+           NUMÉRO DE RONDE
            ======================= */
         int numeroRonde = 1;
         List<Ronde> rondes = Ronde.rondesDuTournoi(con, ronde.getTournoi());
@@ -69,34 +79,55 @@ public class PageEquipe extends VerticalLayout implements HasUrlParameter<Intege
                 "Ronde " + numeroRonde + " — " + ronde.getTournoi().getNom()
         );
 
-        Button retour = new Button("⬅ Retour au tournoi",
-                e -> UI.getCurrent().navigate("tournoi/" + ronde.getTournoi().getId())
+        Button retour = new Button(
+                "⬅ Retour au tournoi",
+                e -> UI.getCurrent().navigate(
+                        "tournoi/" + ronde.getTournoi().getId()
+                )
         );
-
-        HorizontalLayout actions = new HorizontalLayout(retour);
-
-        if (SessionInfo.adminConnected() && !rondeTerminee) { //TODO à changer
-            Button terminer = new Button("🏁 Terminer la ronde");
-            terminer.addClickListener(e -> System.out.println("hello") );
-            actions.add(terminer);
-        }
-
-        add(titre, actions, new Hr());
+ 
+        add(titre, retour, new Hr());
 
         /* =======================
-           MATCHS
+           ACCORDION DES ÉQUIPES
            ======================= */
-        List<Matchs> matchs = Matchs.tousLesMatchsDeLaRonde(con, ronde.getId());
+        Accordion accordion = new Accordion();
 
-        if (matchs.isEmpty()) {
-            add(new Paragraph("Aucun match pour cette ronde"));
-            return;
+        List<Equipe> equipes = Ronde.equipesRonde(con, this.ronde);
+        
+        for (Equipe equipe : equipes) {
+            int score = equipe.getScore();
+
+            //TODO : sélectionner le terrain pour cette équipe.
+            //Terrain terrain = equipe.getTerrain(); // garanti non null
+//            String nomTerrain = terrain.getNom();
+
+            String titreEquipe =
+                    "Équipe " + equipe.getId()
+                    + " — score : " + equipe.getScore();
+                    //+ " — terrain : " + nomTerrain; TODO
+
+            /* -------- Contenu : joueurs -------- */
+            VerticalLayout contenu = new VerticalLayout();
+            contenu.setPadding(false);
+            contenu.setSpacing(false);
+
+            List<Joueur> joueurs = equipe.joueursEquipe(con);
+
+            for (Joueur j : joueurs) {
+                contenu.add(
+                        new Span(
+                                j.getId() + " — " + j.getSurnom()
+                        )
+                );
+            }
+
+            accordion.add(titreEquipe, contenu);
         }
 
-        for (Matchs m : matchs) {
-            add(new BlocMatch(m, rondeTerminee));
-        }
+        add(accordion);
     }
+
 
 
 
