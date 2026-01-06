@@ -17,13 +17,13 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PanneauEquipe extends VerticalLayout {
+public class PanneauConsultEquipe extends VerticalLayout {
 
     private final Tournoi tournoi;
     private Grid<RondeAffichage> grid;
     private List<RondeAffichage> data;
 
-    public PanneauEquipe(Tournoi tournoi) {
+    public PanneauConsultEquipe(Tournoi tournoi) {
         this.tournoi = tournoi;
 
         setPadding(true);

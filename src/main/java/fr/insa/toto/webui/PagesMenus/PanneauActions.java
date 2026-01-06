@@ -9,7 +9,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import fr.insa.beuvron.utils.database.ConnectionPool;
 import fr.insa.toto.model.Jeu.Ronde;
 import fr.insa.toto.model.Jeu.Tournoi;
-import fr.insa.toto.webui.PagesMenus.ComposantsPanneauActions.PanneauEquipe;
+import fr.insa.toto.webui.PagesMenus.ComposantsPanneauActions.PanneauConsultEquipe;
 import fr.insa.toto.webui.PagesMenus.ComposantsPanneauActions.PanneauRonde;
 import fr.insa.toto.webui.PagesMenus.ComposantsPanneauActions.PanneauTerrains;
 import fr.insa.toto.webui.PagesMenus.ComposantsPanneauActions.PodiumDialog;
@@ -48,7 +48,7 @@ public class PanneauActions extends VerticalLayout {
         equipes.addClickListener(e -> {
             Notification.show("choisir une ronde du tournoi : " + tournoi.getNom());
             Dialog dialogEquipes = new Dialog();
-            dialogEquipes.add(new PanneauEquipe(tournoi));
+            dialogEquipes.add(new PanneauConsultEquipe(tournoi));
             dialogEquipes.open();
         });
 
