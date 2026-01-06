@@ -64,5 +64,27 @@ public class CreationUtilisateur extends FormLayout {
         UI.getCurrent().refreshCurrentRoute(true);
         //TODO : problème 22/12/2025 : il semble que la BdD en ligne ne se mette pas réellement à jour lorsqu'on clique sur "save"... lorsqu'on consulte la BBD rien ne se passe
     }
+public String getSurnomValue() {
+    return surnom.getValue();
+}
+
+public String getPasswordValue() {
+    return password.getValue();
+}
+
+/** Création utilisateur STANDARD uniquement */
+public Utilisateur creerUtilisateurStandard() throws SQLException {
+    try (Connection con = ConnectionPool.getConnection()) {
+        Utilisateur u = new Utilisateur(
+                getSurnomValue(),
+                getPasswordValue(),
+                2 // standard
+        );
+        u.saveInDB(con);
+        return u;
+    }
+}
+
+
 
 }

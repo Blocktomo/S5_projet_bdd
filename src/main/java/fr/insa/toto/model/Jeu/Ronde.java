@@ -121,6 +121,47 @@ public class Ronde extends ClasseMiroir implements Serializable {
         }
         return res;
     }
+    
+    public static List<Equipe> equipesRonde(Connection con, Ronde ronde) throws SQLException {
+        List<Equipe> res = new ArrayList<>();
+        
+        List<Equipe> toutesLesEquipes = Equipe.toutesLesEquipes(con);
+        
+        for (Equipe equipe:toutesLesEquipes){
+            if (equipe.getRonde().getId() == ronde.getId()){
+                res.add(equipe);
+            }
+        }
+        return res;
+    }
+    
+        /* =======================
+       SUPPRESSION
+       ======================= */
+
+    public void deleteInDB(Connection con) throws SQLException {
+        if (getId() == -1) {
+            throw new ClasseMiroir.EntiteNonSauvegardee();
+        }
+
+        try {
+            con.setAutoCommit(false);
+
+            try (PreparedStatement pst = con.prepareStatement(
+                    "DELETE FROM ronde WHERE id = ?")) {
+                pst.setInt(1, getId());
+                pst.executeUpdate();
+            }
+
+            entiteSupprimee();
+            con.commit();
+        } catch (SQLException ex) {
+            con.rollback();
+            throw ex;
+        } finally {
+            con.setAutoCommit(true);
+        }
+    }
 
     /* =======================
        GETTERS

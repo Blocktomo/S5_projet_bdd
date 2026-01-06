@@ -1,6 +1,5 @@
 package fr.insa.toto.model.Jeu;
 
-import fr.insa.beuvron.utils.database.ClasseMiroir;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,7 +32,6 @@ public class Participation implements Serializable {
        PERSISTENCE
        ======================= */
 
-    /** Inscrit un joueur à un tournoi */
     public void saveInDB(Connection con) throws SQLException {
         try (PreparedStatement pst = con.prepareStatement(
                 """
@@ -47,7 +45,6 @@ public class Participation implements Serializable {
         }
     }
 
-    /** Supprime la participation */
     public void deleteInDB(Connection con) throws SQLException {
         try (PreparedStatement pst = con.prepareStatement(
                 """
@@ -65,7 +62,6 @@ public class Participation implements Serializable {
        REQUÊTES STATIQUES
        ======================= */
 
-    /** Tous les joueurs d’un tournoi */
     public static List<Joueur> joueursDuTournoi(Connection con, Tournoi tournoi) throws SQLException {
         List<Joueur> res = new ArrayList<>();
 
@@ -94,13 +90,14 @@ public class Participation implements Serializable {
         return res;
     }
 
-    /** Tous les tournois d’un joueur */
     public static List<Tournoi> tournoisDuJoueur(Connection con, Joueur joueur) throws SQLException {
         List<Tournoi> res = new ArrayList<>();
 
         try (PreparedStatement pst = con.prepareStatement(
                 """
-                SELECT t.id, t.nom, t.annee, t.nb_de_rondes, t.duree_match, t.nb_joueurs_equipe
+                SELECT t.id, t.nom, t.annee,
+                       t.nb_de_rondes, t.duree_match,
+                       t.nb_joueurs_equipe, t.nb_joueurs_max
                 FROM tournoi t
                 JOIN participation p ON p.idtournoi = t.id
                 WHERE p.idjoueur = ?

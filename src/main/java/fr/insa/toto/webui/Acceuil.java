@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
@@ -15,12 +16,19 @@ import com.vaadin.flow.router.Route;
 import fr.insa.beuvron.utils.database.ConnectionPool;
 import fr.insa.toto.model.GestionRH.BdDTest;
 import fr.insa.toto.model.GestionRH.GestionBdD;
+import fr.insa.toto.model.Jeu.Participation;
 import fr.insa.toto.model.Jeu.Ronde;
 import fr.insa.toto.model.Jeu.Tournoi;
+import fr.insa.toto.model.Jeu.Joueur;
 import fr.insa.toto.webui.ComposantsIndividuels.EditionTournoiDialog;
 import fr.insa.toto.webui.ComposantsIndividuels.ModeEditionTournoi;
+import fr.insa.toto.webui.session.CreationUtilisateur;
+import fr.insa.toto.webui.session.InscriptionJoueurDialog;
 import fr.insa.toto.webui.session.LoginDialog;
 import fr.insa.toto.webui.session.SessionInfo;
+import fr.insa.toto.webui.session.InscriptionOuConnexionDialog;
+
+
 
 import java.sql.Connection;
 import java.util.List;
@@ -70,31 +78,6 @@ public class Acceuil extends VerticalLayout {
         }
 
         /* =======================
-           RAZ BDD
-           ======================= */
-        Button raz_bdd = new Button("RAZ_BDD");
-        raz_bdd.getStyle()
-                .set("cursor", "pointer")
-                .set("position", "absolute")
-                .set("top", "50px")
-                .set("right", "20px");
-        add(raz_bdd);
-
-        raz_bdd.addClickListener(e -> {
-            try (Connection con = ConnectionPool.getConnection()) {
-                con.setAutoCommit(false);
-                GestionBdD.razBdd(con);
-                BdDTest.createBdDTestV4(con);
-                con.commit();
-                Notification.show("RAZ BDD + init effectuées");
-                refreshTournois();
-            } catch (Exception ex) {
-                Notification.show("Erreur RAZ BDD : " + ex.getMessage());
-                ex.printStackTrace();
-            }
-        });
-
-        /* =======================
            INFO UTILISATEUR
            ======================= */
         String nom = SessionInfo.curUser()
@@ -102,15 +85,13 @@ public class Acceuil extends VerticalLayout {
                 .orElse("Personne");
 
         H2 userInfo = new H2("Utilisateur connecté : " + nom);
-        userInfo.getStyle()
-                .set("color", "white")
-                .set("margin-bottom", "30px");
+        userInfo.getStyle().set("color", "white");
 
         /* =======================
            CARTE CENTRALE
            ======================= */
         VerticalLayout card = new VerticalLayout();
-        card.setWidth("520px");
+        card.setWidth("560px"); // ✅ plus large → plus de débordement
         card.setPadding(true);
         card.setSpacing(true);
         card.setAlignItems(Alignment.STRETCH);
@@ -124,25 +105,9 @@ public class Acceuil extends VerticalLayout {
 
         listeTournois = new VerticalLayout();
         listeTournois.setSpacing(true);
+        listeTournois.setPadding(false);
 
         card.add(titre, listeTournois);
-
-        if (SessionInfo.adminConnected()) {
-            Button ajouter = new Button("➕ Ajouter un tournoi");
-            ajouter.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            ajouter.setWidthFull();
-
-            ajouter.addClickListener(e -> {
-                Tournoi nouveau = new Tournoi("", 2025, 1, 90, 2);
-                new EditionTournoiDialog(
-                        nouveau,
-                        ModeEditionTournoi.CREATE,
-                        this::refreshTournois
-                ).open();
-            });
-
-            card.add(ajouter);
-        }
 
         add(userInfo, card);
         refreshTournois();
@@ -162,20 +127,28 @@ public class Acceuil extends VerticalLayout {
     /* =======================
        UNE LIGNE TOURNOI
        ======================= */
-  private Component ligneTournoi(Tournoi tournoi) {
+private Component ligneTournoi(Tournoi tournoi) {
 
     HorizontalLayout ligne = new HorizontalLayout();
     ligne.setWidthFull();
     ligne.setAlignItems(Alignment.CENTER);
     ligne.setJustifyContentMode(JustifyContentMode.BETWEEN);
 
-    /* ===== TITRE ===== */
+    /* =======================
+       BLOC GAUCHE
+       ======================= */
+    HorizontalLayout gauche = new HorizontalLayout();
+    gauche.setAlignItems(Alignment.CENTER);
+    gauche.setSpacing(true);
+    gauche.setWidthFull();
+
+    /* ----- TITRE ----- */
     Button titre = new Button(tournoi.toString());
     titre.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
     titre.getStyle()
             .set("border", "1.5px solid #2563eb")
             .set("color", "#1e3a8a")
-            .set("font-size", "16px")
+            .set("font-size", "15px")
             .set("border-radius", "8px")
             .set("background", "white");
 
@@ -184,9 +157,12 @@ public class Acceuil extends VerticalLayout {
                     ui.navigate("tournoi/" + tournoi.getId()))
     );
 
-    /* ===== ÉTAT + PLACES ===== */
     Span etatSpan = new Span();
     Span placesSpan = new Span();
+    Button inscrire = new Button("S'inscrire");
+    inscrire.addThemeVariants(ButtonVariant.LUMO_SMALL);
+
+    gauche.add(titre, etatSpan, placesSpan);
 
     try (Connection con = ConnectionPool.getConnection()) {
 
@@ -194,40 +170,53 @@ public class Acceuil extends VerticalLayout {
         etatSpan.setText(etat);
 
         etatSpan.getStyle()
-                .set("padding", "4px 12px")
+                .set("padding", "4px 10px")
                 .set("border-radius", "12px")
                 .set("font-size", "13px")
                 .set("font-weight", "600");
 
         switch (etat) {
-            case "Non initié" ->
-                    etatSpan.getStyle().set("background", "#e5e7eb");
-            case "En cours" ->
-                    etatSpan.getStyle().set("background", "#fde68a");
-            case "Terminé" ->
-                    etatSpan.getStyle().set("background", "#bbf7d0");
+            case "Non initié" -> etatSpan.getStyle().set("background", "#e5e7eb");
+            case "En cours" -> etatSpan.getStyle().set("background", "#fde68a");
+            case "Terminé" -> etatSpan.getStyle().set("background", "#bbf7d0");
         }
 
-        /* ===== PLACES RESTANTES (NON INITIÉ) ===== */
+        /* ===== PLACES + INSCRIPTION ===== */
         if ("Non initié".equals(etat) && tournoi.hasLimiteJoueurs()) {
 
-            placesSpan.getStyle()
-                    .set("font-weight", "600")
-                    .set("font-size", "13px");
+            placesSpan.getStyle().set("font-size", "13px");
 
             if (tournoi.isComplet(con)) {
                 placesSpan.setText("Complet");
-                placesSpan.getStyle().set("color", "#dc2626"); // rouge
+                placesSpan.getStyle().set("color", "#dc2626");
             } else {
                 int restantes = tournoi.getPlacesRestantes(con);
 
                 if (restantes == 1) {
                     placesSpan.setText("Dernière place disponible");
-                    placesSpan.getStyle().set("color", "#f97316"); // orange
+                    placesSpan.getStyle().set("color", "#f97316");
                 } else {
                     placesSpan.setText("Places restantes : " + restantes);
-                    placesSpan.getStyle().set("color", "#16a34a"); // vert
+                    placesSpan.getStyle().set("color", "#16a34a");
                 }
+
+                gauche.add(inscrire);
+
+            inscrire.addClickListener(e -> {
+
+                // 🔴 PAS CONNECTÉ → LOGIN
+                if (!SessionInfo.userConnected()) {
+                    new InscriptionOuConnexionDialog().open();
+                    return;
+                }
+
+                // 🟢 CONNECTÉ → FORMULAIRE JOUEUR
+                new InscriptionJoueurDialog(
+                        tournoi,
+                        this::refreshTournois
+                ).open();
+            });
+
             }
         }
 
@@ -235,11 +224,9 @@ public class Acceuil extends VerticalLayout {
         etatSpan.setText("État inconnu");
     }
 
-    HorizontalLayout centre = new HorizontalLayout(titre, etatSpan, placesSpan);
-    centre.setAlignItems(Alignment.CENTER);
-    centre.setSpacing(true);
-
-    /* ===== ACTIONS ===== */
+    /* =======================
+       ACTIONS DROITE
+       ======================= */
     HorizontalLayout actions = new HorizontalLayout();
     actions.setAlignItems(Alignment.CENTER);
     actions.setSpacing(false);
@@ -264,7 +251,12 @@ public class Acceuil extends VerticalLayout {
         actions.add(edit);
     }
 
-    ligne.add(centre, actions);
+    /* =======================
+       ASSEMBLAGE FINAL
+       ======================= */
+    ligne.add(gauche, actions);
+    ligne.setFlexGrow(1, gauche);
+
     return ligne;
 }
 
