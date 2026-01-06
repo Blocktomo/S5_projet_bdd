@@ -148,7 +148,7 @@ public class Ronde extends ClasseMiroir implements Serializable {
             con.setAutoCommit(false);
 
             try (PreparedStatement pst = con.prepareStatement(
-                    "DELETE FROM ronde WHERE id = ?")) {
+                    "DELETE FROM ronde WHERE idronde = ?")) {
                 pst.setInt(1, getId());
                 pst.executeUpdate();
             }
