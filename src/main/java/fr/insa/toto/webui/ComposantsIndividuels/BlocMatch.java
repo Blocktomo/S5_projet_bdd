@@ -2,18 +2,23 @@ package fr.insa.toto.webui.ComposantsIndividuels;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextField;
 import fr.insa.beuvron.utils.database.ConnectionPool;
 import fr.insa.toto.model.Jeu.Equipe;
+import fr.insa.toto.model.Jeu.Joueur;
 import fr.insa.toto.model.Jeu.Matchs;
 import fr.insa.toto.model.Jeu.Terrain;
 import fr.insa.toto.webui.session.SessionInfo;
 
 import java.sql.Connection;
+import java.util.List;
 
 public class BlocMatch extends VerticalLayout {
 
@@ -58,9 +63,34 @@ public class BlocMatch extends VerticalLayout {
             /* =======================
                ÉQUIPES
                ======================= */
-            Span equipes = new Span(
-                    "Équipe A (N°" + equipeA.getId() + ")  VS  Équipe B (N°" + equipeB.getId() + ")"
-            );
+            Button buttonEquipeA = new Button(String.format("Equipe A (id %s)", this.equipeA.getId()));
+            buttonEquipeA.setHeight("20px");
+            
+            Button buttonEquipeB = new Button(String.format("Equipe B (id %s)", this.equipeB.getId()));
+            buttonEquipeB.setHeight("20px");
+            HorizontalLayout nomsEquipes = new HorizontalLayout();
+            nomsEquipes.add(buttonEquipeA, new Span(" vs "),buttonEquipeB);
+            
+            VerticalLayout joueursEquipeA = new PanneauJoueursEquipe(this.equipeA, "A");
+            
+            VerticalLayout joueursEquipeB = new PanneauJoueursEquipe(this.equipeB, "A");
+            
+            Popover contenuEquipeA = new Popover();
+            contenuEquipeA.setWidth("400px");
+            contenuEquipeA.setHoverDelay(0);
+            contenuEquipeA.setTarget(buttonEquipeA);
+            contenuEquipeA.setOpenOnClick(true);
+            contenuEquipeA.setOpenOnHover(true);
+            contenuEquipeA.add(joueursEquipeA);
+            
+            Popover contenuEquipeB = new Popover();
+            contenuEquipeB.setWidth("400px");
+            contenuEquipeB.setHoverDelay(0);
+            contenuEquipeB.setTarget(buttonEquipeB);
+            contenuEquipeB.setOpenOnClick(true);
+            contenuEquipeB.setOpenOnHover(true);
+            contenuEquipeB.add(joueursEquipeB);
+            
 
             /* =======================
                SCORE (modifiable dynamiquement)
@@ -69,7 +99,7 @@ public class BlocMatch extends VerticalLayout {
             majScore();
             scoreSpan.getStyle().set("font-weight", "bold");
 
-            add(titre, equipes, scoreSpan);
+            add(titre, nomsEquipes, scoreSpan);
 
             /* =======================
                BOUTON ADMIN
