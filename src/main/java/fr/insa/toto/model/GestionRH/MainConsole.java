@@ -2,11 +2,9 @@ package fr.insa.toto.model.GestionRH;
 
 import fr.insa.toto.model.Jeu.Equipe;
 import fr.insa.toto.model.Jeu.Joueur;
-import fr.insa.toto.model.GestionRH.GestionBdD;
-import fr.insa.toto.model.GestionRH.BdDTest;
+import fr.insa.toto.model.GestionRH.*;
 import fr.insa.beuvron.utils.ConsoleFdB;
-import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
-import fr.insa.beuvron.utils.database.ResultSetUtils;
+import fr.insa.beuvron.utils.database.*;
 import fr.insa.beuvron.utils.exceptions.ExceptionsUtils;
 import fr.insa.beuvron.utils.list.ListUtils;
 import fr.insa.toto.model.Jeu.Matchs;
@@ -21,8 +19,15 @@ import fr.insa.toto.model.Jeu.Ronde;
 import fr.insa.toto.model.Jeu.Terrain;
 import java.util.Optional;
 
+
+/*
+MainConsole implémente la version très basique du programme, avec un seul tournoi.
+Par ailleurs, une fois Vaadin pris en main, le développement de MainConsole s'est arrété.
+Ainsi, tout développement au delà de la classee utilisateur/admin n'a pas été fait.
+*/
 public class MainConsole {
 
+    public static Tournoi tournoi1;
     public static void menuJoueur(Connection con) {
         int rep = -1;
         while (rep != 0) {
@@ -37,7 +42,7 @@ public class MainConsole {
             try {
                 int j = 1;
                 if (rep == j++) {
-                    List<Joueur> tous = Joueur.tousLesJoueur(con);
+                    List<Joueur> tous = Joueur.joueursDuTournoi(con, tournoi1); 
                     System.out.println(tous.size() + " joueurs trouvés :");
                     System.out.println(ListUtils.formatList(tous, "---- tous les joueurs\n",
                             "\n", "\n", u -> u.getId() + " : " + u.getSurnom() + ", score = " + u.getScore()));
@@ -46,7 +51,7 @@ public class MainConsole {
                     Joueur u = Joueur.entreeConsole();
                     u.saveInDB(con);
                 } else if (rep == j++) {
-                    List<Joueur> tous = Joueur.tousLesJoueur(con);
+                    List<Joueur> tous = Joueur.tousLesJoueurs(con);
                     List<Joueur> selected = ListUtils.selectMultiple(
                             "selectionnez les joueurs à supprimer : ", tous, 
                             u -> u.getId() + " : " + u.getSurnom());
@@ -105,9 +110,15 @@ public class MainConsole {
             System.out.println("Problème de connection : " + ex.getLocalizedMessage());
             throw new Error(ex);
         }
+        try{
+            MainConsole.tournoi1 = Tournoi.chercherParId(con, 1);
+            //on récupère le premier tournoi et on fait avec
+        }catch (Exception ex){
+            System.out.println("problème de récupération du tournoi, error : " +  ex.getMessage());
+        }
         while (rep != 0) {
             int i = 1;
-            System.out.println("Menu principal du tournoi " + Tournoi.getNom() +" "+  Tournoi.getAnnee());
+            System.out.println("Menu principal du tournoi " + tournoi1.getNom() +" "+  tournoi1.getAnnee());
             System.out.println("======================================");
             System.out.println((i++) + ") menu tournoi");
             System.out.println((i++) + ") menu gestion BdD");
@@ -226,7 +237,7 @@ public class MainConsole {
                 );
 
                 for (var e : selected) {
-                    e.SuppEquipe(con);
+                    e.supprimer(con);
                 }
             }
 
@@ -243,15 +254,15 @@ public class MainConsole {
         while (rep != 0) {
             System.out.println("Menu tournoi");
             System.out.println("================================");
-            //TODO : faire un texte intermédiaire qui affiche un aperçu de tous les tournois existants
             System.out.println("Voici les caractérisitques du Tournoi actuel.");
-            Tournoi.affichageTexte();
+            System.out.println(tournoi1.toString() + ", " + String.format("nbRondes : %s, duree : %s, nbJoueursEquipe : %s", tournoi1.getNbDeRondes(), tournoi1.getDureeMatch(), tournoi1.getNbJoueursEquipe()));
             System.out.println("1) modifier le tournoi");
             System.out.println("0) retour");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
             try {
                 if (rep == 1) {
-                    Tournoi.modifTournoi(con); //modifier un tournoi
+                    
+                    tournoi1.modifTournoi(con); //modifier un tournoi
                 } else{}
             } catch (Exception ex) {
                 System.out.println(ExceptionsUtils.messageEtPremiersAppelsDansPackage(ex, "fr.insa", 3));
@@ -398,7 +409,7 @@ public class MainConsole {
                 
                 if (rep == j++) {
                     //creer Ronde
-                    Ronde r = new Ronde(0);
+                    Ronde r = new Ronde(0, tournoi1);
                     r.saveInDB(con);
                     System.out.println("Ronde creer , ID = " + r.getId());                    
                     
@@ -427,13 +438,14 @@ public class MainConsole {
                 }
                 }else if (rep == j++) {
                     //SUPPRIMER RONDE
-                    List<Ronde> toutes = Ronde.toutesLesRondes(con);
+                    List<Ronde> toutes = Ronde.rondesDuTournoi(con, tournoi1);
                     System.out.println(toutes.size() + "Rondes trouvées :");
+                    
                     
                     List<Ronde> selected = ListUtils.selectMultiple(
                         "Sélectionnez les Rondes à supprimer : ",
                             toutes,
-                            e -> "Ronde " + e.getId() + "(Statut: " + (e.getTerminer()==1 ? "Finie": "En cours") + ")"
+                            e -> "Ronde " + e.getId() + "(Statut: " + (e.getTerminer()==2 ? "Finie": "En cours/non init") + ")"
                     );
                     for (Ronde r : selected) {
                         r.deleteInDB(con);
