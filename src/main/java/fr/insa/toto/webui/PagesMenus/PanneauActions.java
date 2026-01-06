@@ -6,9 +6,15 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import fr.insa.beuvron.utils.database.ConnectionPool;
+import fr.insa.toto.model.Jeu.Ronde;
 import fr.insa.toto.model.Jeu.Tournoi;
 import fr.insa.toto.webui.PagesMenus.ComposantsPanneauActions.PanneauRonde;
 import fr.insa.toto.webui.PagesMenus.ComposantsPanneauActions.PanneauTerrains;
+import fr.insa.toto.webui.PagesMenus.ComposantsPanneauActions.PodiumDialog;
+
+import java.sql.Connection;
+import java.util.List;
 
 public class PanneauActions extends VerticalLayout {
 
@@ -34,7 +40,6 @@ public class PanneauActions extends VerticalLayout {
            ACTIONS
            ======================= */
 
-        // ✅ RETOUR PAGE D’ACCUEIL (ROOT)
         retour.addClickListener(e ->
                 UI.getCurrent().navigate("")
         );
@@ -44,17 +49,49 @@ public class PanneauActions extends VerticalLayout {
         );
 
         rondes.addClickListener(e -> {
-            Notification.show("Rondes du tournoi : " + tournoi.getNom());
-            Dialog dialogRondes = new Dialog();
-            dialogRondes.add(new PanneauRonde(tournoi));
-            dialogRondes.open();
+            Dialog d = new Dialog();
+            d.add(new PanneauRonde(tournoi));
+            d.open();
         });
 
         terrains.addClickListener(e -> {
-            Notification.show("Terrains du tournoi : " + tournoi.getNom());
-            Dialog dialogTerrains = new Dialog();
-            dialogTerrains.add(new PanneauTerrains(tournoi));
-            dialogTerrains.open();
+            Dialog d = new Dialog();
+            d.add(new PanneauTerrains(tournoi));
+            d.open();
         });
+
+        /* =======================
+           🏆 BOUTON PODIUM (CONDITIONNEL)
+           ======================= */
+
+        if (tournoiEstTermine()) {
+            Button podium = new Button("🏆 Voir le podium");
+            podium.addClickListener(e ->
+                    new PodiumDialog(tournoi).open()
+            );
+            add(podium);
+        }
+    }
+
+    /* =======================
+       ÉTAT TOURNOI (copie logique Acceuil)
+       ======================= */
+
+    private boolean tournoiEstTermine() {
+        try (Connection con = ConnectionPool.getConnection()) {
+
+            List<Ronde> rondes = Ronde.rondesDuTournoi(con, tournoi);
+            if (rondes.isEmpty()) return false;
+
+            for (Ronde r : rondes) {
+                if (r.getTerminer() != 2) {
+                    return false;
+                }
+            }
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
