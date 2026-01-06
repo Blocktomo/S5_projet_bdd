@@ -68,14 +68,24 @@ public class PanneauActions extends VerticalLayout {
            🏆 BOUTON PODIUM (CONDITIONNEL)
            ======================= */
 
-        if (tournoiEstTermine()) {
-            Button podium = new Button("🏆 Voir le podium");
-            podium.addClickListener(e ->
-                    new PodiumDialog(tournoi).open()
-            );
-            add(podium);
-        }
+  Button podium = new Button("🏆 Voir le podium");
+
+podium.addClickListener(e -> {
+    if (tournoiEstTermine()) {
+        new PodiumDialog(tournoi).open();
+    } else {
+        Dialog info = new Dialog();
+        info.add("⏳ Le tournoi n'est pas encore terminé.\nVeuillez patienter.");
+        info.open();
+
+        // fermeture automatique après 2,5 secondes
+        UI.getCurrent().getPage().executeJs(
+                "setTimeout(() => $0.close(), 2500);", info
+        );
     }
+});
+
+add(podium);}
 
     /* =======================
        ÉTAT TOURNOI (copie logique Acceuil)
