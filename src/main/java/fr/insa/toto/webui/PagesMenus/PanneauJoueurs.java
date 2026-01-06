@@ -49,7 +49,7 @@ public class PanneauJoueurs extends VerticalLayout {
         grid.addColumn(Joueur::getSurnom).setHeader("Surnom");
         grid.addColumn(Joueur::getCategorie).setHeader("Catégorie");
         grid.addColumn(Joueur::getTaillecm).setHeader("Taille (cm)");
-        grid.addColumn(Joueur::getScore).setHeader("Score");
+        grid.addColumn(Joueur::getScore).setHeader("Score").setSortable(true) ;
 
         grid.setWidthFull();
         grid.setHeight("420px");
