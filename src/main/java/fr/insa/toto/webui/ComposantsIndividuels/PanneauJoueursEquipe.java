@@ -20,6 +20,11 @@ import fr.insa.toto.webui.session.SessionInfo;
 import java.sql.Connection;
 import java.util.List;
 
+
+/**
+ * Cette classe permet d'afficher les joueurs d'une équipe en partculier
+ * surnomEquipe : "equipe A" ou "equipe B"
+ */
 public class PanneauJoueursEquipe extends VerticalLayout {
 
     private final Equipe equipe;

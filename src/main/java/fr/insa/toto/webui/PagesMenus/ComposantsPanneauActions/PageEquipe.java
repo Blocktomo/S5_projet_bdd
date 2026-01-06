@@ -59,10 +59,7 @@ public class PageEquipe extends VerticalLayout implements BeforeEnterObserver  {
     private void buildUI(Connection con) throws SQLException {
 
         removeAll();
-
-        /* =======================
-           NUMÉRO DE RONDE
-           ======================= */
+        
         int numeroRonde = 1;
         List<Ronde> rondes = Ronde.rondesDuTournoi(con, ronde.getTournoi());
         for (int i = 0; i < rondes.size(); i++) {
@@ -72,9 +69,7 @@ public class PageEquipe extends VerticalLayout implements BeforeEnterObserver  {
             }
         }
 
-        /* =======================
-           TITRE
-           ======================= */
+        
         H2 titre = new H2(
                 "Ronde " + numeroRonde + " — " + ronde.getTournoi().getNom()
         );
@@ -98,14 +93,9 @@ public class PageEquipe extends VerticalLayout implements BeforeEnterObserver  {
         for (Equipe equipe : equipes) {
             int score = equipe.getScore();
 
-            //TODO : sélectionner le terrain pour cette équipe.
-            //Terrain terrain = equipe.getTerrain(); // garanti non null
-//            String nomTerrain = terrain.getNom();
-
             String titreEquipe =
                     "Équipe " + equipe.getId()
                     + " — score : " + equipe.getScore();
-                    //+ " — terrain : " + nomTerrain; TODO
 
             /* -------- Contenu : joueurs -------- */
             VerticalLayout contenu = new VerticalLayout();

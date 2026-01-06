@@ -64,10 +64,6 @@ public class PanneauActions extends VerticalLayout {
             d.open();
         });
 
-        /* =======================
-           🏆 BOUTON PODIUM (CONDITIONNEL)
-           ======================= */
-
         if (tournoiEstTermine()) {
             Button podium = new Button("🏆 Voir le podium");
             podium.addClickListener(e ->
@@ -77,9 +73,7 @@ public class PanneauActions extends VerticalLayout {
         }
     }
 
-    /* =======================
-       ÉTAT TOURNOI (copie logique Acceuil)
-       ======================= */
+   
 
     private boolean tournoiEstTermine() {
         try (Connection con = ConnectionPool.getConnection()) {

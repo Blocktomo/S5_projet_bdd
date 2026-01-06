@@ -163,7 +163,7 @@ public class Tournoi extends ClasseMiroir implements Serializable {
 
     /* =======================
        MÉTHODES SUR INSTANCE
-       ======================= */
+       ======================= */ 
 
     public int getNbJoueursInscrits(Connection con) throws SQLException {
         return Joueur.joueursDuTournoi(con, this).size();

@@ -16,10 +16,6 @@ public class Joueur extends ClasseMiroir implements Serializable {
     private double taillecm;
     private int score;
 
-    /* =======================
-       CONSTRUCTEURS
-       ======================= */
-
     /** Nouveau joueur en mémoire */
     public Joueur(String surnom, String categorie, double taillecm) {
         super();
@@ -39,7 +35,7 @@ public class Joueur extends ClasseMiroir implements Serializable {
     }
 
     /* =======================
-       PERSISTENCE
+       DB
        ======================= */
 
     @Override

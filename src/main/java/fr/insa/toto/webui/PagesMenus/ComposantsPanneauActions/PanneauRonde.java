@@ -61,7 +61,6 @@ public class PanneauRonde extends VerticalLayout {
             }
 
             getUI().ifPresent(ui -> {
-                // 🔥 Fermer le Dialog AVANT navigation
                 getParent()
                     .filter(p -> p instanceof com.vaadin.flow.component.dialog.Dialog)
                     .ifPresent(p -> ((com.vaadin.flow.component.dialog.Dialog) p).close());

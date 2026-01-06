@@ -156,7 +156,7 @@ public class GestionBdD {
         deleteSchema(con);
         creeSchema(con);
     }
-
+ 
     /* =======================
        MAIN (TEST)
        ======================= */

@@ -10,19 +10,15 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- *
- * @author francois
- */
+
 public class Matchs extends ClasseMiroir {
 
     private int ronde;
     private int idEquipeA;
     private int idEquipeB;
-    private Terrain terrain; ///TODO : est-ce mieux d'avoir un ID Terrain ou un objet Terrain?
+    private Terrain terrain; 
     private int score;
-//TODO : MàJ des méthodes de la classe pour ajouter l'attribut Terrain.
-
+    
     
     public Matchs(int ronde) {
         this.ronde = ronde;        
@@ -104,7 +100,7 @@ public static List<Matchs> tousLesMatchsDeLaRonde(Connection con, int idRonde) t
                         idRonde,
                         rs.getInt("idEquipeA"),
                         rs.getInt("idEquipeB"),
-                        t,                            // <<< terrain chargé !
+                        t,       
                         rs.getInt("id")
                 ));
             }
@@ -163,10 +159,6 @@ public static List<Matchs> creerMatchsAuto(Connection con, Ronde r, List<Equipe>
     public int getRonde() {
         return this.ronde;
     }
-    /*public int getIdRonde() {
-        int result = this.ronde.getId(); //TODO à finir
-        return result;
-    }*/
     
     public int getIdEquipeA() {
         return idEquipeA;

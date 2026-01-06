@@ -204,13 +204,10 @@ private Component ligneTournoi(Tournoi tournoi) {
 
             inscrire.addClickListener(e -> {
 
-                // 🔴 PAS CONNECTÉ → LOGIN
                 if (!SessionInfo.userConnected()) {
                     new InscriptionOuConnexionDialog().open();
                     return;
                 }
-
-                // 🟢 CONNECTÉ → FORMULAIRE JOUEUR
                 new InscriptionJoueurDialog(
                         tournoi,
                         this::refreshTournois

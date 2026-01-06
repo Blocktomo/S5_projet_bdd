@@ -131,7 +131,7 @@ public class BdDTest {
             pst.setInt(2, idTournoi);
             pst.executeUpdate();
         }
-    }
+    } 
 
     //MAIN (TEST LOCAL)
     public static void main(String[] args) {

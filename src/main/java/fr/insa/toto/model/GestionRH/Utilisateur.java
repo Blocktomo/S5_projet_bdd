@@ -62,12 +62,7 @@ public class Utilisateur extends ClasseMiroir implements Serializable {
         return insert;
     }
 
-    /**
-     * suppose que le resultset contient bien une table d'utilisateurs.
-     *
-     * @param users
-     * @return
-     */
+    
     private static List<Utilisateur> fromResultSetToList(ResultSet users) throws SQLException {
         List<Utilisateur> res = new ArrayList<>();
         while (users.next()) {

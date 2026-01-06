@@ -162,8 +162,9 @@ public class PanneauJoueurs extends VerticalLayout {
                 Notification.show("Erreur inscription : " + ex.getMessage());
             }
         });
-
-        /* === CRÉER JOUEUR (FIX FK) === */
+        
+        /*====== CREER UN JOUEUR ============*/
+        
         creer.addClickListener(e -> {
             Dialog d2 = new Dialog();
             d2.setWidth("400px");
