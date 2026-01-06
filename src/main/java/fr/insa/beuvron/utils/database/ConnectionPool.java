@@ -51,7 +51,7 @@ public class ConnectionPool {
             config.setJdbcUrl("jdbc:mysql://92.222.25.165:3306/m3_tbeverly01");
             config.setUsername("m3_tbeverly01");
             config.setPassword("71884255");
-            config.setMaximumPoolSize(10);
+            config.setMaximumPoolSize(4);
             config.addDataSourceProperty("cachePrepStmts", "true");
             config.addDataSourceProperty("useServerPrepStmts", "true");
             config.addDataSourceProperty("prepStmtCacheSize", "250");
