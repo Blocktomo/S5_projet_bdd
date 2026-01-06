@@ -1,7 +1,6 @@
 package fr.insa.toto.model.GestionRH;
 
 import fr.insa.beuvron.utils.database.ConnectionSimpleSGBD;
-
 import fr.insa.toto.model.Jeu.Joueur;
 import fr.insa.toto.model.Jeu.Ronde;
 import fr.insa.toto.model.Jeu.Terrain;
