@@ -116,7 +116,8 @@ public class Participation implements Serializable {
                             rs.getInt("annee"),
                             rs.getInt("nb_de_rondes"),
                             rs.getInt("duree_match"),
-                            rs.getInt("nb_joueurs_equipe")
+                            rs.getInt("nb_joueurs_equipe"),
+                            rs.getInt("nb_joueurs_max")
                     ));
                 }
             }

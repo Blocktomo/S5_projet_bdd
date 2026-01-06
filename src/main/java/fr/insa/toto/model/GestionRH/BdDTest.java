@@ -19,26 +19,31 @@ public class BdDTest {
         /* =======================
            TOURNOIS
            ======================= */
+
+        // 🔴 CAN : volontairement FULL (44 inscrits / 32 max)
         Tournoi can = new Tournoi(
                 "Tournoi CAN",
                 2025,
                 10,
                 90,
-                11
+                11,
+                44   // 🔥 nb_joueurs_max
         );
         can.saveInDB(con);
         Ronde.creerRondesVides(can, con);
 
+        // 🟡 Tennis Duo : pile FULL (12 / 12)
         Tournoi tennis = new Tournoi(
                 "Tournoi Tennis Duo",
                 2027,
                 5,
                 60,
-                2
+                2,
+                12   // 🔥 nb_joueurs_max
         );
         tennis.saveInDB(con);
         Ronde.creerRondesVides(tennis, con);
-        
+
         /* =======================
            JOUEURS CAN (44)
            ======================= */
@@ -101,14 +106,13 @@ public class BdDTest {
         List<Utilisateur> utilisateurs = List.of(
                 new Utilisateur("thomas", "insa67", 1),
                 new Utilisateur("tartenpion", "insa67", 2)
-                
         );
 
         for (Utilisateur u : utilisateurs) {
             u.saveInDB(con);
-        } 
+        }
     }
-    
+
     /* =======================
        PARTICIPATION
        ======================= */
@@ -123,6 +127,7 @@ public class BdDTest {
             pst.executeUpdate();
         }
     }
+
     /* =======================
        TERRAINS_TOURNOIS
        ======================= */
@@ -138,6 +143,9 @@ public class BdDTest {
         }
     }
 
+    /* =======================
+       MAIN (TEST LOCAL)
+       ======================= */
     public static void main(String[] args) {
         try (Connection con = ConnectionSimpleSGBD.defaultCon()) {
             GestionBdD.razBdd(con);
@@ -145,7 +153,6 @@ public class BdDTest {
             System.out.println("✅ BdDTest V4 initialisée avec succès");
         } catch (SQLException ex) {
             throw new Error(ex);
-
         }
     }
 }

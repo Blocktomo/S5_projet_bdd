@@ -32,14 +32,16 @@ public class EditionTournoiDialog extends Dialog {
         IntegerField annee = new IntegerField("Année");
         IntegerField nbRondes = new IntegerField("Nombre de rondes");
         IntegerField duree = new IntegerField("Durée des matchs (min)");
-        IntegerField nbJoueurs = new IntegerField("Joueurs par équipe");
+        IntegerField nbJoueursEquipe = new IntegerField("Joueurs par équipe");
+        IntegerField nbJoueursMax = new IntegerField("Nombre maximum de joueurs"); // ✅ NOUVEAU
 
         if (tournoi != null) {
             nom.setValue(tournoi.getNom());
             annee.setValue(tournoi.getAnnee());
             nbRondes.setValue(tournoi.getNbDeRondes());
             duree.setValue(tournoi.getDureeMatch());
-            nbJoueurs.setValue(tournoi.getNbJoueursEquipe());
+            nbJoueursEquipe.setValue(tournoi.getNbJoueursEquipe());
+            nbJoueursMax.setValue(tournoi.getNbJoueursMax()); // ✅
         }
 
         /* ===== MODE VIEW → READ ONLY ===== */
@@ -48,10 +50,16 @@ public class EditionTournoiDialog extends Dialog {
         annee.setReadOnly(readOnly);
         nbRondes.setReadOnly(readOnly);
         duree.setReadOnly(readOnly);
-        nbJoueurs.setReadOnly(readOnly);
+        nbJoueursEquipe.setReadOnly(readOnly);
+        nbJoueursMax.setReadOnly(readOnly); // ✅
 
         FormLayout form = new FormLayout(
-                nom, annee, nbRondes, duree, nbJoueurs
+                nom,
+                annee,
+                nbRondes,
+                duree,
+                nbJoueursEquipe,
+                nbJoueursMax // ✅
         );
 
         add(form);
@@ -70,7 +78,8 @@ public class EditionTournoiDialog extends Dialog {
                                 annee.getValue(),
                                 nbRondes.getValue(),
                                 duree.getValue(),
-                                nbJoueurs.getValue()
+                                nbJoueursEquipe.getValue(),
+                                nbJoueursMax.getValue() // ✅
                         );
                         t.saveInDB(con);
                     } else {
@@ -78,7 +87,8 @@ public class EditionTournoiDialog extends Dialog {
                         tournoi.setAnnee(annee.getValue());
                         tournoi.setNbDeRondes(nbRondes.getValue());
                         tournoi.setDureeMatch(duree.getValue());
-                        tournoi.setNbJoueursEquipe(nbJoueurs.getValue());
+                        tournoi.setNbJoueursEquipe(nbJoueursEquipe.getValue());
+                        tournoi.setNbJoueursMax(nbJoueursMax.getValue()); // ✅
                         tournoi.updateInDB(con);
                     }
 

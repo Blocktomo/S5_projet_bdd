@@ -7,9 +7,7 @@ import java.sql.Statement;
 
 /**
  * Gestion de la création et suppression du schéma de la base de données.
- * Version stable (DDL hors transaction).
- *
- * @author thomas_insa
+ * Version stable (compatible nouvelle classe Tournoi).
  */
 public class GestionBdD {
 
@@ -28,7 +26,8 @@ public class GestionBdD {
                     annee INTEGER NOT NULL,
                     nb_de_rondes INTEGER NOT NULL,
                     duree_match INTEGER NOT NULL,
-                    nb_joueurs_equipe INTEGER NOT NULL
+                    nb_joueurs_equipe INTEGER NOT NULL,
+                    nb_joueurs_max INTEGER NOT NULL DEFAULT 0
                 )
             """);
 
@@ -43,7 +42,7 @@ public class GestionBdD {
                 )
             """);
 
-            /* ========= PARTICIPATION (N–N) ========= */
+            /* ========= PARTICIPATION ========= */
             st.executeUpdate("""
                 CREATE TABLE participation (
                     idjoueur INTEGER NOT NULL,
@@ -69,7 +68,7 @@ public class GestionBdD {
                 CREATE TABLE ronde (
                     idronde INTEGER AUTO_INCREMENT PRIMARY KEY,
                     terminer INTEGER CHECK (terminer = 0 OR terminer = 1 OR terminer = 2),
-                    idtournoi INTEGER not null
+                    idtournoi INTEGER NOT NULL
                 )
             """);
 
@@ -83,7 +82,7 @@ public class GestionBdD {
                 )
             """);
 
-            /* ========= COMPOSITION (equipe-joueurs) ========= */
+            /* ========= COMPOSITION ========= */
             st.executeUpdate("""
                 CREATE TABLE composition (
                     idequipe INTEGER NOT NULL,
@@ -102,10 +101,10 @@ public class GestionBdD {
                     occupe INTEGER DEFAULT 0 CHECK (occupe = 0 OR occupe = 1)
                 )
             """);
-            
-            /* ======== TERRAINS_TOURNOIS ===============*/ //bon je n'ai pas trouvé de meilleur nom
+
+            /* ========= TERRAINS_TOURNOIS ========= */
             st.executeUpdate("""
-                CREATE TABLE terrains_tournois ( 
+                CREATE TABLE terrains_tournois (
                     idtournoi INTEGER NOT NULL,
                     idterrain INTEGER NOT NULL,
                     PRIMARY KEY (idtournoi, idterrain),
@@ -137,19 +136,16 @@ public class GestionBdD {
     public static void deleteSchema(Connection con) throws SQLException {
 
         try (Statement st = con.createStatement()) {
-
-            // ⚠️ ordre inverse des dépendances
             try { st.executeUpdate("DROP TABLE matchs"); } catch (SQLException e) {}
             try { st.executeUpdate("DROP TABLE composition"); } catch (SQLException e) {}
             try { st.executeUpdate("DROP TABLE equipe"); } catch (SQLException e) {}
             try { st.executeUpdate("DROP TABLE ronde"); } catch (SQLException e) {}
             try { st.executeUpdate("DROP TABLE participation"); } catch (SQLException e) {}
-            try { st.executeUpdate("DROP TABLE terrains_tournois"); } catch (SQLException e) {}            
-            try { st.executeUpdate("DROP TABLE terrain");} catch (SQLException e) {}
+            try { st.executeUpdate("DROP TABLE terrains_tournois"); } catch (SQLException e) {}
+            try { st.executeUpdate("DROP TABLE terrain"); } catch (SQLException e) {}
             try { st.executeUpdate("DROP TABLE joueur"); } catch (SQLException e) {}
             try { st.executeUpdate("DROP TABLE utilisateur"); } catch (SQLException e) {}
-            try { st.executeUpdate("DROP TABLE tournoi"); } catch (SQLException e) { e.printStackTrace();} //afficher l'ensemble des erreurus SQL
-            
+            try { st.executeUpdate("DROP TABLE tournoi"); } catch (SQLException e) {}
         }
     }
 

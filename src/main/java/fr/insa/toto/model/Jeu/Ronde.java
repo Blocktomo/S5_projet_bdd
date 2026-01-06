@@ -106,7 +106,8 @@ public static Ronde chercherRondeParId(Connection con, int idRonde) throws SQLEx
                         rs.getInt("annee"),
                         rs.getInt("nb_de_rondes"),
                         rs.getInt("duree_match"),
-                        rs.getInt("nb_joueurs_equipe")
+                        rs.getInt("nb_joueurs_equipe"),
+                        rs.getInt("nb_joueurs_max")
                 );
 
                 return new Ronde(
@@ -142,7 +143,8 @@ public static Ronde chercherRondeParId(Connection con, int idRonde) throws SQLEx
                             rs.getInt("annee"),
                             rs.getInt("nb_de_rondes"),
                             rs.getInt("duree_match"),
-                            rs.getInt("nb_joueurs_equipe")
+                            rs.getInt("nb_joueurs_equipe"),
+                            rs.getInt("nb_joueurs_max")
                     );
 
                     res.add(new Ronde(

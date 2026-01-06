@@ -68,7 +68,7 @@ public class Acceuil extends VerticalLayout {
                 getUI().ifPresent(ui -> ui.getPage().reload());
             });
         }
-        
+
         /* =======================
            RAZ BDD
            ======================= */
@@ -79,24 +79,21 @@ public class Acceuil extends VerticalLayout {
                 .set("top", "50px")
                 .set("right", "20px");
         add(raz_bdd);
+
         raz_bdd.addClickListener(e -> {
-    try (Connection con = ConnectionPool.getConnection()) {
+            try (Connection con = ConnectionPool.getConnection()) {
+                con.setAutoCommit(false);
+                GestionBdD.razBdd(con);
+                BdDTest.createBdDTestV4(con);
+                con.commit();
+                Notification.show("RAZ BDD + init effectuées");
+                refreshTournois();
+            } catch (Exception ex) {
+                Notification.show("Erreur RAZ BDD : " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        });
 
-        con.setAutoCommit(false); // optionnel mais propre
-
-        GestionBdD.razBdd(con);
-        BdDTest.createBdDTestV4(con);
-
-        con.commit(); // 🔥 LIGNE CRITIQUE
-
-        Notification.show("RAZ BDD + init effectuées");
-
-    } catch (Exception ex) {
-        Notification.show("Erreur RAZ BDD : " + ex.getMessage());
-        ex.printStackTrace();
-    }
-});
-        
         /* =======================
            INFO UTILISATEUR
            ======================= */
@@ -125,31 +122,18 @@ public class Acceuil extends VerticalLayout {
 
         H1 titre = new H1("Liste des tournois");
 
-        /* =======================
-           LISTE DES TOURNOIS
-           ======================= */
         listeTournois = new VerticalLayout();
         listeTournois.setSpacing(true);
 
         card.add(titre, listeTournois);
 
-        /* =======================
-           BOUTON AJOUT (ADMIN)
-           ======================= */
         if (SessionInfo.adminConnected()) {
             Button ajouter = new Button("➕ Ajouter un tournoi");
             ajouter.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             ajouter.setWidthFull();
 
             ajouter.addClickListener(e -> {
-                Tournoi nouveau = new Tournoi(
-                        "",
-                        2025,
-                        1,
-                        90,
-                        2
-                );
-
+                Tournoi nouveau = new Tournoi("", 2025, 1, 90, 2);
                 new EditionTournoiDialog(
                         nouveau,
                         ModeEditionTournoi.CREATE,
@@ -160,27 +144,16 @@ public class Acceuil extends VerticalLayout {
             card.add(ajouter);
         }
 
-        /* =======================
-           AJOUT FINAL À LA PAGE
-           ======================= */
         add(userInfo, card);
-
         refreshTournois();
     }
 
-    /* =======================
-       RAFRAÎCHIR LA LISTE
-       ======================= */
     private void refreshTournois() {
         listeTournois.removeAll();
-
         try (Connection con = ConnectionPool.getConnection()) {
-            List<Tournoi> tournois = Tournoi.tousLesTournois(con);
-
-            for (Tournoi t : tournois) {
+            for (Tournoi t : Tournoi.tousLesTournois(con)) {
                 listeTournois.add(ligneTournoi(t));
             }
-
         } catch (Exception ex) {
             Notification.show("Erreur chargement tournois : " + ex.getMessage());
         }
@@ -189,134 +162,118 @@ public class Acceuil extends VerticalLayout {
     /* =======================
        UNE LIGNE TOURNOI
        ======================= */
-  private Component ligneTournoi(Tournoi tournoi) {
+    private Component ligneTournoi(Tournoi tournoi) {
 
-    HorizontalLayout ligne = new HorizontalLayout();
-    ligne.setWidthFull();
-    ligne.setAlignItems(Alignment.CENTER);
-    ligne.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        HorizontalLayout ligne = new HorizontalLayout();
+        ligne.setWidthFull();
+        ligne.setAlignItems(Alignment.CENTER);
+        ligne.setJustifyContentMode(JustifyContentMode.BETWEEN);
 
-    /* ===== TITRE (BOUTON) ===== */
-    Button titre = new Button(tournoi.toString());
-    titre.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        Button titre = new Button(tournoi.toString());
+        titre.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        titre.getStyle()
+                .set("border", "1.5px solid #2563eb")
+                .set("color", "#1e3a8a")
+                .set("font-size", "16px")
+                .set("border-radius", "8px")
+                .set("background", "white");
 
-    titre.getStyle()
-            .set("border", "1.5px solid #2563eb")
-            .set("color", "#1e3a8a")
-            .set("font-size", "16px")
-            .set("border-radius", "8px")
-            .set("background", "white");
-
-    titre.addClickListener(e ->
-            getUI().ifPresent(ui ->
-                    ui.navigate("tournoi/" + tournoi.getId()))
-    );
-
-    /* ===== ÉTAT DU TOURNOI ===== */
-    Span etatSpan = new Span("…");
-
-    try (Connection con = ConnectionPool.getConnection()) {
-        String etat = calculerEtatTournoi(con, tournoi);
-        etatSpan.setText(etat);
-
-        etatSpan.getStyle()
-                .set("padding", "4px 12px")
-                .set("border-radius", "12px")
-                .set("font-size", "13px")
-                .set("font-weight", "600");
-
-        switch (etat) {
-            case "Non initié" ->
-                    etatSpan.getStyle().set("background", "#e5e7eb");
-            case "En cours" ->
-                    etatSpan.getStyle().set("background", "#fde68a");
-            case "Terminé" ->
-                    etatSpan.getStyle().set("background", "#bbf7d0");
-        }
-
-    } catch (Exception e) {
-        etatSpan.setText("État inconnu");
-    }
-
-    /* ===== ACTIONS ===== */
-    HorizontalLayout actions = new HorizontalLayout();
-    actions.setAlignItems(Alignment.CENTER);
-    actions.setSpacing(false);
-
-    Button view = new Button(new Icon(VaadinIcon.EYE));
-    view.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
-    view.getElement().setAttribute("title", "Voir le tournoi");
-
-    view.addClickListener(e ->
-            new EditionTournoiDialog(
-                    tournoi,
-                    ModeEditionTournoi.VIEW,
-                    null
-            ).open()
-    );
-
-    actions.add(view);
-
-    if (SessionInfo.adminConnected()) {
-        Button edit = new Button(new Icon(VaadinIcon.EDIT));
-        edit.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
-        edit.getElement().setAttribute("title", "Modifier le tournoi");
-
-        edit.addClickListener(e ->
-                new EditionTournoiDialog(
-                        tournoi,
-                        ModeEditionTournoi.EDIT,
-                        this::refreshTournois
-                ).open()
+        titre.addClickListener(e ->
+                getUI().ifPresent(ui ->
+                        ui.navigate("tournoi/" + tournoi.getId()))
         );
 
-        actions.add(edit);
+        Span etatSpan = new Span("…");
+        Span placesSpan = new Span();
+
+        try (Connection con = ConnectionPool.getConnection()) {
+            String etat = calculerEtatTournoi(con, tournoi);
+            etatSpan.setText(etat);
+
+            etatSpan.getStyle()
+                    .set("padding", "4px 12px")
+                    .set("border-radius", "12px")
+                    .set("font-size", "13px")
+                    .set("font-weight", "600");
+
+            switch (etat) {
+                case "Non initié" ->
+                        etatSpan.getStyle().set("background", "#e5e7eb");
+                case "En cours" ->
+                        etatSpan.getStyle().set("background", "#fde68a");
+                case "Terminé" ->
+                        etatSpan.getStyle().set("background", "#bbf7d0");
+            }
+
+            // ✅ PLACES RESTANTES (UNIQUEMENT NON INITIÉ)
+            if ("Non initié".equals(etat) && tournoi.hasLimiteJoueurs()) {
+
+                if (tournoi.isComplet(con)) {
+                    placesSpan.setText("FULL");
+                    placesSpan.getStyle()
+                            .set("color", "red")
+                            .set("font-weight", "700");
+                } else {
+                    int restantes = tournoi.getPlacesRestantes(con);
+                    placesSpan.setText(restantes + " places");
+                    placesSpan.getStyle()
+                            .set("color", "#2563eb")
+                            .set("font-weight", "600");
+                }
+            }
+
+        } catch (Exception e) {
+            etatSpan.setText("État inconnu");
+        }
+
+        HorizontalLayout centre = new HorizontalLayout(titre, etatSpan, placesSpan);
+        centre.setAlignItems(Alignment.CENTER);
+        centre.setSpacing(true);
+
+        HorizontalLayout actions = new HorizontalLayout();
+        actions.setAlignItems(Alignment.CENTER);
+        actions.setSpacing(false);
+
+        Button view = new Button(new Icon(VaadinIcon.EYE));
+        view.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
+        view.addClickListener(e ->
+                new EditionTournoiDialog(tournoi, ModeEditionTournoi.VIEW, null).open()
+        );
+        actions.add(view);
+
+        if (SessionInfo.adminConnected()) {
+            Button edit = new Button(new Icon(VaadinIcon.EDIT));
+            edit.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
+            edit.addClickListener(e ->
+                    new EditionTournoiDialog(
+                            tournoi,
+                            ModeEditionTournoi.EDIT,
+                            this::refreshTournois
+                    ).open()
+            );
+            actions.add(edit);
+        }
+
+        ligne.add(centre, actions);
+        return ligne;
     }
 
-    /* ===== ASSEMBLAGE ===== */
-    HorizontalLayout centre = new HorizontalLayout(titre, etatSpan);
-    centre.setAlignItems(Alignment.CENTER);
-    centre.setSpacing(true);
+    private String calculerEtatTournoi(Connection con, Tournoi tournoi) throws Exception {
 
-    ligne.add(centre, actions);
-    return ligne;
-}
+        List<Ronde> rondes = Ronde.rondesDuTournoi(con, tournoi);
 
-private String calculerEtatTournoi(Connection con, Tournoi tournoi) throws Exception {
+        if (rondes.isEmpty()) return "Non initié";
 
-    List<Ronde> rondes = Ronde.rondesDuTournoi(con, tournoi);
+        boolean auMoinsUneInitieeOuTerminee = false;
+        boolean toutesTerminees = true;
 
-    // Sécurité
-    if (rondes.isEmpty()) {
+        for (Ronde r : rondes) {
+            if (r.getTerminer() >= 1) auMoinsUneInitieeOuTerminee = true;
+            if (r.getTerminer() != 2) toutesTerminees = false;
+        }
+
+        if (toutesTerminees) return "Terminé";
+        if (auMoinsUneInitieeOuTerminee) return "En cours";
         return "Non initié";
     }
-
-    boolean auMoinsUneInitieeOuTerminee = false;
-    boolean toutesTerminees = true;
-
-    for (Ronde r : rondes) {
-
-        // Au moins une ronde initiée OU terminée
-        if (r.getTerminer() >= 1) {
-            auMoinsUneInitieeOuTerminee = true;
-        }
-
-        // Si une seule ronde n'est pas terminée → tournoi pas terminé
-        if (r.getTerminer() != 2) {
-            toutesTerminees = false;
-        }
-    }
-
-    if (toutesTerminees) {
-        return "Terminé";
-    }
-
-    if (auMoinsUneInitieeOuTerminee) {
-        return "En cours";
-    }
-
-    return "Non initié";
-}
-
-
 }
