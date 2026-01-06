@@ -117,7 +117,7 @@ public class PageEquipe extends VerticalLayout implements BeforeEnterObserver  {
             for (Joueur j : joueurs) {
                 contenu.add(
                         new Span(
-                                j.getId() + " — " + j.getSurnom()
+                                j.getId() + " — " + j.getSurnom() + " - " + j.getCategorie()
                         )
                 );
             }
