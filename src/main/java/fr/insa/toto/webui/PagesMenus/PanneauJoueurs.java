@@ -214,7 +214,11 @@ public class PanneauJoueurs extends VerticalLayout {
                 Notification.show("Erreur suppression : " + ex.getMessage());
             }
         });
-
+        
+        /*====== FERMER ============*/
+        fermer.addClickListener(e-> dialog.close());
+        
+        
         contenu.add(
                 new H3("Inscrire des joueurs au tournoi"),
                 recherche,
