@@ -52,7 +52,7 @@ public class BdDTest {
         for (int i = 1; i <= 44; i++) {
             joueursCAN.add(
                     new Joueur(
-                            "CAN_Player_" + i,
+                            "Joueur_CAN" + i,
                             (i % 2 == 0) ? "S" : "J",
                             165 + (i % 20)
                     )
@@ -72,7 +72,7 @@ public class BdDTest {
         for (int i = 1; i <= 12; i++) {
             joueursTennis.add(
                     new Joueur(
-                            "Tennis_Player_" + i,
+                            "Joueur_Tennis" + i,
                             "S",
                             170 + (i % 10)
                     )
